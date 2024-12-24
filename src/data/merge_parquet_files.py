@@ -45,6 +45,18 @@ def concat_dataframes(df1, df2):
     return pd.concat([df1, df2], axis=1)
 
 
+def remove_null_rows(df, window='6H'):
+    """
+    Remove rows with null values and those within a specified window of them.
+
+    :param df: DataFrame to process.
+    :param window: Time window to consider for dropping rows.
+    :return: DataFrame with specified rows removed.
+    """
+    null_mask = df.isnull().any(axis=1)
+    drop_mask = null_mask.rolling(window=window, min_periods=1).max().astype(bool)
+    return df[~drop_mask]
+
 def merge_parquet_files(parquet_path1, parquet_path2, output_path, ffill_multiplier):
     # Load the Parquet files
     df1 = pd.read_parquet(parquet_path1)
@@ -60,16 +72,8 @@ def merge_parquet_files(parquet_path1, parquet_path2, output_path, ffill_multipl
 
     merged_df = concat_dataframes(df1, df2)
 
-
     # Remove rows with null values and those within 6 hours of them
-    null_mask = merged_df.isnull().any(axis=1)
-    null_indices = merged_df.index[null_mask]
-
-    # Create a mask for rows to drop using a rolling window
-    drop_mask = null_mask.rolling(window='6H', min_periods=1).max().astype(bool)
-
-    # Drop the rows
-    merged_df = merged_df[~drop_mask]
+    merged_df = remove_null_rows(merged_df, window='6H')
 
     # Log the time differences between indices
     time_diffs = merged_df.index.to_series().diff().value_counts().sort_index()

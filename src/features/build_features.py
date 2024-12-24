@@ -14,7 +14,11 @@ def create_features(df):
     """
     # Add a column for days since the start of the year
     df['days_since_year_start'] = df.index.dayofyear
-    for col in df.columns:
+    # Add columns for month, hour, minute, and second
+    df['month'] = df.index.month
+    df['hour'] = df.index.hour
+    df['minute'] = df.index.minute
+    df['second'] = df.index.second
         if col.startswith('env_temp_') or col.startswith('star_watt_'):
             # Add any feature creation logic here
             # For now, just pass through the DataFrame

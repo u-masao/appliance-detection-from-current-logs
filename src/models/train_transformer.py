@@ -133,6 +133,10 @@ def objective(trial, input_path, output_path, fraction, num_epochs):
                 pbar.set_postfix({"loss": loss})
 
         mlflow.log_metric("val_loss", val_loss)
+    # Save the best model
+    if trial.number == study.best_trial.number:
+        torch.save(model.state_dict(), output_path)
+        
     mlflow.end_run()
     logger.info("Training completed")
     logger.info(f"Final validation loss: {val_loss}")

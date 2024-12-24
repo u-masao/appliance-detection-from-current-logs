@@ -69,3 +69,20 @@ stages:
       hash: md5
       md5: 892b254eae278e9458da1bd156b1c41f
       size: 62374638
+  train_model:
+    cmd: python src/models/train_transformer.py data/interim/features.parquet models/best_model.pth
+      --data_fraction 0.01 --n_trials 2 --num_epochs 2
+    deps:
+    - path: data/interim/features.parquet
+      hash: md5
+      md5: 892b254eae278e9458da1bd156b1c41f
+      size: 62374638
+    - path: src/models/train_transformer.py
+      hash: md5
+      md5: f115af102aa6e17ac58a9580f6739789
+      size: 7059
+    outs:
+    - path: models/best_model.pth
+      hash: md5
+      md5: 648514906081e09e8794057277ff384d
+      size: 6125758

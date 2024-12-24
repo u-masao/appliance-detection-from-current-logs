@@ -10,10 +10,13 @@ from sklearn.model_selection import train_test_split
 from torch.utils.data import DataLoader, Dataset
 
 
-def load_data(file_path):
+def load_data(file_path, fraction=1.0):
     logger = logging.getLogger(__name__)
     logger.info(f"Loading data from {file_path}")
     df = pd.read_parquet(file_path)
+    if fraction < 1.0:
+        df = df.sample(frac=fraction, random_state=42)
+        logger.info(f"Data reduced to {len(df)} samples for development")
     logger.info("Data loaded successfully")
     return df
 
@@ -58,7 +61,7 @@ class TransformerModel(nn.Module):
 
 
 # Objective function for Optuna
-def objective(trial, input_path, output_path):
+def objective(trial, input_path, output_path, fraction):
     logger = logging.getLogger(__name__)
     # Hyperparameters
     embed_dim = trial.suggest_int("embed_dim", 16, 64)
@@ -78,7 +81,7 @@ def objective(trial, input_path, output_path):
     criterion = nn.MSELoss()
 
     # Data
-    df = load_data(input_path)
+    df = load_data(input_path, fraction)
     train_df, val_df = train_test_split(df, test_size=0.2, shuffle=False)
     train_dataset = TimeSeriesDataset(train_df)
     val_dataset = TimeSeriesDataset(val_df)
@@ -123,7 +126,13 @@ def objective(trial, input_path, output_path):
     default="train_transformer",
     help="Name of the MLflow run.",
 )
-def main(input_path, output_path, mlflow_run_name):
+@click.option(
+    "--fraction",
+    type=float,
+    default=1.0,
+    help="Fraction of data to load for development.",
+)
+def main(input_path, output_path, mlflow_run_name, fraction):
     logger = logging.getLogger(__name__)
     logger.info("==== start process ====")
     logger.info(f"Input path: {input_path}")
@@ -136,7 +145,7 @@ def main(input_path, output_path, mlflow_run_name):
     # Run Optuna
     study = optuna.create_study(direction="minimize")
     study.optimize(
-        lambda trial: objective(trial, input_path, output_path), n_trials=50
+        lambda trial: objective(trial, input_path, output_path, fraction), n_trials=50
     )
     logger.info(f"Best trial: {study.best_trial}")
     # Save the best model

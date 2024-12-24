@@ -44,6 +44,8 @@ stages:
       data/interim/features.parquet
       models/best_model.pth
       --data_fraction ${train_model.data_fraction}
+      --n_trials ${train_model.n_trials}
+      --num_epochs ${train_model.num_epochs}
     deps:
       - src/models/train_transformer.py
       - data/interim/features.parquet

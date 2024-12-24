@@ -1,2 +1,4 @@
 train_model:
   data_fraction: 0.01
+  num_epochs: 2
+  n_trials: 2

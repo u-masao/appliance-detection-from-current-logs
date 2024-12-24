@@ -25,9 +25,9 @@ def merge_parquet_files(parquet_path1, parquet_path2, output_path):
 
     # Resample only the DataFrame with the longer interval
     if interval_df1 > interval_df2:
-        df1 = df1.resample(target_interval).ffill()
+        df1 = df1.resample(target_interval).ffill(limit=5)
     elif interval_df2 > interval_df1:
-        df2 = df2.resample(target_interval).ffill()
+        df2 = df2.resample(target_interval).ffill(limit=5)
     df1.columns = [f"env_temp_{col}" for col in df1.columns]
     df2.columns = [f"star_watt_{col}" for col in df2.columns]
     merged_df = pd.concat([df1, df2], axis=1)

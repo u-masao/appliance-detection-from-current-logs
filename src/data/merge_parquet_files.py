@@ -59,7 +59,7 @@ def remove_null_rows(df, window='6H'):
 
 def merge_parquet_files(df1, df2, ffill_multiplier, window):
 
-    # Align intervals
+    logger = logging.getLogger(__name__)
     df1, df2 = align_intervals(df1, df2, ffill_multiplier)
 
     merged_df = concat_dataframes(df1, df2)

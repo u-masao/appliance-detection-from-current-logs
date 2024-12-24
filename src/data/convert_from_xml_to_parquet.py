@@ -43,6 +43,7 @@ def parse_database(root, step: int, quantized_ts: int, cf_text: str):
     logger.info(f"{ts_index=}")
     df = pd.DataFrame(data, index=ts_index)
     df.columns = [f"sensor{i}" for i in range(df.shape[1])]
+    logger.info(f"{df.index=}")
     return df
 
 
@@ -110,20 +111,14 @@ def main(**kwargs):
 
     logger = logging.getLogger(__name__)
     logger.info("==== start process ====")
-    logger.info({
-        f"args.{k}": v for k, v in kwargs.items()
-    })
+    logger.info({f"args.{k}": v for k, v in kwargs.items()})
 
     mlflow.set_experiment("make_dataset")
     mlflow.start_run(run_name=kwargs["mlflow_run_name"])
-    mlflow.log_params({
-        f"args.{k}": v for k, v in kwargs.items()
-    })
+    mlflow.log_params({f"args.{k}": v for k, v in kwargs.items()})
 
     convert_xml_to_parquet(
-        kwargs["xml_file_path"],
-        kwargs["parquet_file_path"],
-        kwargs["cf_text"]
+        kwargs["xml_file_path"], kwargs["parquet_file_path"], kwargs["cf_text"]
     )
 
     mlflow.end_run()

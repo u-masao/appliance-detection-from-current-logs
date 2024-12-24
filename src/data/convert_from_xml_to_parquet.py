@@ -46,7 +46,7 @@ def parse_database(root, step: int, quantized_ts: int, cf_text: str):
     return df
 
 
-def convert_xml_to_parquet(xml_path: str, parquet_path: str):
+def convert_xml_to_parquet(xml_path: str, parquet_path: str, cf_text: str):
     """
     Convert an XML file to a Parquet file.
 
@@ -65,7 +65,7 @@ def convert_xml_to_parquet(xml_path: str, parquet_path: str):
     step = int(root.find("step").text)
     last_update = int(root.find("lastupdate").text)
     quantized_ts = step * (last_update // step)
-    df = parse_database(root, step, quantized_ts, "LAST")
+    df = parse_database(root, step, quantized_ts, cf_text)
 
     # output
     logger.info(f"{step=}")
@@ -88,8 +88,9 @@ def convert_xml_to_parquet(xml_path: str, parquet_path: str):
 @click.command()
 @click.argument("xml_file_path", type=click.Path(exists=True))
 @click.argument("parquet_file_path", type=click.Path())
-@click.option("--mlflow_run_name", type=str, default="develop")
-def main(**kwargs):
+@click.option("--mlflow_run_name", type=str, default="develop", help="Name of the MLflow run.")
+@click.option("--cf_text", type=str, default="LAST", help="CF text to search for in the XML.")
+def main(xml_file_path, parquet_file_path, mlflow_run_name, cf_text):
     """
     Convert an XML file to a Parquet file.
 
@@ -105,9 +106,7 @@ def main(**kwargs):
     mlflow.start_run(run_name=kwargs["mlflow_run_name"])
     mlflow.log_params({f"args.{k}": v for k, v in kwargs.items()})
 
-    convert_xml_to_parquet(
-        kwargs["xml_file_path"], kwargs["parquet_file_path"]
-    )
+    convert_xml_to_parquet(xml_file_path, parquet_file_path, cf_text)
 
     mlflow.end_run()
     logger.info("==== end process ====")

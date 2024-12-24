@@ -7,6 +7,7 @@ import pandas as pd
 import torch
 import torch.nn as nn
 from sklearn.model_selection import train_test_split
+from tqdm import tqdm
 from torch.utils.data import DataLoader, Dataset
 
 
@@ -108,7 +109,7 @@ def objective(trial, input_path, output_path, fraction):
     for epoch in range(10):
         logger.info(f"Epoch {epoch+1} started")
         model.train()
-        for x, y in train_loader:
+        for x, y in tqdm(train_loader, desc=f"Epoch {epoch+1} [Train]"):
             optimizer.zero_grad()
             output = model(x)
             loss = criterion(output.view_as(y), y)
@@ -120,7 +121,7 @@ def objective(trial, input_path, output_path, fraction):
         model.eval()
         val_loss = 0
         with torch.no_grad():
-            for x, y in val_loader:
+            for x, y in tqdm(val_loader, desc=f"Epoch {epoch+1} [Validation]"):
                 output = model(x)
                 val_loss += criterion(output.view_as(y), y).item()
 

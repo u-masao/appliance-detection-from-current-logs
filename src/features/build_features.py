@@ -64,7 +64,8 @@ def main(input_parquet_path, output_parquet_path, mlflow_run_name):
     df = create_features(df)
     logger.info("DataFrame with features:\n%s", df.head())
 
-    # Log the column names of the DataFrame with features
+    # Log the entire DataFrame with features
+    logger.info("Resulting DataFrame:\n%s", df)
     logger.info("Output DataFrame columns: %s", df.columns)
     df.to_parquet(output_parquet_path)
 

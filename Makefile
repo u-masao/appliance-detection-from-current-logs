@@ -10,6 +10,10 @@ PYTHON_INTERPRETER = python
 # COMMANDS                                                                      #
 #################################################################################
 
+## dvc repro
+.PHONY: repro
+repro:
+	uv run dvc repro
 
 ## Install Python Dependencies
 .PHONY: requirements

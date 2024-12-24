@@ -1,4 +1,5 @@
-import argparse
+import click
+import mlflow
 import optuna
 import pandas as pd
 import torch
@@ -7,11 +8,14 @@ from sklearn.model_selection import train_test_split
 from torch.utils.data import DataLoader, Dataset
 
 
-def parse_args():
-    parser = argparse.ArgumentParser(description="Train Transformer Model")
-    parser.add_argument("--input", type=str, required=True, help="Path to input data file")
-    parser.add_argument("--output", type=str, required=True, help="Path to save the trained model")
-    return parser.parse_args()
+@click.command()
+@click.argument("input_path", type=click.Path(exists=True))
+@click.argument("output_path", type=click.Path())
+@click.option("--mlflow_run_name", type=str, default="train_transformer", help="Name of the MLflow run.")
+def main(input_path, output_path, mlflow_run_name):
+    mlflow.set_experiment("train_transformer")
+    mlflow.start_run(run_name=mlflow_run_name)
+    mlflow.log_params({"input_path": input_path, "output_path": output_path})
 
 def load_data(file_path):
     df = pd.read_parquet(file_path)
@@ -78,8 +82,7 @@ def objective(trial):
     criterion = nn.MSELoss()
 
     # Data
-    args = parse_args()
-    df = load_data(args.input)
+    df = load_data(input_path)
     train_df, val_df = train_test_split(df, test_size=0.2, shuffle=False)
     train_dataset = TimeSeriesDataset(train_df)
     val_dataset = TimeSeriesDataset(val_df)
@@ -87,12 +90,14 @@ def objective(trial):
     val_loader = DataLoader(val_dataset, batch_size=32, shuffle=False)
 
     # Training loop
-    for epoch in range(10):  # Simple loop for demonstration
+    for epoch in range(10):
+        mlflow.log_metric("epoch", epoch)
         model.train()
         for x, y in train_loader:
             optimizer.zero_grad()
             output = model(x)
             loss = criterion(output, y)
+            mlflow.log_metric("train_loss", loss.item())
             loss.backward()
             optimizer.step()
 
@@ -104,12 +109,13 @@ def objective(trial):
                 output = model(x)
                 val_loss += criterion(output, y).item()
 
+        mlflow.log_metric("val_loss", val_loss)
+    mlflow.end_run()
     return val_loss
 
 
 # Run Optuna
 if __name__ == "__main__":
-    args = parse_args()
     study = optuna.create_study(direction="minimize")
     study.optimize(objective, n_trials=50)
     print("Best trial:", study.best_trial)

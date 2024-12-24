@@ -21,6 +21,12 @@ def convert_xml_to_parquet(xml_path: str, parquet_path: str):
     logger.info("XML DataFrame content:\n%s", df)
     mlflow.log_text(df.to_string(), "xml_dataframe_content.txt")
 
+    # Log the number of rows and columns
+    num_rows, num_cols = df.shape
+    logger.info("Number of rows: %d, Number of columns: %d", num_rows, num_cols)
+    mlflow.log_param("num_rows", num_rows)
+    mlflow.log_param("num_cols", num_cols)
+
     # Write the DataFrame to a Parquet file
     df.to_parquet(parquet_path)
 

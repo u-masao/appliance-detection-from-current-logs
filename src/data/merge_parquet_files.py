@@ -1,5 +1,6 @@
 import pandas as pd
-import argparse
+import click
+import mlflow
 
 def merge_parquet_files(parquet_path1, parquet_path2, output_path):
     # Load the Parquet files
@@ -19,11 +20,31 @@ def merge_parquet_files(parquet_path1, parquet_path2, output_path):
     # Save the merged DataFrame to a new Parquet file
     merged_df.to_parquet(output_path)
 
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Merge two Parquet files.")
-    parser.add_argument("input1", type=str, help="Path to the first input Parquet file.")
-    parser.add_argument("input2", type=str, help="Path to the second input Parquet file.")
-    parser.add_argument("output", type=str, help="Path to the output Parquet file.")
-    args = parser.parse_args()
+@click.command()
+@click.argument("input1", type=click.Path(exists=True))
+@click.argument("input2", type=click.Path(exists=True))
+@click.argument("output", type=click.Path())
+@click.option(
+    "--mlflow_run_name",
+    type=str,
+    default="merge_parquet_files",
+    help="Name of the MLflow run.",
+)
+def main(input1, input2, output, mlflow_run_name):
+    """
+    Merge two Parquet files and save the result.
 
-    merge_parquet_files(args.input1, args.input2, args.output)
+    :param input1: Path to the first input Parquet file.
+    :param input2: Path to the second input Parquet file.
+    :param output: Path to the output Parquet file.
+    """
+    mlflow.set_experiment("merge_datasets")
+    mlflow.start_run(run_name=mlflow_run_name)
+    mlflow.log_params({"input1": input1, "input2": input2, "output": output})
+
+    merge_parquet_files(input1, input2, output)
+
+    mlflow.end_run()
+
+if __name__ == "__main__":
+    main()

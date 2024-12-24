@@ -6,3 +6,11 @@ stages:
       - data/raw/env_temp.xml
     outs:
       - data/interim/env_temp.parquet
+
+  convert_star_watt:
+    cmd: python src/data/convert_from_xml_to_parquet.py data/raw/star_watt.xml data/interim/star_watt.parquet
+    deps:
+      - src/data/convert_from_xml_to_parquet.py
+      - data/raw/star_watt.xml
+    outs:
+      - data/interim/star_watt.parquet

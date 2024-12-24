@@ -103,8 +103,8 @@ def objective(trial, input_path, output_path, fraction, num_epochs, study):
     train_size = int(len(df) * 0.7)
     val_size = int(len(df) * 0.15)
     train_df = df.iloc[:train_size]
-    val_df = df.iloc[train_size:train_size + val_size]
-    test_df = df.iloc[train_size + val_size:]
+    val_df = df.iloc[train_size : train_size + val_size]
+    test_df = df.iloc[train_size + val_size :]
     train_dataset = TimeSeriesDataset(train_df)
     val_dataset = TimeSeriesDataset(val_df)
     train_loader = DataLoader(train_dataset, batch_size=32, shuffle=True)
@@ -219,7 +219,6 @@ def main(
     )
     # Save the best model
     torch.save(model.state_dict(), output_path)
-    mlflow.pytorch.log_model(model, "model")
 
 
 if __name__ == "__main__":

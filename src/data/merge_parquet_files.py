@@ -3,6 +3,10 @@ import pandas as pd
 import click
 import mlflow
 
+# Configure logging
+log_fmt = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+logging.basicConfig(level=logging.INFO, format=log_fmt)
+
 def merge_parquet_files(parquet_path1, parquet_path2, output_path):
     # Load the Parquet files
     df1 = pd.read_parquet(parquet_path1)
@@ -10,8 +14,8 @@ def merge_parquet_files(parquet_path1, parquet_path2, output_path):
 
     # Log the index of the input DataFrames
     logger = logging.getLogger(__name__)
-    logger.info(f"Index of first DataFrame: {df1.index}")
-    logger.info(f"Index of second DataFrame: {df2.index}")
+    logger.info("Index of first DataFrame: %s", df1.index)
+    logger.info("Index of second DataFrame: %s", df2.index)
     high_res_index = df1.index.union(df2.index).sort_values()
 
     # Resample both DataFrames to the higher resolution index

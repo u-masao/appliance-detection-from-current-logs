@@ -71,7 +71,13 @@ def merge_parquet_files(df1, df2, ffill_multiplier, window):
     time_diffs = merged_df.index.to_series().diff().value_counts().sort_index()
     logger.info("Time differences between indices:\n%s", time_diffs)
 
-    # Log the count of null values in each column
+    # Calculate the gap column
+    time_diffs = merged_df.index.to_series().diff().fillna(pd.Timedelta(seconds=0))
+    min_diff = time_diffs[time_diffs > pd.Timedelta(seconds=0)].min()
+    gap = (time_diffs != min_diff) | (time_diffs.shift(-1) != min_diff)
+    gap.iloc[0] = True  # First row
+    gap.iloc[-1] = True  # Last row
+    merged_df['gap'] = gap
     null_counts = merged_df.isnull().sum()
     logger.info("Null counts per column:\n%s", null_counts)
 

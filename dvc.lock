@@ -1,0 +1,18 @@
+schema: '2.0'
+stages:
+  convert_xml_to_parquet:
+    cmd: python src/data/convert_from_xml_to_parquet.py data/raw/env_temp.xml data/interim/env_temp.parquet
+    deps:
+    - path: data/raw/env_temp.xml
+      hash: md5
+      md5: d3c1ac14db8e84891f0a61c29c643190
+      size: 72520793
+    - path: src/data/convert_from_xml_to_parquet.py
+      hash: md5
+      md5: aca324f3dfa20a34b4db6f73cc8c20f7
+      size: 822
+    outs:
+    - path: data/interim/env_temp.parquet
+      hash: md5
+      md5: d9072f213f69086bbeaf67572140abd7
+      size: 9479

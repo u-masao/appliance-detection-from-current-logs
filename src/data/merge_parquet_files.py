@@ -35,15 +35,14 @@ def merge_parquet_files(parquet_path1, parquet_path2, output_path):
 
 
     # Remove rows with null values and those within 6 hours of them
-    null_indices = merged_df[merged_df.isnull().any(axis=1)].index
+    null_mask = merged_df.isnull().any(axis=1)
+    null_indices = merged_df.index[null_mask]
 
-    # Create a boolean mask for rows to drop
-    mask = pd.Series(False, index=merged_df.index)
-    for idx in null_indices:
-        mask |= (merged_df.index >= idx - pd.Timedelta(hours=6)) & (merged_df.index <= idx + pd.Timedelta(hours=6))
+    # Create a mask for rows to drop using a rolling window
+    drop_mask = null_mask.rolling(window='6H', min_periods=1).max().astype(bool)
 
     # Drop the rows
-    merged_df = merged_df[~mask]
+    merged_df = merged_df[~drop_mask]
 
     # Log the time differences between indices
     time_diffs = merged_df.index.to_series().diff().value_counts().sort_index()

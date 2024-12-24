@@ -6,10 +6,7 @@ def merge_parquet_files(parquet_path1, parquet_path2, output_path):
     df2 = pd.read_parquet(parquet_path2)
 
     # Determine the higher resolution index
-    if df1.index.freq < df2.index.freq:
-        high_res_index = df1.index
-    else:
-        high_res_index = df2.index
+    high_res_index = df1.index.union(df2.index).sort_values()
 
     # Resample both DataFrames to the higher resolution index
     df1_resampled = df1.reindex(high_res_index).interpolate(method='linear')

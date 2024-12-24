@@ -1,0 +1,8 @@
+stages:
+  convert_xml_to_parquet:
+    cmd: python src/data/convert_from_xml_to_parquet.py
+    deps:
+      - src/data/convert_from_xml_to_parquet.py
+      - data/raw/env_temp.xml
+    outs:
+      - data/interim/env_temp.parquet

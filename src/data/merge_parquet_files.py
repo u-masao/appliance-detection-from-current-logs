@@ -71,6 +71,10 @@ def merge_parquet_files(df1, df2, ffill_multiplier, window):
     time_diffs = merged_df.index.to_series().diff().value_counts().sort_index()
     logger.info("Time differences between indices:\n%s", time_diffs)
 
+    # Log the count of null values in each column
+    null_counts = merged_df.isnull().sum()
+    logger.info("Null counts per column:\n%s", null_counts)
+
     return merged_df
 
 @click.command()

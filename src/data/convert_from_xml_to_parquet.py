@@ -88,8 +88,18 @@ def convert_xml_to_parquet(xml_path: str, parquet_path: str, cf_text: str):
 @click.command()
 @click.argument("xml_file_path", type=click.Path(exists=True))
 @click.argument("parquet_file_path", type=click.Path())
-@click.option("--mlflow_run_name", type=str, default="develop", help="Name of the MLflow run.")
-@click.option("--cf_text", type=str, default="LAST", help="CF text to search for in the XML.")
+@click.option(
+    "--mlflow_run_name",
+    type=str,
+    default="develop",
+    help="Name of the MLflow run.",
+)
+@click.option(
+    "--cf_text",
+    type=str,
+    default="LAST",
+    help="CF text to search for in the XML.",
+)
 def main(xml_file_path, parquet_file_path, mlflow_run_name, cf_text):
     """
     Convert an XML file to a Parquet file.

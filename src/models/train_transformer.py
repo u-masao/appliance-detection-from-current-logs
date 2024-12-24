@@ -1,3 +1,4 @@
+import logging
 import click
 import mlflow
 import optuna
@@ -13,6 +14,11 @@ from torch.utils.data import DataLoader, Dataset
 @click.argument("output_path", type=click.Path())
 @click.option("--mlflow_run_name", type=str, default="train_transformer", help="Name of the MLflow run.")
 def main(input_path, output_path, mlflow_run_name):
+    logger = logging.getLogger(__name__)
+    logger.info("==== start process ====")
+    logger.info(f"Input path: {input_path}")
+    logger.info(f"Output path: {output_path}")
+
     mlflow.set_experiment("train_transformer")
     mlflow.start_run(run_name=mlflow_run_name)
     mlflow.log_params({"input_path": input_path, "output_path": output_path})
@@ -20,12 +26,14 @@ def main(input_path, output_path, mlflow_run_name):
     # Run Optuna
     study = optuna.create_study(direction="minimize")
     study.optimize(lambda trial: objective(trial, input_path, output_path), n_trials=50)
-    print("Best trial:", study.best_trial)
+    logger.info(f"Best trial: {study.best_trial}")
     # Save the best model
     torch.save(study.best_trial.value, output_path)
 
 def load_data(file_path):
+    logger.info(f"Loading data from {file_path}")
     df = pd.read_parquet(file_path)
+    logger.info("Data loaded successfully")
     df = df[df["Gap"] == False]  # Filter out non-continuous data
     return df
 
@@ -98,6 +106,7 @@ def objective(trial, input_path, output_path):
 
     # Training loop
     for epoch in range(10):
+        logger.info(f"Epoch {epoch+1} started")
         mlflow.log_metric("epoch", epoch)
         model.train()
         for x, y in train_loader:
@@ -118,8 +127,13 @@ def objective(trial, input_path, output_path):
 
         mlflow.log_metric("val_loss", val_loss)
     mlflow.end_run()
+    logger.info("Training completed")
+    logger.info(f"Final validation loss: {val_loss}")
+    logger.info("==== end process ====")
     return val_loss
 
 
 if __name__ == "__main__":
+    log_fmt = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    logging.basicConfig(level=logging.INFO, format=log_fmt)
     main()

@@ -19,6 +19,7 @@ def create_features(df):
     df['hour'] = df.index.hour
     df['minute'] = df.index.minute
     df['second'] = df.index.second
+    for col in df.columns:
         if col.startswith('env_temp_') or col.startswith('star_watt_'):
             # Add any feature creation logic here
             # For now, just pass through the DataFrame

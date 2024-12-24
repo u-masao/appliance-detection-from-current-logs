@@ -154,7 +154,13 @@ def objective(trial, input_path, output_path, fraction, num_epochs):
     default=10,
     help="Number of training epochs.",
 )
-def main(input_path, output_path, mlflow_run_name, data_fraction, num_epochs):
+@click.option(
+    "--n_trials",
+    type=int,
+    default=50,
+    help="Number of Optuna trials.",
+)
+def main(input_path, output_path, mlflow_run_name, data_fraction, num_epochs, n_trials):
     """
     Train the transformer model with the specified parameters.
 
@@ -177,7 +183,7 @@ def main(input_path, output_path, mlflow_run_name, data_fraction, num_epochs):
     study = optuna.create_study(direction="minimize")
     study.optimize(
         lambda trial: objective(trial, input_path, output_path, data_fraction, num_epochs),
-        n_trials=50,
+        n_trials=n_trials,
     )
     logger.info(f"Best trial: {study.best_trial}")
     # Save the best model

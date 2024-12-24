@@ -26,3 +26,14 @@ stages:
       - data/interim/star_watt.parquet
     outs:
       - data/interim/dataset.parquet
+
+  build_features:
+    cmd: >-
+      python src/features/build_features.py
+      data/interim/dataset.parquet
+      data/processed/features.parquet
+    deps:
+      - src/features/build_features.py
+      - data/interim/dataset.parquet
+    outs:
+      - data/processed/features.parquet

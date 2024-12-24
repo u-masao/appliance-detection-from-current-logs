@@ -1,16 +1,15 @@
 stages:
   convert_xml_to_parquet:
-    cmd: python src/data/convert_from_xml_to_parquet.py data/raw/env_temp.xml data/interim/env_temp.parquet
+    matrix:
+      dataname:
+        - env_temp
+        - star_watt
+    cmd: >-
+      python -m src.data.convert_from_xml_to_parquet
+      data/raw/${item.dataname}.xml
+      data/interim/${item.dataname}.parquet
     deps:
       - src/data/convert_from_xml_to_parquet.py
-      - data/raw/env_temp.xml
+      - data/raw/${item.dataname}.xml
     outs:
-      - data/interim/env_temp.parquet
-
-  convert_star_watt:
-    cmd: python src/data/convert_from_xml_to_parquet.py data/raw/star_watt.xml data/interim/star_watt.parquet
-    deps:
-      - src/data/convert_from_xml_to_parquet.py
-      - data/raw/star_watt.xml
-    outs:
-      - data/interim/star_watt.parquet
+      - data/interim/${item.dataname}.parquet

@@ -9,10 +9,26 @@ stages:
       size: 72520793
     - path: src/data/convert_from_xml_to_parquet.py
       hash: md5
-      md5: aca324f3dfa20a34b4db6f73cc8c20f7
-      size: 822
+      md5: f13e7ba7edb2454b55d2db74da023be1
+      size: 3582
     outs:
     - path: data/interim/env_temp.parquet
       hash: md5
-      md5: d9072f213f69086bbeaf67572140abd7
-      size: 9479
+      md5: 972a592a61627c5dcf256d340c33c62f
+      size: 3221030
+  convert_star_watt:
+    cmd: python src/data/convert_from_xml_to_parquet.py data/raw/star_watt.xml data/interim/star_watt.parquet
+    deps:
+    - path: data/raw/star_watt.xml
+      hash: md5
+      md5: 3e48c4b58b5edc3c96417d6b3a3c876f
+      size: 649685660
+    - path: src/data/convert_from_xml_to_parquet.py
+      hash: md5
+      md5: f13e7ba7edb2454b55d2db74da023be1
+      size: 3582
+    outs:
+    - path: data/interim/star_watt.parquet
+      hash: md5
+      md5: 26c3f17d550c58ce045d9de9b83f70ff
+      size: 38166479

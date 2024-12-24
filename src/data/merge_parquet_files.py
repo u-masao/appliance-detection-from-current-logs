@@ -96,6 +96,12 @@ def merge_parquet_files(parquet_path1, parquet_path2, output_path, ffill_multipl
     default=4,
     help="Multiplier for the forward fill limit.",
 )
+@click.option(
+    "--window",
+    type=str,
+    default='6H',
+    help="Time window for dropping rows with null values.",
+)
 def main(input1, input2, output, mlflow_run_name, ffill_multiplier, window):
     """
     Merge two Parquet files and save the result.

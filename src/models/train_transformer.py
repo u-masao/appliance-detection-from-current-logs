@@ -15,6 +15,7 @@ def load_data(file_path, fraction=1.0):
     logger.info(f"Loading data from {file_path}")
     df = pd.read_parquet(file_path)
     logger.info(f"Data types:\n{df.dtypes}")
+    if fraction < 1.0:
         df = df.iloc[: int(len(df) * fraction)]
         logger.info(
             f"Data reduced to {len(df)} samples for development (sequentially)"
@@ -34,13 +35,22 @@ class TimeSeriesDataset(Dataset):
         return len(self.data) - self.input_length - self.output_length
 
     def __getitem__(self, idx):
-        x = self.data.iloc[idx : idx + self.input_length].to_numpy(dtype='float32')
-        y = self.data.iloc[
-            idx
-            + self.input_length : idx
-            + self.input_length
-            + self.output_length
-        ][["watt_black", "watt_red", "watt_kitchen", "watt_living"]].to_numpy(dtype='float32')
+        x = (
+            self.data.iloc[idx : idx + self.input_length]
+            .to_numpy(dtype="float32")
+            .flatten()
+        )
+        y = (
+            self.data.iloc[
+                idx
+                + self.input_length : idx
+                + self.input_length
+                + self.output_length
+            ][["watt_black", "watt_red", "watt_kitchen", "watt_living"]]
+            .to_numpy(dtype="float32")
+            .flatten()
+        )
+        
         return torch.tensor(x, dtype=torch.float32), torch.tensor(
             y, dtype=torch.float32
         )
@@ -66,19 +76,22 @@ class TransformerModel(nn.Module):
 def objective(trial, input_path, output_path, fraction):
     logger = logging.getLogger(__name__)
     # Hyperparameters
-    num_heads = trial.suggest_int("num_heads", 1, 4)
-    embed_dim = trial.suggest_int("embed_dim", num_heads * 4, num_heads * 16, step=num_heads)
+    embed_dim = trial.suggest_int(
+        "embed_dim", num_heads * 4, num_heads * 16, step=num_heads
+    )
     num_heads = trial.suggest_int("num_heads", 1, 4)
     num_layers = trial.suggest_int("num_layers", 1, 3)
     lr = trial.suggest_loguniform("lr", 1e-4, 1e-2)
 
+    logger.info(f"params: {num_heads=}, {embed_dim=}, {num_layers=}, {lr=}")
+
     # Model
     model = TransformerModel(
-        input_dim=5,
+        input_dim=60 * 3 * 13,
         embed_dim=embed_dim,
         num_heads=num_heads,
         num_layers=num_layers,
-        output_dim=4,
+        output_dim=5 * 4,
     )
     optimizer = torch.optim.Adam(model.parameters(), lr=lr)
     criterion = nn.MSELoss()
@@ -94,7 +107,6 @@ def objective(trial, input_path, output_path, fraction):
     # Training loop
     for epoch in range(10):
         logger.info(f"Epoch {epoch+1} started")
-        mlflow.log_metric("epoch", epoch)
         model.train()
         for x, y in train_loader:
             optimizer.zero_grad()

@@ -21,7 +21,7 @@ def create_features(df):
 
 @click.command()
 @click.argument("input_parquet_path", type=click.Path(exists=True))
-@click.argument("output_parquet_path", type=click.Path())
+@click.argument("output_parquet_path", type=click.Path(), default="data/interim/features.parquet")
 @click.option(
     "--mlflow_run_name",
     type=str,

@@ -31,7 +31,7 @@ stages:
     cmd: >-
       python src/features/build_features.py
       data/interim/dataset.parquet
-      data/processed/features.parquet
+      data/interim/features.parquet
     deps:
       - src/features/build_features.py
       - data/interim/dataset.parquet

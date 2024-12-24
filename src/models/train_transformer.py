@@ -120,4 +120,4 @@ if __name__ == "__main__":
     study.optimize(objective, n_trials=50)
     print("Best trial:", study.best_trial)
     # Save the best model
-    torch.save(study.best_trial.value, args.output)
+    torch.save(study.best_trial.value, output_path)

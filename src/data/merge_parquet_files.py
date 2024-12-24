@@ -45,7 +45,7 @@ def concat_dataframes(df1, df2):
     return pd.concat([df1, df2], axis=1)
 
 
-def merge_parquet_files(parquet_path1, parquet_path2, output_path):
+def merge_parquet_files(parquet_path1, parquet_path2, output_path, ffill_multiplier):
     # Load the Parquet files
     df1 = pd.read_parquet(parquet_path1)
     df2 = pd.read_parquet(parquet_path2)
@@ -56,7 +56,7 @@ def merge_parquet_files(parquet_path1, parquet_path2, output_path):
     logger.info("Index of second DataFrame: %s", df2.index)
 
     # Align intervals
-    df1, df2 = align_intervals(df1, df2, kwargs['ffill_multiplier'])
+    df1, df2 = align_intervals(df1, df2, ffill_multiplier)
 
     merged_df = concat_dataframes(df1, df2)
 
@@ -104,7 +104,7 @@ def main(input1, input2, output, mlflow_run_name, ffill_multiplier):
     mlflow.start_run(run_name=mlflow_run_name)
     mlflow.log_params({"input1": input1, "input2": input2, "output": output})
 
-    merge_parquet_files(input1, input2, output)
+    merge_parquet_files(input1, input2, output, ffill_multiplier)
 
     mlflow.end_run()
 

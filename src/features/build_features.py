@@ -12,7 +12,8 @@ def create_features(df):
     :param df: Input DataFrame.
     :return: DataFrame with new features.
     """
-    # Apply feature creation to all sensor columns
+    # Add a column for days since the start of the year
+    df['days_since_year_start'] = df.index.dayofyear
     for col in df.columns:
         if col.startswith('env_temp_') or col.startswith('star_watt_'):
             # Add any feature creation logic here

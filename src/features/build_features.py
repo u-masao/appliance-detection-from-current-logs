@@ -13,23 +13,37 @@ def create_features(df):
     :return: DataFrame with new features.
     """
     # Add a column for days since the start of the year
-    df['days_since_year_start'] = df.index.dayofyear
-    # Add columns for month, hour, minute, and second
-    df['month'] = df.index.month
-    df['hour'] = df.index.hour
-    df['minute'] = df.index.minute
-    df['second'] = df.index.second
-    for col in df.columns:
-        if col.startswith('env_temp_') or col.startswith('star_watt_'):
-            # Add any feature creation logic here
-            # For now, just pass through the DataFrame
-            pass
+    df["days_since_year_start"] = df.index.dayofyear
+    # Add columns for month, hour, and minute
+    df["month"] = df.index.month
+    df["hour"] = df.index.hour
+    df["minute"] = df.index.minute
+    df["watt_black_minus_kitchen"] = (
+        df["star_watt_sensor0"] - df["star_watt_sensor2"]
+    )
+    df["watt_red_minus_living"] = (
+        df["star_watt_sensor1"] - df["star_watt_sensor3"]
+    )
+    df["watt_total"] = df["star_watt_sensor0"] - df["star_watt_sensor1"]
+    df = df.rename(
+        columns={
+            "star_watt_sensor0": "watt_black",
+            "star_watt_sensor1": "watt_red",
+            "star_watt_sensor2": "watt_kitchen",
+            "star_watt_sensor3": "watt_living",
+            "env_temp_sensor0": "temperature_outside",
+        }
+    )
     return df
 
 
 @click.command()
 @click.argument("input_parquet_path", type=click.Path(exists=True))
-@click.argument("output_parquet_path", type=click.Path(), default="data/interim/features.parquet")
+@click.argument(
+    "output_parquet_path",
+    type=click.Path(),
+    default="data/interim/features.parquet",
+)
 @click.option(
     "--mlflow_run_name",
     type=str,
@@ -50,11 +64,13 @@ def main(input_parquet_path, output_parquet_path, mlflow_run_name):
 
     mlflow.set_experiment("build_features")
     mlflow.start_run(run_name=mlflow_run_name)
-    mlflow.log_params({
-        "input_parquet_path": input_parquet_path,
-        "output_parquet_path": output_parquet_path,
-        "mlflow_run_name": mlflow_run_name
-    })
+    mlflow.log_params(
+        {
+            "input_parquet_path": input_parquet_path,
+            "output_parquet_path": output_parquet_path,
+            "mlflow_run_name": mlflow_run_name,
+        }
+    )
 
     # Load the Parquet file
     df = pd.read_parquet(input_parquet_path)

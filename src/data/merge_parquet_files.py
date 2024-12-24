@@ -14,7 +14,9 @@ def merge_parquet_files(parquet_path1, parquet_path2, output_path):
     df1_resampled = df1.reindex(high_res_index).interpolate(method='linear')
     df2_resampled = df2.reindex(high_res_index).interpolate(method='linear')
 
-    # Concatenate the DataFrames
+    # Rename columns to ensure uniqueness
+    df1_resampled.columns = [f"env_temp_{col}" for col in df1_resampled.columns]
+    df2_resampled.columns = [f"star_watt_{col}" for col in df2_resampled.columns]
     merged_df = pd.concat([df1_resampled, df2_resampled], axis=1)
 
     # Save the merged DataFrame to a new Parquet file

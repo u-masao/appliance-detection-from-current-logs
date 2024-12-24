@@ -32,6 +32,19 @@ def align_intervals(df1, df2):
     return df1, df2
 
 
+def concat_dataframes(df1, df2):
+    """
+    Concatenate two DataFrames with prefixed column names.
+
+    :param df1: First DataFrame.
+    :param df2: Second DataFrame.
+    :return: Concatenated DataFrame.
+    """
+    df1.columns = [f"env_temp_{col}" for col in df1.columns]
+    df2.columns = [f"star_watt_{col}" for col in df2.columns]
+    return pd.concat([df1, df2], axis=1)
+
+
 def merge_parquet_files(parquet_path1, parquet_path2, output_path):
     # Load the Parquet files
     df1 = pd.read_parquet(parquet_path1)
@@ -45,9 +58,7 @@ def merge_parquet_files(parquet_path1, parquet_path2, output_path):
     # Align intervals
     df1, df2 = align_intervals(df1, df2)
 
-    df1.columns = [f"env_temp_{col}" for col in df1.columns]
-    df2.columns = [f"star_watt_{col}" for col in df2.columns]
-    merged_df = pd.concat([df1, df2], axis=1)
+    merged_df = concat_dataframes(df1, df2)
 
 
     # Remove rows with null values and those within 6 hours of them

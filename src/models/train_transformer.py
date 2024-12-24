@@ -13,6 +13,7 @@ def parse_args():
     parser.add_argument("--output", type=str, required=True, help="Path to save the trained model")
     return parser.parse_args()
 
+def load_data(file_path):
     df = pd.read_parquet(file_path)
     df = df[df["Gap"] == False]  # Filter out non-continuous data
     return df
@@ -108,8 +109,9 @@ def objective(trial):
 
 # Run Optuna
 if __name__ == "__main__":
+    args = parse_args()
     study = optuna.create_study(direction="minimize")
     study.optimize(objective, n_trials=50)
     print("Best trial:", study.best_trial)
     # Save the best model
-    torch.save(study.best_trial, args.output)
+    torch.save(study.best_trial.value, args.output)

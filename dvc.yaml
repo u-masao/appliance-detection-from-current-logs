@@ -41,10 +41,11 @@ stages:
   train_model:
     cmd: >-
       python src/models/train_transformer.py
-      --input data/interim/features.parquet
-      --output models/best_model.pth
+      data/interim/features.parquet
+      models/best_model.pth
+      --data_fraction ${train_model.data_fraction}
     deps:
       - src/models/train_transformer.py
       - data/interim/features.parquet
     outs:
-      - models/
+      - models/best_model.pth

@@ -1,0 +1,2 @@
+train_model:
+  data_fraction: 0.01

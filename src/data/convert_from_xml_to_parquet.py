@@ -14,7 +14,7 @@ def convert_xml_to_parquet(xml_path: str, parquet_path: str):
     """
     logger = logging.getLogger(__name__)
     # Read the XML file into a DataFrame
-    df = pd.read_xml(xml_path, xpath = '//rra["LAST"]/following-subling::database')
+    df = pd.read_xml(xml_path, xpath = '//rra["LAST"]/following-sibling::database')
 
     # Log the DataFrame content
     logger.info("XML DataFrame content:\n%s", df)

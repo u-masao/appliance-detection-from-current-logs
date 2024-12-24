@@ -57,6 +57,21 @@ def remove_null_rows(df, window='6H'):
     drop_mask = null_mask.rolling(window=window, min_periods=1).max().astype(bool)
     return df[~drop_mask]
 
+def add_gap_column(df):
+    """
+    Add a gap column to indicate time continuity breaks.
+
+    :param df: DataFrame to process.
+    :return: DataFrame with a gap column added.
+    """
+    time_diffs = df.index.to_series().diff().fillna(pd.Timedelta(seconds=0))
+    min_diff = time_diffs[time_diffs > pd.Timedelta(seconds=0)].min()
+    gap = (time_diffs != min_diff) | (time_diffs.shift(-1) != min_diff)
+    gap.iloc[0] = True  # First row
+    gap.iloc[-1] = True  # Last row
+    df['gap'] = gap
+    return df
+
 def merge_parquet_files(df1, df2, ffill_multiplier, window):
 
     logger = logging.getLogger(__name__)
@@ -71,13 +86,8 @@ def merge_parquet_files(df1, df2, ffill_multiplier, window):
     time_diffs = merged_df.index.to_series().diff().value_counts().sort_index()
     logger.info("Time differences between indices:\n%s", time_diffs)
 
-    # Calculate the gap column
-    time_diffs = merged_df.index.to_series().diff().fillna(pd.Timedelta(seconds=0))
-    min_diff = time_diffs[time_diffs > pd.Timedelta(seconds=0)].min()
-    gap = (time_diffs != min_diff) | (time_diffs.shift(-1) != min_diff)
-    gap.iloc[0] = True  # First row
-    gap.iloc[-1] = True  # Last row
-    merged_df['gap'] = gap
+    # Add the gap column
+    merged_df = add_gap_column(merged_df)
     null_counts = merged_df.isnull().sum()
     logger.info("Null counts per column:\n%s", null_counts)
 

@@ -9,8 +9,8 @@ stages:
       size: 72520793
     - path: src/data/convert_from_xml_to_parquet.py
       hash: md5
-      md5: 348e5173328c66398fd383b08fa8b055
-      size: 3645
+      md5: 88da0f001cf3fb2022198d2950a6d0b7
+      size: 3876
     outs:
     - path: data/interim/env_temp.parquet
       hash: md5
@@ -25,10 +25,31 @@ stages:
       size: 649685660
     - path: src/data/convert_from_xml_to_parquet.py
       hash: md5
-      md5: 348e5173328c66398fd383b08fa8b055
-      size: 3645
+      md5: 88da0f001cf3fb2022198d2950a6d0b7
+      size: 3876
     outs:
     - path: data/interim/star_watt.parquet
       hash: md5
       md5: 26c3f17d550c58ce045d9de9b83f70ff
       size: 38166479
+  merge_parquet_files:
+    cmd: python src/data/merge_parquet_files.py data/interim/env_temp.parquet data/interim/star_watt.parquet
+      data/interim/dataset.parquet
+    deps:
+    - path: data/interim/env_temp.parquet
+      hash: md5
+      md5: 972a592a61627c5dcf256d340c33c62f
+      size: 3221030
+    - path: data/interim/star_watt.parquet
+      hash: md5
+      md5: 26c3f17d550c58ce045d9de9b83f70ff
+      size: 38166479
+    - path: src/data/merge_parquet_files.py
+      hash: md5
+      md5: 6dadcd2d783033492fa0703a05332892
+      size: 4827
+    outs:
+    - path: data/interim/dataset.parquet
+      hash: md5
+      md5: 794d570f00a5b78c66a1f0b1257e6223
+      size: 39634109

@@ -16,7 +16,16 @@ def merge_parquet_files(parquet_path1, parquet_path2, output_path):
     logger = logging.getLogger(__name__)
     logger.info("Index of first DataFrame: %s", df1.index)
     logger.info("Index of second DataFrame: %s", df2.index)
-    # Rename columns to ensure uniqueness
+    # Calculate time intervals
+    interval_df1 = df1.index.to_series().diff().min()
+    interval_df2 = df2.index.to_series().diff().min()
+
+    # Determine the shorter interval
+    target_interval = min(interval_df1, interval_df2)
+
+    # Resample DataFrames to the shorter interval
+    df1 = df1.resample(target_interval).ffill()
+    df2 = df2.resample(target_interval).ffill()
     df1.columns = [f"env_temp_{col}" for col in df1.columns]
     df2.columns = [f"star_watt_{col}" for col in df2.columns]
     merged_df = pd.concat([df1, df2], axis=1)

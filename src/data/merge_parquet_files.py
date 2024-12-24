@@ -1,4 +1,5 @@
 import pandas as pd
+import argparse
 
 def merge_parquet_files(parquet_path1, parquet_path2, output_path):
     # Load the Parquet files
@@ -19,8 +20,10 @@ def merge_parquet_files(parquet_path1, parquet_path2, output_path):
     merged_df.to_parquet(output_path)
 
 if __name__ == "__main__":
-    merge_parquet_files(
-        "data/interim/env_temp.parquet",
-        "data/interim/star_watt.parquet",
-        "data/processed/merged_data.parquet"
-    )
+    parser = argparse.ArgumentParser(description="Merge two Parquet files.")
+    parser.add_argument("input1", type=str, help="Path to the first input Parquet file.")
+    parser.add_argument("input2", type=str, help="Path to the second input Parquet file.")
+    parser.add_argument("output", type=str, help="Path to the output Parquet file.")
+    args = parser.parse_args()
+
+    merge_parquet_files(args.input1, args.input2, args.output)

@@ -16,7 +16,7 @@ stages:
 
   merge_parquet_files:
     cmd: >-
-      python src/data/merge_parquet_files.py
+      python src/data/merge_parquet_files.py data/interim/env_temp.parquet data/interim/star_watt.parquet data/processed/merged_data.parquet
     deps:
       - src/data/merge_parquet_files.py
       - data/interim/env_temp.parquet

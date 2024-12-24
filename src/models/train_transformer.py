@@ -1,4 +1,5 @@
 import logging
+
 import click
 import mlflow
 import optuna
@@ -9,39 +10,17 @@ from sklearn.model_selection import train_test_split
 from torch.utils.data import DataLoader, Dataset
 
 
-logger = logging.getLogger(__name__)
-
-@click.command()
-@click.argument("input_path", type=click.Path(exists=True))
-@click.argument("output_path", type=click.Path())
-@click.option("--mlflow_run_name", type=str, default="train_transformer", help="Name of the MLflow run.")
-def main(input_path, output_path, mlflow_run_name):
-    logger.info("==== start process ====")
-    logger.info(f"Input path: {input_path}")
-    logger.info(f"Output path: {output_path}")
-
-    mlflow.set_experiment("train_transformer")
-    mlflow.start_run(run_name=mlflow_run_name)
-    mlflow.log_params({"input_path": input_path, "output_path": output_path})
-
-    # Run Optuna
-    study = optuna.create_study(direction="minimize")
-    study.optimize(lambda trial: objective(trial, input_path, output_path), n_trials=50)
-    logger.info(f"Best trial: {study.best_trial}")
-    # Save the best model
-    torch.save(study.best_trial.value, output_path)
-
 def load_data(file_path):
+    logger = logging.getLogger(__name__)
     logger.info(f"Loading data from {file_path}")
     df = pd.read_parquet(file_path)
     logger.info("Data loaded successfully")
-    df = df[df["Gap"] == False]  # Filter out non-continuous data
     return df
 
 
 # Custom Dataset
 class TimeSeriesDataset(Dataset):
-    def __init__(self, data, input_length=60*3, output_length=5):
+    def __init__(self, data, input_length=60 * 3, output_length=5):
         self.data = data
         self.input_length = input_length
         self.output_length = output_length
@@ -80,6 +59,7 @@ class TransformerModel(nn.Module):
 
 # Objective function for Optuna
 def objective(trial, input_path, output_path):
+    logger = logging.getLogger(__name__)
     # Hyperparameters
     embed_dim = trial.suggest_int("embed_dim", 16, 64)
     num_heads = trial.suggest_int("num_heads", 1, 4)
@@ -132,6 +112,35 @@ def objective(trial, input_path, output_path):
     logger.info(f"Final validation loss: {val_loss}")
     logger.info("==== end process ====")
     return val_loss
+
+
+@click.command()
+@click.argument("input_path", type=click.Path(exists=True))
+@click.argument("output_path", type=click.Path())
+@click.option(
+    "--mlflow_run_name",
+    type=str,
+    default="train_transformer",
+    help="Name of the MLflow run.",
+)
+def main(input_path, output_path, mlflow_run_name):
+    logger = logging.getLogger(__name__)
+    logger.info("==== start process ====")
+    logger.info(f"Input path: {input_path}")
+    logger.info(f"Output path: {output_path}")
+
+    mlflow.set_experiment("train_transformer")
+    mlflow.start_run(run_name=mlflow_run_name)
+    mlflow.log_params({"input_path": input_path, "output_path": output_path})
+
+    # Run Optuna
+    study = optuna.create_study(direction="minimize")
+    study.optimize(
+        lambda trial: objective(trial, input_path, output_path), n_trials=50
+    )
+    logger.info(f"Best trial: {study.best_trial}")
+    # Save the best model
+    torch.save(study.best_trial.value, output_path)
 
 
 if __name__ == "__main__":

@@ -74,7 +74,7 @@ class TransformerModel(nn.Module):
 
 
 # Objective function for Optuna
-def objective(trial, input_path, output_path, fraction):
+def objective(trial, input_path, output_path, fraction, num_epochs):
     logger = logging.getLogger(__name__)
     # Hyperparameters
     num_heads = trial.suggest_int("num_heads", 1, 4)
@@ -106,7 +106,7 @@ def objective(trial, input_path, output_path, fraction):
     val_loader = DataLoader(val_dataset, batch_size=32, shuffle=False)
 
     # Training loop
-    for epoch in range(10):
+    for epoch in range(num_epochs):
         logger.info(f"Epoch {epoch+1} started")
         model.train()
         for x, y in tqdm(train_loader, desc=f"Epoch {epoch+1} [Train]", leave=False):
@@ -148,7 +148,7 @@ def objective(trial, input_path, output_path, fraction):
     default=1.0,
     help="Fraction of data to load for development.",
 )
-def main(input_path, output_path, mlflow_run_name, data_fraction):
+def main(input_path, output_path, mlflow_run_name, data_fraction, num_epochs):
     logger = logging.getLogger(__name__)
     logger.info("==== start process ====")
     logger.info(f"Input path: {input_path}")
@@ -161,7 +161,7 @@ def main(input_path, output_path, mlflow_run_name, data_fraction):
     # Run Optuna
     study = optuna.create_study(direction="minimize")
     study.optimize(
-        lambda trial: objective(trial, input_path, output_path, data_fraction),
+        lambda trial: objective(trial, input_path, output_path, data_fraction, num_epochs),
         n_trials=50,
     )
     logger.info(f"Best trial: {study.best_trial}")

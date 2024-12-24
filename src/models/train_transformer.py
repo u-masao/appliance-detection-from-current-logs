@@ -17,6 +17,13 @@ def main(input_path, output_path, mlflow_run_name):
     mlflow.start_run(run_name=mlflow_run_name)
     mlflow.log_params({"input_path": input_path, "output_path": output_path})
 
+    # Run Optuna
+    study = optuna.create_study(direction="minimize")
+    study.optimize(lambda trial: objective(trial, input_path, output_path), n_trials=50)
+    print("Best trial:", study.best_trial)
+    # Save the best model
+    torch.save(study.best_trial.value, output_path)
+
 def load_data(file_path):
     df = pd.read_parquet(file_path)
     df = df[df["Gap"] == False]  # Filter out non-continuous data
@@ -114,10 +121,5 @@ def objective(trial, input_path, output_path):
     return val_loss
 
 
-# Run Optuna
 if __name__ == "__main__":
-    study = optuna.create_study(direction="minimize")
-    study.optimize(lambda trial: objective(trial, input_path, output_path), n_trials=50)
-    print("Best trial:", study.best_trial)
-    # Save the best model
-    torch.save(study.best_trial.value, output_path)
+    main()

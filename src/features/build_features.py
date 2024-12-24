@@ -59,7 +59,8 @@ def main(input_parquet_path, output_parquet_path, mlflow_run_name):
     df = create_features(df)
     logger.info("DataFrame with features:\n%s", df.head())
 
-    # Save the DataFrame with features to a Parquet file
+    # Log the column names of the DataFrame with features
+    logger.info("Output DataFrame columns: %s", df.columns)
     df.to_parquet(output_parquet_path)
 
     mlflow.end_run()

@@ -15,10 +15,6 @@ def create_features(df):
     # Apply feature creation to all sensor columns
     for col in df.columns:
         if col.startswith('env_temp_') or col.startswith('star_watt_'):
-            # Example feature: rolling mean
-            df[f'{col}_rolling_mean'] = df[col].rolling(window=3).mean()
-            # Example feature: difference
-            df[f'{col}_diff'] = df[col].diff()
     return df
 
 

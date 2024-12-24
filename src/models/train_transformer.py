@@ -15,8 +15,10 @@ def load_data(file_path, fraction=1.0):
     logger.info(f"Loading data from {file_path}")
     df = pd.read_parquet(file_path)
     if fraction < 1.0:
-        df = df.iloc[:int(len(df) * fraction)]
-        logger.info(f"Data reduced to {len(df)} samples for development (sequentially)")
+        df = df.iloc[: int(len(df) * fraction)]
+        logger.info(
+            f"Data reduced to {len(df)} samples for development (sequentially)"
+        )
     logger.info("Data loaded successfully")
     return df
 
@@ -127,12 +129,12 @@ def objective(trial, input_path, output_path, fraction):
     help="Name of the MLflow run.",
 )
 @click.option(
-    "--fraction",
+    "--data_fraction",
     type=float,
     default=1.0,
     help="Fraction of data to load for development.",
 )
-def main(input_path, output_path, mlflow_run_name, fraction):
+def main(input_path, output_path, mlflow_run_name, data_fraction):
     logger = logging.getLogger(__name__)
     logger.info("==== start process ====")
     logger.info(f"Input path: {input_path}")
@@ -145,7 +147,8 @@ def main(input_path, output_path, mlflow_run_name, fraction):
     # Run Optuna
     study = optuna.create_study(direction="minimize")
     study.optimize(
-        lambda trial: objective(trial, input_path, output_path, fraction), n_trials=50
+        lambda trial: objective(trial, input_path, output_path, data_fraction),
+        n_trials=50,
     )
     logger.info(f"Best trial: {study.best_trial}")
     # Save the best model

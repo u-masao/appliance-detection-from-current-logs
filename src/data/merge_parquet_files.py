@@ -23,11 +23,12 @@ def merge_parquet_files(parquet_path1, parquet_path2, output_path):
     # Determine the shorter interval
     target_interval = min(interval_df1, interval_df2)
 
-    # Resample only the DataFrame with the longer interval
+    # Calculate the limit for ffill based on the intervals
+    ffill_limit = max(interval_df1, interval_df2) // min(interval_df1, interval_df2)
     if interval_df1 > interval_df2:
-        df1 = df1.resample(target_interval).ffill(limit=5)
+        df1 = df1.resample(target_interval).ffill(limit=ffill_limit)
     elif interval_df2 > interval_df1:
-        df2 = df2.resample(target_interval).ffill(limit=5)
+        df2 = df2.resample(target_interval).ffill(limit=ffill_limit)
     df1.columns = [f"env_temp_{col}" for col in df1.columns]
     df2.columns = [f"star_watt_{col}" for col in df2.columns]
     merged_df = pd.concat([df1, df2], axis=1)

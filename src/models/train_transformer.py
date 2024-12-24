@@ -14,7 +14,7 @@ def load_data(file_path, fraction=1.0):
     logger = logging.getLogger(__name__)
     logger.info(f"Loading data from {file_path}")
     df = pd.read_parquet(file_path)
-    if fraction < 1.0:
+    logger.info(f"Data types:\n{df.dtypes}")
         df = df.iloc[: int(len(df) * fraction)]
         logger.info(
             f"Data reduced to {len(df)} samples for development (sequentially)"

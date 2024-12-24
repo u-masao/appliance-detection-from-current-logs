@@ -100,7 +100,7 @@ def convert_xml_to_parquet(xml_path: str, parquet_path: str, cf_text: str):
     default="LAST",
     help="CF text to search for in the XML.",
 )
-def main(xml_file_path, parquet_file_path, mlflow_run_name, cf_text):
+def main(**kwargs):
     """
     Convert an XML file to a Parquet file.
 
@@ -110,13 +110,21 @@ def main(xml_file_path, parquet_file_path, mlflow_run_name, cf_text):
 
     logger = logging.getLogger(__name__)
     logger.info("==== start process ====")
-    logger.info({f"args.{k}": v for k, v in kwargs.items()})
+    logger.info({
+        f"args.{k}": v for k, v in kwargs.items()
+    })
 
     mlflow.set_experiment("make_dataset")
     mlflow.start_run(run_name=kwargs["mlflow_run_name"])
-    mlflow.log_params({f"args.{k}": v for k, v in kwargs.items()})
+    mlflow.log_params({
+        f"args.{k}": v for k, v in kwargs.items()
+    })
 
-    convert_xml_to_parquet(xml_file_path, parquet_file_path, cf_text)
+    convert_xml_to_parquet(
+        kwargs["xml_file_path"],
+        kwargs["parquet_file_path"],
+        kwargs["cf_text"]
+    )
 
     mlflow.end_run()
     logger.info("==== end process ====")

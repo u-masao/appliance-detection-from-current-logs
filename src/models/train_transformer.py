@@ -74,7 +74,7 @@ class TransformerModel(nn.Module):
 
 
 # Objective function for Optuna
-def objective(trial, input_path, output_path, fraction, num_epochs):
+def objective(trial, input_path, output_path, fraction, num_epochs, study):
     logger = logging.getLogger(__name__)
     # Hyperparameters
     num_heads = trial.suggest_int("num_heads", 1, 4)
@@ -133,10 +133,6 @@ def objective(trial, input_path, output_path, fraction, num_epochs):
                 pbar.set_postfix({"loss": loss})
 
         mlflow.log_metric("val_loss", val_loss)
-    # Save the best model
-    if trial.number == study.best_trial.number:
-        torch.save(model.state_dict(), output_path)
-        
     mlflow.end_run()
     logger.info("Training completed")
     logger.info(f"Final validation loss: {val_loss}")
@@ -201,11 +197,21 @@ def main(
     study = optuna.create_study(direction="minimize")
     study.optimize(
         lambda trial: objective(
-            trial, input_path, output_path, data_fraction, num_epochs
+            trial, input_path, output_path, data_fraction, num_epochs, study
         ),
         n_trials=n_trials,
     )
     logger.info(f"Best trial: {study.best_trial}")
+    # Save the best model
+    # Define the model with the best parameters
+    best_trial = study.best_trial
+    model = TransformerModel(
+        input_dim=60 * 3 * 13,
+        embed_dim=best_trial.params["embed_dim"],
+        num_heads=best_trial.params["num_heads"],
+        num_layers=best_trial.params["num_layers"],
+        output_dim=5 * 4,
+    )
     # Save the best model
     torch.save(model.state_dict(), output_path)
 

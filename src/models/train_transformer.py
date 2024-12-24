@@ -66,7 +66,8 @@ class TransformerModel(nn.Module):
 def objective(trial, input_path, output_path, fraction):
     logger = logging.getLogger(__name__)
     # Hyperparameters
-    embed_dim = trial.suggest_int("embed_dim", 16, 64)
+    num_heads = trial.suggest_int("num_heads", 1, 4)
+    embed_dim = trial.suggest_int("embed_dim", num_heads * 4, num_heads * 16, step=num_heads)
     num_heads = trial.suggest_int("num_heads", 1, 4)
     num_layers = trial.suggest_int("num_layers", 1, 3)
     lr = trial.suggest_loguniform("lr", 1e-4, 1e-2)

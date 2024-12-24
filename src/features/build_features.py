@@ -15,7 +15,7 @@ def create_features(df):
     # Apply feature creation to all sensor columns
     for col in df.columns:
         if col.startswith('env_temp_') or col.startswith('star_watt_'):
-    return df
+        return df
 
 
 @click.command()

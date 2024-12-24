@@ -69,7 +69,7 @@ class TransformerModel(nn.Module):
     def forward(self, src):
         src = self.embedding(src)
         output = self.transformer(src, src)
-        return self.fc_out(output[-1])
+        return self.fc_out(output[-1]).view(-1, self.fc_out.out_features)
 
 
 # Objective function for Optuna

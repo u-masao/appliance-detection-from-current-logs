@@ -203,7 +203,7 @@ def main(
     )
     logger.info(f"Best trial: {study.best_trial}")
     # Save the best model
-    torch.save(study.best_trial.value, output_path)
+    torch.save(model.state_dict(), output_path)
 
 
 if __name__ == "__main__":

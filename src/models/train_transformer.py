@@ -9,12 +9,13 @@ from sklearn.model_selection import train_test_split
 from torch.utils.data import DataLoader, Dataset
 
 
+logger = logging.getLogger(__name__)
+
 @click.command()
 @click.argument("input_path", type=click.Path(exists=True))
 @click.argument("output_path", type=click.Path())
 @click.option("--mlflow_run_name", type=str, default="train_transformer", help="Name of the MLflow run.")
 def main(input_path, output_path, mlflow_run_name):
-    logger = logging.getLogger(__name__)
     logger.info("==== start process ====")
     logger.info(f"Input path: {input_path}")
     logger.info(f"Output path: {output_path}")

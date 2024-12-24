@@ -24,7 +24,7 @@ def merge_parquet_files(parquet_path1, parquet_path2, output_path):
     target_interval = min(interval_df1, interval_df2)
 
     # Calculate the limit for ffill based on the intervals
-    ffill_limit = max(interval_df1, interval_df2) // min(interval_df1, interval_df2)
+    ffill_limit = int(max(interval_df1, interval_df2) / min(interval_df1, interval_df2))
     if interval_df1 > interval_df2:
         df1 = df1.resample(target_interval).ffill(limit=ffill_limit)
     elif interval_df2 > interval_df1:

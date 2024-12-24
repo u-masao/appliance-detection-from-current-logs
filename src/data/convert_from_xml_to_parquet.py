@@ -1,5 +1,11 @@
 import click
+import logging
+import mlflow
 import pandas as pd
+
+# Set up logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 def convert_xml_to_parquet(xml_path: str, parquet_path: str):
     """
@@ -10,6 +16,10 @@ def convert_xml_to_parquet(xml_path: str, parquet_path: str):
     """
     # Read the XML file into a DataFrame
     df = pd.read_xml(xml_path)
+
+    # Log the DataFrame content
+    logger.info("XML DataFrame content:\n%s", df)
+    mlflow.log_text(df.to_string(), "xml_dataframe_content.txt")
 
     # Write the DataFrame to a Parquet file
     df.to_parquet(parquet_path)

@@ -4,7 +4,7 @@
 
 PROJECT_NAME = appliance-detection-from-current-logs
 PYTHON_VERSION = 3.10
-PYTHON_INTERPRETER = python
+PYTHON_INTERPRETER = uv run python
 
 #################################################################################
 # COMMANDS                                                                      #
@@ -15,36 +15,13 @@ PYTHON_INTERPRETER = python
 repro:
 	uv run dvc repro
 
-## Install Python Dependencies
-.PHONY: requirements
-requirements:
-	$(PYTHON_INTERPRETER) -m pip install -U pip
-	$(PYTHON_INTERPRETER) -m pip install -r requirements.txt
-	
 
-
-
-## Delete all compiled Python files
-.PHONY: clean
-clean:
-	find . -type f -name "*.py[co]" -delete
-	find . -type d -name "__pycache__" -delete
-
-## Lint using flake8 and black (use `make format` to do formatting)
+## formatting and lint
 .PHONY: lint
 lint:
-	flake8 src
-	isort --check --diff --profile black src
-	black --check --config pyproject.toml src
-
-## Format source code with black
-.PHONY: format
-format:
-	black --config pyproject.toml src
-
-
-
-
+	uv run isort src
+	uv run black src -l 79
+	uv run flake8 src
 
 
 #################################################################################

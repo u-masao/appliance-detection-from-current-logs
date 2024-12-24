@@ -111,7 +111,7 @@ def objective(trial, input_path, output_path, fraction):
         for x, y in train_loader:
             optimizer.zero_grad()
             output = model(x)
-            loss = criterion(output, y)
+            loss = criterion(output.view_as(y), y)
             mlflow.log_metric("train_loss", loss.item())
             loss.backward()
             optimizer.step()
@@ -122,7 +122,7 @@ def objective(trial, input_path, output_path, fraction):
         with torch.no_grad():
             for x, y in val_loader:
                 output = model(x)
-                val_loss += criterion(output, y).item()
+                val_loss += criterion(output.view_as(y), y).item()
 
         mlflow.log_metric("val_loss", val_loss)
     mlflow.end_run()

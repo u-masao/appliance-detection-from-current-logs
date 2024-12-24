@@ -86,6 +86,12 @@ def merge_parquet_files(parquet_path1, parquet_path2, output_path):
     default="merge_parquet_files",
     help="Name of the MLflow run.",
 )
+@click.option(
+    "--ffill_multiplier",
+    type=int,
+    default=4,
+    help="Multiplier for the forward fill limit.",
+)
 def main(input1, input2, output, mlflow_run_name, ffill_multiplier):
     """
     Merge two Parquet files and save the result.

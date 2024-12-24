@@ -125,7 +125,14 @@ def main(input1, input2, output, mlflow_run_name, ffill_multiplier, window):
     """
     mlflow.set_experiment("merge_datasets")
     mlflow.start_run(run_name=mlflow_run_name)
-    mlflow.log_params({"input1": input1, "input2": input2, "output": output})
+    mlflow.log_params({
+        "input1": input1,
+        "input2": input2,
+        "output": output,
+        "mlflow_run_name": mlflow_run_name,
+        "ffill_multiplier": ffill_multiplier,
+        "window": window
+    })
 
     logger = logging.getLogger(__name__)
 

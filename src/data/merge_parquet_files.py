@@ -16,16 +16,10 @@ def merge_parquet_files(parquet_path1, parquet_path2, output_path):
     logger = logging.getLogger(__name__)
     logger.info("Index of first DataFrame: %s", df1.index)
     logger.info("Index of second DataFrame: %s", df2.index)
-    high_res_index = df1.index.union(df2.index).sort_values()
-
-    # Resample both DataFrames to the higher resolution index
-    df1_resampled = df1.reindex(high_res_index).interpolate(method='linear')
-    df2_resampled = df2.reindex(high_res_index).interpolate(method='linear')
-
     # Rename columns to ensure uniqueness
-    df1_resampled.columns = [f"env_temp_{col}" for col in df1_resampled.columns]
-    df2_resampled.columns = [f"star_watt_{col}" for col in df2_resampled.columns]
-    merged_df = pd.concat([df1_resampled, df2_resampled], axis=1)
+    df1.columns = [f"env_temp_{col}" for col in df1.columns]
+    df2.columns = [f"star_watt_{col}" for col in df2.columns]
+    merged_df = pd.concat([df1, df2], axis=1)
 
     # Save the merged DataFrame to a new Parquet file
     merged_df.to_parquet(output_path)

@@ -7,7 +7,7 @@ import mlflow
 log_fmt = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 logging.basicConfig(level=logging.INFO, format=log_fmt)
 
-def align_intervals(df1, df2):
+def align_intervals(df1, df2, ffill_multiplier):
     """
     Align the intervals of two DataFrames by resampling to the shorter interval.
 
@@ -23,7 +23,7 @@ def align_intervals(df1, df2):
     target_interval = min(interval_df1, interval_df2)
 
     # Calculate the limit for ffill based on the intervals
-    ffill_limit = 4 * (max(interval_df1, interval_df2) // min(interval_df1, interval_df2))
+    ffill_limit = ffill_multiplier * (max(interval_df1, interval_df2) // min(interval_df1, interval_df2))
     if interval_df1 > interval_df2:
         df1 = df1.resample(target_interval).ffill(limit=ffill_limit)
     elif interval_df2 > interval_df1:
@@ -56,7 +56,7 @@ def merge_parquet_files(parquet_path1, parquet_path2, output_path):
     logger.info("Index of second DataFrame: %s", df2.index)
 
     # Align intervals
-    df1, df2 = align_intervals(df1, df2)
+    df1, df2 = align_intervals(df1, df2, kwargs['ffill_multiplier'])
 
     merged_df = concat_dataframes(df1, df2)
 
@@ -86,7 +86,7 @@ def merge_parquet_files(parquet_path1, parquet_path2, output_path):
     default="merge_parquet_files",
     help="Name of the MLflow run.",
 )
-def main(input1, input2, output, mlflow_run_name):
+def main(input1, input2, output, mlflow_run_name, ffill_multiplier):
     """
     Merge two Parquet files and save the result.
 

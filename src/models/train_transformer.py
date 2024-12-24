@@ -99,7 +99,12 @@ def objective(trial, input_path, output_path, fraction, num_epochs, study):
 
     # Data
     df = load_data(input_path, fraction)
-    train_df, val_df = train_test_split(df, test_size=0.2, shuffle=False)
+    # Split data into train, validation, and test sets sequentially
+    train_size = int(len(df) * 0.7)
+    val_size = int(len(df) * 0.15)
+    train_df = df.iloc[:train_size]
+    val_df = df.iloc[train_size:train_size + val_size]
+    test_df = df.iloc[train_size + val_size:]
     train_dataset = TimeSeriesDataset(train_df)
     val_dataset = TimeSeriesDataset(val_df)
     train_loader = DataLoader(train_dataset, batch_size=32, shuffle=True)

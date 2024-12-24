@@ -37,3 +37,12 @@ stages:
       - data/interim/dataset.parquet
     outs:
       - data/interim/features.parquet
+
+  train_model:
+    cmd: >-
+      python src/models/train_transformer.py
+    deps:
+      - src/models/train_transformer.py
+      - data/interim/features.parquet
+    outs:
+      - models/

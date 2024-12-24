@@ -63,7 +63,7 @@ class TransformerModel(nn.Module):
 
 
 # Objective function for Optuna
-def objective(trial):
+def objective(trial, input_path, output_path):
     # Hyperparameters
     embed_dim = trial.suggest_int("embed_dim", 16, 64)
     num_heads = trial.suggest_int("num_heads", 1, 4)
@@ -117,7 +117,7 @@ def objective(trial):
 # Run Optuna
 if __name__ == "__main__":
     study = optuna.create_study(direction="minimize")
-    study.optimize(objective, n_trials=50)
+    study.optimize(lambda trial: objective(trial, input_path, output_path), n_trials=50)
     print("Best trial:", study.best_trial)
     # Save the best model
     torch.save(study.best_trial.value, output_path)

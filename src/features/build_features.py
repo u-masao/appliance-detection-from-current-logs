@@ -12,19 +12,6 @@ def create_features(df):
     :param df: Input DataFrame.
     :return: DataFrame with new features.
     """
-    # Add a column for days since the start of the year
-    df["days_since_year_start"] = df.index.dayofyear
-    # Add columns for month, hour, and minute
-    df["month"] = df.index.month
-    df["hour"] = df.index.hour
-    df["minute"] = df.index.minute
-    df["watt_black_minus_kitchen"] = (
-        df["star_watt_sensor0"] - df["star_watt_sensor2"]
-    )
-    df["watt_red_minus_living"] = (
-        df["star_watt_sensor1"] - df["star_watt_sensor3"]
-    )
-    df["watt_total"] = df["star_watt_sensor0"] - df["star_watt_sensor1"]
     df = df.rename(
         columns={
             "star_watt_sensor0": "watt_black",
@@ -34,6 +21,16 @@ def create_features(df):
             "env_temp_sensor0": "temperature_outside",
         }
     )
+    df["watt_black_minus_kitchen"] = df["watt_black"] - df["watt_kitchen"]
+    df["watt_red_minus_living"] = df["watt_red"] - df["watt_living"]
+    df["watt_total"] = df["watt_black"] - df["watt_red"]
+
+    # Add a column for days since the start of the year
+    df["days_since_year_start"] = df.index.dayofyear
+    # Add columns for month, hour, and minute
+    df["month"] = df.index.month
+    df["hour"] = df.index.hour
+    df["minute"] = df.index.minute
     return df
 
 

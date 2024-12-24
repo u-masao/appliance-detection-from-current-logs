@@ -36,4 +36,4 @@ stages:
       - src/features/build_features.py
       - data/interim/dataset.parquet
     outs:
-      - data/processed/features.parquet
+      - data/interim/features.parquet

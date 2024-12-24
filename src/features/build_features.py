@@ -17,6 +17,7 @@ def create_features(df):
         if col.startswith('env_temp_') or col.startswith('star_watt_'):
             # Add any feature creation logic here
             # For now, just pass through the DataFrame
+            pass
     return df
 
 

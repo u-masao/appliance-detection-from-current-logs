@@ -34,12 +34,15 @@ def merge_parquet_files(parquet_path1, parquet_path2, output_path):
     merged_df = pd.concat([df1, df2], axis=1)
 
 
-    # Remove rows with null values and those within 6 hours of each other
+    # Remove rows with null values and those within 6 hours of them
     null_indices = merged_df[merged_df.isnull().any(axis=1)].index
-    to_drop = null_indices.to_series().diff().fillna(pd.Timedelta(hours=7)) < pd.Timedelta(hours=6)
-    all_to_drop = null_indices.union(null_indices[to_drop])
-    all_to_drop = all_to_drop.union(
-        all_to_drop.to_series().apply(lambda x: merged_df.index[(merged_df.index >= x - pd.Timedelta(hours=6)) & (merged_df.index <= x + pd.Timedelta(hours=6))])
+    all_to_drop = null_indices.union(
+        null_indices.to_series().apply(
+            lambda x: merged_df.index[
+                (merged_df.index >= x - pd.Timedelta(hours=6)) & 
+                (merged_df.index <= x + pd.Timedelta(hours=6))
+            ]
+        ).explode()
     ).unique()
     merged_df = merged_df.drop(all_to_drop)
     merged_df.to_parquet(output_path)

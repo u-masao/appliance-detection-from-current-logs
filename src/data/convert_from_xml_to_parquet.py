@@ -16,7 +16,7 @@ def convert_xml_to_parquet(xml_path: str, parquet_path: str):
 if __name__ == "__main__":
     # Define the input and output paths
     xml_file_path = "data/raw/env_temp.xml"
-    parquet_file_path = "data/processed/env_temp.parquet"
+    parquet_file_path = "data/interim/env_temp.parquet"
 
     # Convert the XML to Parquet
     convert_xml_to_parquet(xml_file_path, parquet_file_path)

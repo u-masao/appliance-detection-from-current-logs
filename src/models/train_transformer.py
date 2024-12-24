@@ -7,8 +7,8 @@ import pandas as pd
 import torch
 import torch.nn as nn
 from sklearn.model_selection import train_test_split
-from tqdm import tqdm
 from torch.utils.data import DataLoader, Dataset
+from tqdm import tqdm
 
 
 def load_data(file_path, fraction=1.0):
@@ -51,7 +51,7 @@ class TimeSeriesDataset(Dataset):
             .to_numpy(dtype="float32")
             .flatten()
         )
-        
+
         return torch.tensor(x, dtype=torch.float32), torch.tensor(
             y, dtype=torch.float32
         )
@@ -123,7 +123,9 @@ def objective(trial, input_path, output_path, fraction, num_epochs):
         model.eval()
         val_loss = 0
         with torch.no_grad():
-            pbar = tqdm(val_loader, desc=f"Epoch {epoch+1} [Validation]", leave=False)
+            pbar = tqdm(
+                val_loader, desc=f"Epoch {epoch+1} [Validation]", leave=False
+            )
             for x, y in pbar:
                 output = model(x)
                 loss = criterion(output.view_as(y), y).item()
@@ -165,7 +167,14 @@ def objective(trial, input_path, output_path, fraction, num_epochs):
     default=50,
     help="Number of Optuna trials.",
 )
-def main(input_path, output_path, mlflow_run_name, data_fraction, num_epochs, n_trials):
+def main(
+    input_path,
+    output_path,
+    mlflow_run_name,
+    data_fraction,
+    num_epochs,
+    n_trials,
+):
     """
     Train the transformer model with the specified parameters.
 
@@ -187,7 +196,9 @@ def main(input_path, output_path, mlflow_run_name, data_fraction, num_epochs, n_
     # Run Optuna
     study = optuna.create_study(direction="minimize")
     study.optimize(
-        lambda trial: objective(trial, input_path, output_path, data_fraction, num_epochs),
+        lambda trial: objective(
+            trial, input_path, output_path, data_fraction, num_epochs
+        ),
         n_trials=n_trials,
     )
     logger.info(f"Best trial: {study.best_trial}")

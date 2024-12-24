@@ -58,12 +58,14 @@ def remove_null_rows(df, window='6H'):
     return df[~drop_mask]
 
 def merge_parquet_files(parquet_path1, parquet_path2, output_path, ffill_multiplier, window):
+
+    logger = logging.getLogger(__name__)
+
     # Load the Parquet files
     df1 = pd.read_parquet(parquet_path1)
     df2 = pd.read_parquet(parquet_path2)
 
     # Log the index of the input DataFrames
-    logger = logging.getLogger(__name__)
     logger.info("Index of first DataFrame: %s", df1.index)
     logger.info("Index of second DataFrame: %s", df2.index)
 
@@ -78,6 +80,7 @@ def merge_parquet_files(parquet_path1, parquet_path2, output_path, ffill_multipl
     # Log the time differences between indices
     time_diffs = merged_df.index.to_series().diff().value_counts().sort_index()
     logger.info("Time differences between indices:\n%s", time_diffs)
+
     merged_df.to_parquet(output_path)
 
 @click.command()

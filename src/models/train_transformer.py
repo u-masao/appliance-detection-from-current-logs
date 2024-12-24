@@ -1,3 +1,4 @@
+import argparse
 import optuna
 import pandas as pd
 import torch
@@ -6,8 +7,12 @@ from sklearn.model_selection import train_test_split
 from torch.utils.data import DataLoader, Dataset
 
 
-# Load data
-def load_data(file_path):
+def parse_args():
+    parser = argparse.ArgumentParser(description="Train Transformer Model")
+    parser.add_argument("--input", type=str, required=True, help="Path to input data file")
+    parser.add_argument("--output", type=str, required=True, help="Path to save the trained model")
+    return parser.parse_args()
+
     df = pd.read_parquet(file_path)
     df = df[df["Gap"] == False]  # Filter out non-continuous data
     return df
@@ -72,7 +77,8 @@ def objective(trial):
     criterion = nn.MSELoss()
 
     # Data
-    df = load_data("data/interim/features.parquet")
+    args = parse_args()
+    df = load_data(args.input)
     train_df, val_df = train_test_split(df, test_size=0.2, shuffle=False)
     train_dataset = TimeSeriesDataset(train_df)
     val_dataset = TimeSeriesDataset(val_df)
@@ -105,3 +111,5 @@ if __name__ == "__main__":
     study = optuna.create_study(direction="minimize")
     study.optimize(objective, n_trials=50)
     print("Best trial:", study.best_trial)
+    # Save the best model
+    torch.save(study.best_trial, args.output)

@@ -57,17 +57,7 @@ def remove_null_rows(df, window='6H'):
     drop_mask = null_mask.rolling(window=window, min_periods=1).max().astype(bool)
     return df[~drop_mask]
 
-def merge_parquet_files(parquet_path1, parquet_path2, output_path, ffill_multiplier, window):
-
-    logger = logging.getLogger(__name__)
-
-    # Load the Parquet files
-    df1 = pd.read_parquet(parquet_path1)
-    df2 = pd.read_parquet(parquet_path2)
-
-    # Log the index of the input DataFrames
-    logger.info("Index of first DataFrame: %s", df1.index)
-    logger.info("Index of second DataFrame: %s", df2.index)
+def merge_parquet_files(df1, df2, ffill_multiplier, window):
 
     # Align intervals
     df1, df2 = align_intervals(df1, df2, ffill_multiplier)
@@ -81,7 +71,7 @@ def merge_parquet_files(parquet_path1, parquet_path2, output_path, ffill_multipl
     time_diffs = merged_df.index.to_series().diff().value_counts().sort_index()
     logger.info("Time differences between indices:\n%s", time_diffs)
 
-    merged_df.to_parquet(output_path)
+    return merged_df
 
 @click.command()
 @click.argument("input1", type=click.Path(exists=True))
@@ -117,7 +107,20 @@ def main(input1, input2, output, mlflow_run_name, ffill_multiplier, window):
     mlflow.start_run(run_name=mlflow_run_name)
     mlflow.log_params({"input1": input1, "input2": input2, "output": output})
 
-    merge_parquet_files(input1, input2, output, ffill_multiplier, window)
+    logger = logging.getLogger(__name__)
+
+    # Load the Parquet files
+    df1 = pd.read_parquet(input1)
+    df2 = pd.read_parquet(input2)
+
+    # Log the index of the input DataFrames
+    logger.info("Index of first DataFrame: %s", df1.index)
+    logger.info("Index of second DataFrame: %s", df2.index)
+
+    merged_df = merge_parquet_files(df1, df2, ffill_multiplier, window)
+
+    # Save the merged DataFrame to a Parquet file
+    merged_df.to_parquet(output)
 
     mlflow.end_run()
 

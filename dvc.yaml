@@ -13,3 +13,13 @@ stages:
       - data/raw/${item.dataname}.xml
     outs:
       - data/interim/${item.dataname}.parquet
+
+  merge_parquet_files:
+    cmd: >-
+      python src/data/merge_parquet_files.py
+    deps:
+      - src/data/merge_parquet_files.py
+      - data/interim/env_temp.parquet
+      - data/interim/star_watt.parquet
+    outs:
+      - data/processed/merged_data.parquet

@@ -34,13 +34,13 @@ class TimeSeriesDataset(Dataset):
         return len(self.data) - self.input_length - self.output_length
 
     def __getitem__(self, idx):
-        x = self.data.iloc[idx : idx + self.input_length].values
+        x = self.data.iloc[idx : idx + self.input_length].to_numpy(dtype='float32')
         y = self.data.iloc[
             idx
             + self.input_length : idx
             + self.input_length
             + self.output_length
-        ][["watt_black", "watt_red", "watt_kitchen", "watt_living"]].values
+        ][["watt_black", "watt_red", "watt_kitchen", "watt_living"]].to_numpy(dtype='float32')
         return torch.tensor(x, dtype=torch.float32), torch.tensor(
             y, dtype=torch.float32
         )

@@ -15,8 +15,8 @@ def load_data(file_path, fraction=1.0):
     logger.info(f"Loading data from {file_path}")
     df = pd.read_parquet(file_path)
     if fraction < 1.0:
-        df = df.sample(frac=fraction, random_state=42)
-        logger.info(f"Data reduced to {len(df)} samples for development")
+        df = df.iloc[:int(len(df) * fraction)]
+        logger.info(f"Data reduced to {len(df)} samples for development (sequentially)")
     logger.info("Data loaded successfully")
     return df
 

@@ -21,6 +21,9 @@ def merge_parquet_files(parquet_path1, parquet_path2, output_path):
     df2.columns = [f"star_watt_{col}" for col in df2.columns]
     merged_df = pd.concat([df1, df2], axis=1)
 
+    # Interpolate NaN values using the previous row's values
+    merged_df.fillna(method='ffill', inplace=True)
+
     # Save the merged DataFrame to a new Parquet file
     merged_df.to_parquet(output_path)
 

@@ -57,7 +57,7 @@ def remove_null_rows(df, window='6H'):
     drop_mask = null_mask.rolling(window=window, min_periods=1).max().astype(bool)
     return df[~drop_mask]
 
-def merge_parquet_files(parquet_path1, parquet_path2, output_path, ffill_multiplier):
+def merge_parquet_files(parquet_path1, parquet_path2, output_path, ffill_multiplier, window):
     # Load the Parquet files
     df1 = pd.read_parquet(parquet_path1)
     df2 = pd.read_parquet(parquet_path2)
@@ -73,7 +73,7 @@ def merge_parquet_files(parquet_path1, parquet_path2, output_path, ffill_multipl
     merged_df = concat_dataframes(df1, df2)
 
     # Remove rows with null values and those within 6 hours of them
-    merged_df = remove_null_rows(merged_df, window='6H')
+    merged_df = remove_null_rows(merged_df, window=window)
 
     # Log the time differences between indices
     time_diffs = merged_df.index.to_series().diff().value_counts().sort_index()
@@ -96,7 +96,7 @@ def merge_parquet_files(parquet_path1, parquet_path2, output_path, ffill_multipl
     default=4,
     help="Multiplier for the forward fill limit.",
 )
-def main(input1, input2, output, mlflow_run_name, ffill_multiplier):
+def main(input1, input2, output, mlflow_run_name, ffill_multiplier, window):
     """
     Merge two Parquet files and save the result.
 
@@ -108,7 +108,7 @@ def main(input1, input2, output, mlflow_run_name, ffill_multiplier):
     mlflow.start_run(run_name=mlflow_run_name)
     mlflow.log_params({"input1": input1, "input2": input2, "output": output})
 
-    merge_parquet_files(input1, input2, output, ffill_multiplier)
+    merge_parquet_files(input1, input2, output, ffill_multiplier, window)
 
     mlflow.end_run()
 

@@ -7,15 +7,14 @@ import mlflow
 log_fmt = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 logging.basicConfig(level=logging.INFO, format=log_fmt)
 
-def merge_parquet_files(parquet_path1, parquet_path2, output_path):
-    # Load the Parquet files
-    df1 = pd.read_parquet(parquet_path1)
-    df2 = pd.read_parquet(parquet_path2)
+def align_intervals(df1, df2):
+    """
+    Align the intervals of two DataFrames by resampling to the shorter interval.
 
-    # Log the index of the input DataFrames
-    logger = logging.getLogger(__name__)
-    logger.info("Index of first DataFrame: %s", df1.index)
-    logger.info("Index of second DataFrame: %s", df2.index)
+    :param df1: First DataFrame.
+    :param df2: Second DataFrame.
+    :return: Tuple of resampled DataFrames.
+    """
     # Calculate time intervals
     interval_df1 = df1.index.to_series().diff().min()
     interval_df2 = df2.index.to_series().diff().min()
@@ -29,6 +28,23 @@ def merge_parquet_files(parquet_path1, parquet_path2, output_path):
         df1 = df1.resample(target_interval).ffill(limit=ffill_limit)
     elif interval_df2 > interval_df1:
         df2 = df2.resample(target_interval).ffill(limit=ffill_limit)
+
+    return df1, df2
+
+
+def merge_parquet_files(parquet_path1, parquet_path2, output_path):
+    # Load the Parquet files
+    df1 = pd.read_parquet(parquet_path1)
+    df2 = pd.read_parquet(parquet_path2)
+
+    # Log the index of the input DataFrames
+    logger = logging.getLogger(__name__)
+    logger.info("Index of first DataFrame: %s", df1.index)
+    logger.info("Index of second DataFrame: %s", df2.index)
+
+    # Align intervals
+    df1, df2 = align_intervals(df1, df2)
+
     df1.columns = [f"env_temp_{col}" for col in df1.columns]
     df2.columns = [f"star_watt_{col}" for col in df2.columns]
     merged_df = pd.concat([df1, df2], axis=1)

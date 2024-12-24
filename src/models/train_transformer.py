@@ -148,7 +148,22 @@ def objective(trial, input_path, output_path, fraction, num_epochs):
     default=1.0,
     help="Fraction of data to load for development.",
 )
+@click.option(
+    "--num_epochs",
+    type=int,
+    default=10,
+    help="Number of training epochs.",
+)
 def main(input_path, output_path, mlflow_run_name, data_fraction, num_epochs):
+    """
+    Train the transformer model with the specified parameters.
+
+    :param input_path: Path to the input data file.
+    :param output_path: Path to save the output model.
+    :param mlflow_run_name: Name of the MLflow run.
+    :param data_fraction: Fraction of data to use for training.
+    :param num_epochs: Number of training epochs.
+    """
     logger = logging.getLogger(__name__)
     logger.info("==== start process ====")
     logger.info(f"Input path: {input_path}")

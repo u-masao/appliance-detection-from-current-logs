@@ -1,3 +1,4 @@
+import logging
 import pandas as pd
 import click
 import mlflow
@@ -7,7 +8,10 @@ def merge_parquet_files(parquet_path1, parquet_path2, output_path):
     df1 = pd.read_parquet(parquet_path1)
     df2 = pd.read_parquet(parquet_path2)
 
-    # Determine the higher resolution index
+    # Log the index of the input DataFrames
+    logger = logging.getLogger(__name__)
+    logger.info(f"Index of first DataFrame: {df1.index}")
+    logger.info(f"Index of second DataFrame: {df2.index}")
     high_res_index = df1.index.union(df2.index).sort_values()
 
     # Resample both DataFrames to the higher resolution index

@@ -44,6 +44,10 @@ def merge_parquet_files(parquet_path1, parquet_path2, output_path):
 
     # Drop the rows
     merged_df = merged_df[~mask]
+
+    # Log the time differences between indices
+    time_diffs = merged_df.index.to_series().diff().value_counts().sort_index()
+    logger.info("Time differences between indices:\n%s", time_diffs)
     merged_df.to_parquet(output_path)
 
 @click.command()

@@ -67,9 +67,9 @@ class TransformerModel(nn.Module):
         self.fc_out = nn.Linear(embed_dim, output_dim)
 
     def forward(self, src):
-        src = self.embedding(src)
+        src = self.embedding(src).unsqueeze(1)  # Add batch dimension
         output = self.transformer(src, src)
-        return self.fc_out(output[-1]).view(-1, self.fc_out.out_features)
+        return self.fc_out(output.squeeze(1))  # Remove batch dimension
 
 
 # Objective function for Optuna

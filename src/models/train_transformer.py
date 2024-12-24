@@ -214,6 +214,7 @@ def main(
     )
     # Save the best model
     torch.save(model.state_dict(), output_path)
+    mlflow.pytorch.log_model(model, "model")
 
 
 if __name__ == "__main__":

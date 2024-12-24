@@ -46,10 +46,26 @@ stages:
       size: 38166479
     - path: src/data/merge_parquet_files.py
       hash: md5
-      md5: 6dadcd2d783033492fa0703a05332892
-      size: 4827
+      md5: fe6bda10f7206e708b7ad6bc111a1126
+      size: 4906
     outs:
     - path: data/interim/dataset.parquet
       hash: md5
       md5: 794d570f00a5b78c66a1f0b1257e6223
       size: 39634109
+  build_features:
+    cmd: python src/features/build_features.py data/interim/dataset.parquet data/interim/features.parquet
+    deps:
+    - path: data/interim/dataset.parquet
+      hash: md5
+      md5: 794d570f00a5b78c66a1f0b1257e6223
+      size: 39634109
+    - path: src/features/build_features.py
+      hash: md5
+      md5: 3ea15ec7c5bb365d01f3c5a9c524a9d9
+      size: 2795
+    outs:
+    - path: data/interim/features.parquet
+      hash: md5
+      md5: 9ae4d76df9d058343ff9600d305300da
+      size: 62374638

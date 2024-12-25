@@ -11,8 +11,6 @@ from torch.utils.data import DataLoader, Dataset
 from tqdm import tqdm
 
 def load_data(file_path, fraction=1.0):
-    # Define target columns for prediction
-    target_columns = ["watt_black", "watt_red", "watt_kitchen", "watt_living"]
     logger = logging.getLogger(__name__)
     logger.info(f"Loading data from {file_path}")
     df = pd.read_parquet(file_path)
@@ -278,10 +276,10 @@ def main(
     mlflow.start_run(run_name=mlflow_run_name)
     mlflow.log_params({"input_path": input_path, "output_path": output_path})
 
-    # Define target columns for prediction
-    target_columns = ["watt_black", "watt_red", "watt_kitchen", "watt_living"]
     df = pd.read_parquet(input_path)
     num_columns = df.shape[1]
+    # Define target columns for prediction
+    target_columns = ["watt_black", "watt_red", "watt_kitchen", "watt_living"]
     study = optuna.create_study(direction="minimize")
     study.optimize(
         lambda trial: objective(

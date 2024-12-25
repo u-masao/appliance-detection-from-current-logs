@@ -112,13 +112,14 @@ def objective(
     )
     val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False)
 
-    num_columns = train_df.shape[1]
     # Set device
     if force_cpu:
         device = torch.device("cpu")
     else:
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     logger.info(f"Using device: {device}")
+
+    num_columns = train_df.shape[1]
     model = TransformerModel(
         input_dim=input_length * num_columns,
         embed_dim=embed_dim,
@@ -302,9 +303,6 @@ def main(
     # Define target columns for prediction
     target_columns = ["watt_black", "watt_red", "watt_kitchen", "watt_living"]
     study = optuna.create_study(direction="minimize")
-    # Load data to determine the number of columns
-    train_df = load_data(train_path, fraction=data_fraction)
-    num_columns = train_df.shape[1]
 
     study.optimize(
         lambda trial: objective(
@@ -340,6 +338,10 @@ def main(
         if num_layers is not None
         else best_trial.params["num_layers"]
     )
+
+    # Load data to determine the number of columns
+    train_df = load_data(train_path, fraction=data_fraction)
+    num_columns = train_df.shape[1]
     model = TransformerModel(
         input_dim=input_length * num_columns,
         embed_dim=embed_dim,

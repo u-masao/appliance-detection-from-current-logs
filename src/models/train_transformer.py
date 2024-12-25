@@ -88,7 +88,7 @@ def objective(
         "embed_dim", num_heads * 4, num_heads * 16, step=num_heads
     )
     num_layers = trial.suggest_int("num_layers", 1, 3)
-    lr = trial.suggest_loguniform("lr", 1e-4, 1e-2)
+    lr = trial.suggest_float("lr", 1e-4, 1e-2, log=True)
 
     logger.info(f"params: {num_heads=}, {embed_dim=}, {num_layers=}, {lr=}")
 
@@ -307,7 +307,9 @@ def main(
         lambda trial: objective(
             trial,
             train_path,
-            model_output_path,
+            train_path,
+            val_path,
+            test_path,
             val_ratio,
             force_cpu,
             data_fraction,

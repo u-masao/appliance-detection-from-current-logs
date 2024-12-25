@@ -107,8 +107,8 @@ def objective(trial, input_path, output_path, fraction, num_epochs, study, input
     test_df = df.iloc[train_size + val_size :]
     train_dataset = TimeSeriesDataset(train_df, input_length=input_length)
     val_dataset = TimeSeriesDataset(val_df, input_length=input_length)
-    train_loader = DataLoader(train_dataset, batch_size=32, shuffle=True)
-    val_loader = DataLoader(val_dataset, batch_size=32, shuffle=False)
+    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
+    val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False)
 
     # Training loop
     for epoch in range(num_epochs):
@@ -208,7 +208,14 @@ def objective(trial, input_path, output_path, fraction, num_epochs, study, input
     default=5 * 4,
     help="Output dimension for the transformer model.",
 )
+@click.option(
+    "--batch_size",
+    type=int,
+    default=32,
+    help="Batch size for the DataLoader.",
+)
 def main(
+    batch_size,
     input_length,
     input_dim,
     embed_dim,

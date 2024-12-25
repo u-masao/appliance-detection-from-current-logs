@@ -10,9 +10,9 @@ from sklearn.model_selection import train_test_split
 from torch.utils.data import DataLoader, Dataset
 from tqdm import tqdm
 
-
 # Define target columns for prediction
 target_columns = ["watt_black", "watt_red", "watt_kitchen", "watt_living"]
+
 
 def load_data(file_path, fraction=1.0):
     logger = logging.getLogger(__name__)
@@ -30,7 +30,7 @@ def load_data(file_path, fraction=1.0):
 
 # Custom Dataset
 class TimeSeriesDataset(Dataset):
-    def __init__(self, data, input_length=60 * 3, output_length=5):
+    def __init__(self, data, input_length, output_length):
         self.data = data
         self.input_length = input_length
         self.output_length = output_length
@@ -77,7 +77,19 @@ class TransformerModel(nn.Module):
 
 
 # Objective function for Optuna
-def objective(trial, input_path, output_path, fraction, num_epochs, study, input_length, batch_size, output_length, train_ratio, val_ratio):
+def objective(
+    trial,
+    input_path,
+    output_path,
+    fraction,
+    num_epochs,
+    study,
+    input_length,
+    batch_size,
+    output_length,
+    train_ratio,
+    val_ratio,
+):
     logger = logging.getLogger(__name__)
     # Load data to determine the number of columns
     df = pd.read_parquet(input_path)
@@ -110,9 +122,15 @@ def objective(trial, input_path, output_path, fraction, num_epochs, study, input
     train_df = df.iloc[:train_size]
     val_df = df.iloc[train_size : train_size + val_size]
     test_df = df.iloc[train_size + val_size :]
-    train_dataset = TimeSeriesDataset(train_df, input_length=input_length)
-    val_dataset = TimeSeriesDataset(val_df, input_length=input_length)
-    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
+    train_dataset = TimeSeriesDataset(
+        train_df, input_length=input_length, output_length=output_length
+    )
+    val_dataset = TimeSeriesDataset(
+        val_df, input_length=input_length, output_length=output_length
+    )
+    train_loader = DataLoader(
+        train_dataset, batch_size=batch_size, shuffle=True
+    )
     val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False)
 
     # Training loop
@@ -271,7 +289,17 @@ def main(
     study = optuna.create_study(direction="minimize")
     study.optimize(
         lambda trial: objective(
-            trial, input_path, output_path, data_fraction, num_epochs, study, input_length, batch_size, output_length, train_ratio, val_ratio
+            trial,
+            input_path,
+            output_path,
+            data_fraction,
+            num_epochs,
+            study,
+            input_length,
+            batch_size,
+            output_length,
+            train_ratio,
+            val_ratio,
         ),
         n_trials=n_trials,
     )
@@ -279,9 +307,17 @@ def main(
     # Define the model with the best parameters
     best_trial = study.best_trial
     # Use CLI options if provided, otherwise use best trial parameters
-    embed_dim = embed_dim if embed_dim is not None else best_trial.params["embed_dim"]
-    num_heads = num_heads if num_heads is not None else best_trial.params["num_heads"]
-    num_layers = num_layers if num_layers is not None else best_trial.params["num_layers"]
+    embed_dim = (
+        embed_dim if embed_dim is not None else best_trial.params["embed_dim"]
+    )
+    num_heads = (
+        num_heads if num_heads is not None else best_trial.params["num_heads"]
+    )
+    num_layers = (
+        num_layers
+        if num_layers is not None
+        else best_trial.params["num_layers"]
+    )
     model = TransformerModel(
         input_dim=input_length * num_columns,
         embed_dim=embed_dim,

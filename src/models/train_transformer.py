@@ -81,7 +81,7 @@ def objective(
     # Define target columns for prediction
     target_columns = ["watt_black", "watt_red", "watt_kitchen", "watt_living"]
     # Load data to determine the number of columns
-    df = pd.read_parquet(input_path)
+    df = pd.read_parquet(train_path)
     num_columns = df.shape[1]
     num_heads = trial.suggest_int("num_heads", 1, 4)
     embed_dim = trial.suggest_int(
@@ -110,11 +110,11 @@ def objective(
     criterion = nn.MSELoss()
 
     # Data
-    df = load_data(input_path, fraction)
+    df = load_data(train_path, fraction)
     # Load pre-split data
-    train_df = pd.read_parquet(f"{input_path}_train.parquet")
-    val_df = pd.read_parquet(f"{input_path}_val.parquet")
-    test_df = pd.read_parquet(f"{input_path}_test.parquet")
+    train_df = pd.read_parquet(train_path)
+    val_df = pd.read_parquet(val_path)
+    test_df = pd.read_parquet(test_path)
     train_dataset = TimeSeriesDataset(
         train_df,
         input_length=input_length,
@@ -261,8 +261,10 @@ def main(
     num_heads,
     num_layers,
     output_length,
-    input_path,
-    output_path,
+    train_path,
+    val_path,
+    test_path,
+    model_output_path,
     mlflow_run_name,
     data_fraction,
     num_epochs,

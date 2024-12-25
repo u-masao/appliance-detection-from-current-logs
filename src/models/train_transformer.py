@@ -308,6 +308,8 @@ def main(
             trial,
             train_path,
             model_output_path,
+            val_ratio,
+            force_cpu,
             data_fraction,
             num_epochs,
             study,

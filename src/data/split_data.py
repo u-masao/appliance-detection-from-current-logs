@@ -1,4 +1,5 @@
 import logging
+import mlflow
 import click
 import pandas as pd
 
@@ -27,6 +28,7 @@ import pandas as pd
 )
 def main(input_path, output_train_path, output_val_path, output_test_path, train_ratio, val_ratio, input_length):
     logger = logging.getLogger(__name__)
+    mlflow.start_run()
     logger.info("==== start data splitting ====")
     logger.info(f"Input path: {input_path}")
 
@@ -38,11 +40,18 @@ def main(input_path, output_train_path, output_val_path, output_test_path, train
     test_df = df.iloc[train_size + input_length + val_size + input_length :]
 
     train_df.to_parquet(output_train_path)
+    logger.info(f"Train data shape: {train_df.shape}")
+    mlflow.log_param("train_data_shape", train_df.shape)
     val_df.to_parquet(output_val_path)
+    logger.info(f"Validation data shape: {val_df.shape}")
+    mlflow.log_param("val_data_shape", val_df.shape)
     test_df.to_parquet(output_test_path)
+    logger.info(f"Test data shape: {test_df.shape}")
+    mlflow.log_param("test_data_shape", test_df.shape)
 
     logger.info("Data splitting completed")
     logger.info("==== end data splitting ====")
+    mlflow.end_run()
 
 if __name__ == "__main__":
     log_fmt = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"

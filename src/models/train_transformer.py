@@ -103,7 +103,9 @@ def objective(
 
     logger.info(f"params: {num_heads=}, {embed_dim=}, {num_layers=}, {lr=}")
 
-    # Model
+    # Set device
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    logger.info(f"Using device: {device}")
     model = TransformerModel(
         input_dim=input_length * num_columns,
         embed_dim=embed_dim,
@@ -111,6 +113,7 @@ def objective(
         num_layers=num_layers,
         output_dim=output_length * len(target_columns),
     )
+    model.to(device)
     optimizer = torch.optim.Adam(model.parameters(), lr=lr)
     criterion = nn.MSELoss()
 
@@ -146,6 +149,7 @@ def objective(
         pbar = tqdm(train_loader, desc=f"Epoch {epoch+1} [Train]", leave=False)
         for x, y in pbar:
             optimizer.zero_grad()
+            x, y = x.to(device), y.to(device)
             output = model(x)
             loss = criterion(output.view_as(y), y)
             mlflow.log_metric("train_loss", loss.item())
@@ -161,6 +165,7 @@ def objective(
                 val_loader, desc=f"Epoch {epoch+1} [Validation]", leave=False
             )
             for x, y in pbar:
+                x, y = x.to(device), y.to(device)
                 output = model(x)
                 loss = criterion(output.view_as(y), y).item()
                 val_loss += loss

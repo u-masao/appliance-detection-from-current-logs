@@ -27,6 +27,21 @@ stages:
     outs:
       - data/interim/dataset.parquet
 
+  split_data:
+    cmd: >-
+      python src/data/split_data.py
+      data/interim/features.parquet
+      data/processed/train.parquet
+      data/processed/val.parquet
+      data/processed/test.parquet
+    deps:
+      - src/data/split_data.py
+      - data/interim/features.parquet
+    outs:
+      - data/processed/train.parquet
+      - data/processed/val.parquet
+      - data/processed/test.parquet
+
   build_features:
     cmd: >-
       python src/features/build_features.py

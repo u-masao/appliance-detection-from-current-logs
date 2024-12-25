@@ -1,3 +1,7 @@
+train_model:
+  data_fraction: 1.0
+  n_trials: 50
+  num_epochs: 10
   input_length: 180
   batch_size: 32
   train_ratio: 0.7

@@ -40,12 +40,21 @@ def main(input_path, output_train_path, output_val_path, output_test_path, train
     test_df = df.iloc[train_size + input_length + val_size + input_length :]
 
     train_df.to_parquet(output_train_path)
+    train_start, train_end = train_df.index.min(), train_df.index.max()
+    logger.info(f"Train data period: {train_start} to {train_end}")
+    mlflow.log_param("train_data_period", f"{train_start} to {train_end}")
     logger.info(f"Train data shape: {train_df.shape}")
     mlflow.log_param("train_data_shape", train_df.shape)
     val_df.to_parquet(output_val_path)
+    val_start, val_end = val_df.index.min(), val_df.index.max()
+    logger.info(f"Validation data period: {val_start} to {val_end}")
+    mlflow.log_param("val_data_period", f"{val_start} to {val_end}")
     logger.info(f"Validation data shape: {val_df.shape}")
     mlflow.log_param("val_data_shape", val_df.shape)
     test_df.to_parquet(output_test_path)
+    test_start, test_end = test_df.index.min(), test_df.index.max()
+    logger.info(f"Test data period: {test_start} to {test_end}")
+    mlflow.log_param("test_data_period", f"{test_start} to {test_end}")
     logger.info(f"Test data shape: {test_df.shape}")
     mlflow.log_param("test_data_shape", test_df.shape)
 

@@ -181,12 +181,6 @@ def objective(trial, input_path, output_path, fraction, num_epochs, study, input
     help="Number of Optuna trials.",
 )
 @click.option(
-    "--input_dim",
-    type=int,
-    default=60 * 3 * 13,
-    help="Input dimension for the transformer model.",
-)
-@click.option(
     "--embed_dim",
     type=int,
     default=None,
@@ -219,7 +213,6 @@ def objective(trial, input_path, output_path, fraction, num_epochs, study, input
 def main(
     batch_size,
     input_length,
-    input_dim,
     embed_dim,
     num_heads,
     num_layers,

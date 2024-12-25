@@ -92,9 +92,9 @@ def objective(
 
     # Data
     # Load pre-split data
-    train_df = load_data(train_path, fraction=fractin)
-    val_df = load_data(val_path, fraction=fractin)
-    test_df = load_data(test_path, fraction=fractin)
+    train_df = load_data(train_path, fraction=fraction)
+    val_df = load_data(val_path, fraction=fraction)
+    test_df = load_data(test_path, fraction=fraction)
     train_dataset = TimeSeriesDataset(
         train_df,
         input_length=input_length,

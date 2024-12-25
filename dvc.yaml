@@ -50,7 +50,7 @@ stages:
       --batch_size ${train_model.batch_size}
       --train_ratio ${train_model.train_ratio}
       --val_ratio ${train_model.val_ratio}
-    output_length: 5
+      --output_length ${train_model.output_length}
     deps:
       - src/models/train_transformer.py
       - data/interim/features.parquet
@@ -62,10 +62,9 @@ stages:
       python src/models/inference.py
       models/best_model.pth
       data/interim/features.parquet
-      --input-length ${train_model.input_length}
-      --output-length ${train_model.output_length}
-      --target-columns 0 1 2 3
-      --batch-size ${train_model.batch_size}
+      --input_length ${train_model.input_length}
+      --output_length ${train_model.output_length}
+      --batch_size ${train_model.batch_size}
       --device cpu
     deps:
       - src/models/inference.py

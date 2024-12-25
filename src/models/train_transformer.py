@@ -88,7 +88,7 @@ def objective(trial, input_path, output_path, fraction, num_epochs, study):
 
     # Model
     model = TransformerModel(
-        input_dim=60 * 3 * 13,
+        input_dim=input_length * 13,
         embed_dim=embed_dim,
         num_heads=num_heads,
         num_layers=num_layers,
@@ -105,8 +105,8 @@ def objective(trial, input_path, output_path, fraction, num_epochs, study):
     train_df = df.iloc[:train_size]
     val_df = df.iloc[train_size : train_size + val_size]
     test_df = df.iloc[train_size + val_size :]
-    train_dataset = TimeSeriesDataset(train_df)
-    val_dataset = TimeSeriesDataset(val_df)
+    train_dataset = TimeSeriesDataset(train_df, input_length=input_length)
+    val_dataset = TimeSeriesDataset(val_df, input_length=input_length)
     train_loader = DataLoader(train_dataset, batch_size=32, shuffle=True)
     val_loader = DataLoader(val_dataset, batch_size=32, shuffle=False)
 
@@ -148,6 +148,12 @@ def objective(trial, input_path, output_path, fraction, num_epochs, study):
 @click.command()
 @click.argument("input_path", type=click.Path(exists=True))
 @click.argument("output_path", type=click.Path())
+@click.option(
+    "--input_length",
+    type=int,
+    default=60 * 3,
+    help="Input length for the time series data.",
+)
 @click.option(
     "--mlflow_run_name",
     type=str,
@@ -203,6 +209,7 @@ def objective(trial, input_path, output_path, fraction, num_epochs, study):
     help="Output dimension for the transformer model.",
 )
 def main(
+    input_length,
     input_dim,
     embed_dim,
     num_heads,

@@ -76,7 +76,9 @@ class TransformerModel(nn.Module):
 # Objective function for Optuna
 def objective(trial, input_path, output_path, fraction, num_epochs, study, input_length, batch_size):
     logger = logging.getLogger(__name__)
-    # Hyperparameters
+    # Load data to determine the number of columns
+    df = pd.read_parquet(input_path)
+    num_columns = df.shape[1]
     num_heads = trial.suggest_int("num_heads", 1, 4)
     embed_dim = trial.suggest_int(
         "embed_dim", num_heads * 4, num_heads * 16, step=num_heads

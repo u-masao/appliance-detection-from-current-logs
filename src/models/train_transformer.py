@@ -74,7 +74,7 @@ class TransformerModel(nn.Module):
 
 
 # Objective function for Optuna
-def objective(trial, input_path, output_path, fraction, num_epochs, study):
+def objective(trial, input_path, output_path, fraction, num_epochs, study, input_length):
     logger = logging.getLogger(__name__)
     # Hyperparameters
     num_heads = trial.suggest_int("num_heads", 1, 4)
@@ -244,7 +244,7 @@ def main(
     study = optuna.create_study(direction="minimize")
     study.optimize(
         lambda trial: objective(
-            trial, input_path, output_path, data_fraction, num_epochs, study
+            trial, input_path, output_path, data_fraction, num_epochs, study, input_length
         ),
         n_trials=n_trials,
     )

@@ -109,12 +109,10 @@ def objective(
 
     # Data
     df = load_data(input_path, fraction)
-    # Split data into train, validation, and test sets sequentially
-    train_size = int(len(df) * train_ratio)
-    val_size = int(len(df) * val_ratio)
-    train_df = df.iloc[:train_size]
-    val_df = df.iloc[train_size : train_size + val_size]
-    test_df = df.iloc[train_size + val_size :]
+    # Load pre-split data
+    train_df = pd.read_parquet(f"{input_path}_train.parquet")
+    val_df = pd.read_parquet(f"{input_path}_val.parquet")
+    test_df = pd.read_parquet(f"{input_path}_test.parquet")
     train_dataset = TimeSeriesDataset(
         train_df,
         input_length=input_length,

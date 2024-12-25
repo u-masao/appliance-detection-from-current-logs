@@ -104,7 +104,10 @@ def objective(
     logger.info(f"params: {num_heads=}, {embed_dim=}, {num_layers=}, {lr=}")
 
     # Set device
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    if force_cpu:
+        device = torch.device("cpu")
+    else:
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     logger.info(f"Using device: {device}")
     model = TransformerModel(
         input_dim=input_length * num_columns,
@@ -254,6 +257,12 @@ def objective(
     type=int,
     default=5,
     help="Output length for the time series data.",
+)
+@click.option(
+    "--force_cpu",
+    is_flag=True,
+    default=False,
+    help="Force the use of CPU even if a GPU is available.",
 )
 def main(
     batch_size,

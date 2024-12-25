@@ -307,11 +307,9 @@ def main(
         lambda trial: objective(
             trial,
             train_path,
-            train_path,
             val_path,
             test_path,
-            val_ratio,
-            force_cpu,
+            model_output_path,
             data_fraction,
             num_epochs,
             study,

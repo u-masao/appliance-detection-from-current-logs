@@ -204,7 +204,7 @@ def objective(trial, input_path, output_path, fraction, num_epochs, study, input
 @click.option(
     "--output_dim",
     type=int,
-    default=5 * 4,
+    default=5 * len(target_columns),
     help="Output dimension for the transformer model.",
 )
 @click.option(

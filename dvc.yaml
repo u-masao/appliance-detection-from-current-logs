@@ -55,3 +55,18 @@ stages:
       - data/interim/features.parquet
     outs:
       - models/best_model.pth
+
+  inference:
+    cmd: >-
+      python src/models/inference.py
+      models/best_model.pth
+      data/interim/features.parquet
+      --input-length ${train_model.input_length}
+      --output-length ${train_model.output_length}
+      --target-columns 0 1 2 3
+      --batch-size ${train_model.batch_size}
+      --device cpu
+    deps:
+      - src/models/inference.py
+      - models/best_model.pth
+      - data/interim/features.parquet

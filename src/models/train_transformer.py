@@ -10,6 +10,7 @@ from sklearn.model_selection import train_test_split
 from torch.utils.data import DataLoader, Dataset
 from tqdm import tqdm
 
+
 def load_data(file_path, fraction=1.0):
     logger = logging.getLogger(__name__)
     logger.info(f"Loading data from {file_path}")
@@ -122,10 +123,16 @@ def objective(
     val_df = df.iloc[train_size : train_size + val_size]
     test_df = df.iloc[train_size + val_size :]
     train_dataset = TimeSeriesDataset(
-        train_df, input_length=input_length, output_length=output_length, target_columns=target_columns
+        train_df,
+        input_length=input_length,
+        output_length=output_length,
+        target_columns=target_columns,
     )
     val_dataset = TimeSeriesDataset(
-        val_df, input_length=input_length, output_length=output_length, target_columns=target_columns
+        val_df,
+        input_length=input_length,
+        output_length=output_length,
+        target_columns=target_columns,
     )
     train_loader = DataLoader(
         train_dataset, batch_size=batch_size, shuffle=True

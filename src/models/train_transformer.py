@@ -11,6 +11,9 @@ from torch.utils.data import DataLoader, Dataset
 from tqdm import tqdm
 
 
+# Define target columns for prediction
+target_columns = ["watt_black", "watt_red", "watt_kitchen", "watt_living"]
+
 def load_data(file_path, fraction=1.0):
     logger = logging.getLogger(__name__)
     logger.info(f"Loading data from {file_path}")
@@ -47,7 +50,7 @@ class TimeSeriesDataset(Dataset):
                 + self.input_length : idx
                 + self.input_length
                 + self.output_length
-            ][["watt_black", "watt_red", "watt_kitchen", "watt_living"]]
+            ][target_columns]
             .to_numpy(dtype="float32")
             .flatten()
         )
@@ -94,7 +97,7 @@ def objective(trial, input_path, output_path, fraction, num_epochs, study, input
         embed_dim=embed_dim,
         num_heads=num_heads,
         num_layers=num_layers,
-        output_dim=5 * 4,
+        output_dim=5 * len(target_columns),
     )
     optimizer = torch.optim.Adam(model.parameters(), lr=lr)
     criterion = nn.MSELoss()

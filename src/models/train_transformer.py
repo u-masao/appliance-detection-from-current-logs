@@ -88,7 +88,7 @@ def objective(trial, input_path, output_path, fraction, num_epochs, study, input
 
     # Model
     model = TransformerModel(
-        input_dim=input_length * 13,
+        input_dim=input_length * num_columns,
         embed_dim=embed_dim,
         num_heads=num_heads,
         num_layers=num_layers,
@@ -247,7 +247,9 @@ def main(
     mlflow.start_run(run_name=mlflow_run_name)
     mlflow.log_params({"input_path": input_path, "output_path": output_path})
 
-    # Run Optuna
+    # Determine the number of columns in the input data
+    df = pd.read_parquet(input_path)
+    num_columns = df.shape[1]
     study = optuna.create_study(direction="minimize")
     study.optimize(
         lambda trial: objective(

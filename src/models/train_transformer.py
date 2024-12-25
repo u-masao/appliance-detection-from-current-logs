@@ -81,8 +81,6 @@ def objective(
     # Define target columns for prediction
     target_columns = ["watt_black", "watt_red", "watt_kitchen", "watt_living"]
     # Load data to determine the number of columns
-    df = pd.read_parquet(train_path)
-    num_columns = df.shape[1]
     num_heads = trial.suggest_int("num_heads", 1, 4)
     embed_dim = trial.suggest_int(
         "embed_dim", num_heads * 4, num_heads * 16, step=num_heads
@@ -92,6 +90,29 @@ def objective(
 
     logger.info(f"params: {num_heads=}, {embed_dim=}, {num_layers=}, {lr=}")
 
+    # Data
+    # Load pre-split data
+    train_df = load_data(train_path, fraction=fractin)
+    val_df = load_data(val_path, fraction=fractin)
+    test_df = load_data(test_path, fraction=fractin)
+    train_dataset = TimeSeriesDataset(
+        train_df,
+        input_length=input_length,
+        output_length=output_length,
+        target_columns=target_columns,
+    )
+    val_dataset = TimeSeriesDataset(
+        val_df,
+        input_length=input_length,
+        output_length=output_length,
+        target_columns=target_columns,
+    )
+    train_loader = DataLoader(
+        train_dataset, batch_size=batch_size, shuffle=True
+    )
+    val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False)
+
+    num_columns = train_df.shape[1]
     # Set device
     if force_cpu:
         device = torch.device("cpu")
@@ -109,28 +130,6 @@ def objective(
     optimizer = torch.optim.Adam(model.parameters(), lr=lr)
     criterion = nn.MSELoss()
 
-    # Data
-    df = load_data(train_path, fraction)
-    # Load pre-split data
-    train_df = pd.read_parquet(train_path)
-    val_df = pd.read_parquet(val_path)
-    test_df = pd.read_parquet(test_path)
-    train_dataset = TimeSeriesDataset(
-        train_df,
-        input_length=input_length,
-        output_length=output_length,
-        target_columns=target_columns,
-    )
-    val_dataset = TimeSeriesDataset(
-        val_df,
-        input_length=input_length,
-        output_length=output_length,
-        target_columns=target_columns,
-    )
-    train_loader = DataLoader(
-        train_dataset, batch_size=batch_size, shuffle=True
-    )
-    val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False)
 
     # Training loop
     for epoch in range(num_epochs):
@@ -289,17 +288,17 @@ def main(
     logger.info(f"Test path: {test_path}")
     logger.info(f"Model output path: {model_output_path}")
 
-    mlflow.set_experiment("train_transformer")
+    mlflow.set_experiment("train_model")
     mlflow.start_run(run_name=mlflow_run_name)
-    mlflow.log_params({
-        "train_path": train_path,
-        "val_path": val_path,
-        "test_path": test_path,
-        "model_output_path": model_output_path
-    })
+    mlflow.log_params(
+        {
+            "train_path": train_path,
+            "val_path": val_path,
+            "test_path": test_path,
+            "model_output_path": model_output_path,
+        }
+    )
 
-    df = pd.read_parquet(train_path)
-    num_columns = df.shape[1]
     # Define target columns for prediction
     target_columns = ["watt_black", "watt_red", "watt_kitchen", "watt_living"]
     study = optuna.create_study(direction="minimize")

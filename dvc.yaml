@@ -8,6 +8,9 @@ stages:
       python -m src.data.convert_from_xml_to_parquet
       data/raw/${item.dataname}.xml
       data/interim/${item.dataname}.parquet
+      --embed_dim 128
+      --num_heads 4
+      --num_layers 2
     deps:
       - src/data/convert_from_xml_to_parquet.py
       - data/raw/${item.dataname}.xml

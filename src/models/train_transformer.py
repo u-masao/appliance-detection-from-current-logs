@@ -249,6 +249,7 @@ def objective(
     help="Ratio of data to use for validation.",
 )
 @click.option(
+    "--output_length",
     type=int,
     default=5,
     help="Output length for the time series data.",

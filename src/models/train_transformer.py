@@ -26,7 +26,8 @@ def load_data(file_path, fraction=1.0):
 
 # Custom Dataset
 class TimeSeriesDataset(Dataset):
-    def __init__(self, data, input_length, output_length):
+    def __init__(self, data, input_length, output_length, target_columns):
+        self.target_columns = target_columns
         self.data = data
         self.input_length = input_length
         self.output_length = output_length
@@ -40,14 +41,13 @@ class TimeSeriesDataset(Dataset):
             .to_numpy(dtype="float32")
             .flatten()
         )
-        target_columns = ["watt_black", "watt_red", "watt_kitchen", "watt_living"]
         y = (
             self.data.iloc[
                 idx
                 + self.input_length : idx
                 + self.input_length
                 + self.output_length
-            ][target_columns]
+            ][self.target_columns]
             .to_numpy(dtype="float32")
             .flatten()
         )
@@ -122,10 +122,10 @@ def objective(
     val_df = df.iloc[train_size : train_size + val_size]
     test_df = df.iloc[train_size + val_size :]
     train_dataset = TimeSeriesDataset(
-        train_df, input_length=input_length, output_length=output_length
+        train_df, input_length=input_length, output_length=output_length, target_columns=target_columns
     )
     val_dataset = TimeSeriesDataset(
-        val_df, input_length=input_length, output_length=output_length
+        val_df, input_length=input_length, output_length=output_length, target_columns=target_columns
     )
     train_loader = DataLoader(
         train_dataset, batch_size=batch_size, shuffle=True

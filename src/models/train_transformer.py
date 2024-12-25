@@ -267,7 +267,7 @@ def main(
     num_heads = num_heads if num_heads is not None else best_trial.params["num_heads"]
     num_layers = num_layers if num_layers is not None else best_trial.params["num_layers"]
     model = TransformerModel(
-        input_dim=input_dim,
+        input_dim=input_length * num_columns,
         embed_dim=embed_dim,
         num_heads=num_heads,
         num_layers=num_layers,

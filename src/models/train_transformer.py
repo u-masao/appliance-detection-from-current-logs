@@ -6,11 +6,11 @@ import optuna
 import pandas as pd
 import torch
 import torch.nn as nn
-from models.inference import run_inference
-from models.model import TransformerModel
 from sklearn.model_selection import train_test_split
 from torch.utils.data import DataLoader, Dataset
 from tqdm import tqdm
+
+from src.models.model import TransformerModel
 
 
 def load_data(file_path, fraction=1.0):
@@ -58,8 +58,6 @@ class TimeSeriesDataset(Dataset):
         return torch.tensor(x, dtype=torch.float32), torch.tensor(
             y, dtype=torch.float32
         )
-
-
 
 
 # Objective function for Optuna
@@ -168,8 +166,6 @@ def objective(
     mlflow.end_run()
     logger.info("Training completed")
 
-    # Run inference
-    run_inference(model, test_df, input_length, output_length, target_columns, batch_size, device)
     logger.info(f"Final validation loss: {val_loss}")
     logger.info("==== end process ====")
     return val_loss

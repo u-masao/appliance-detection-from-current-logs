@@ -50,6 +50,7 @@ stages:
       --batch_size ${train_model.batch_size}
       --train_ratio ${train_model.train_ratio}
       --val_ratio ${train_model.val_ratio}
+    output_length: 5
     deps:
       - src/models/train_transformer.py
       - data/interim/features.parquet

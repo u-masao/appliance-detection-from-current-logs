@@ -1,8 +1,8 @@
 train_model:
-  data_fraction: 1.0
-  n_trials: 50
-  num_epochs: 10
+  data_fraction: 0.01
+  n_trials: 5
+  num_epochs: 3
   input_length: 180
-  batch_size: 128
+  batch_size: 4096
   train_ratio: 0.7
   val_ratio: 0.15

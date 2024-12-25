@@ -113,6 +113,7 @@ def objective(
         num_layers=num_layers,
         output_dim=output_length * len(target_columns),
     ).to(device)
+    logger.info(f"Model transferred to device: {device}")
     optimizer = torch.optim.Adam(model.parameters(), lr=lr)
     criterion = nn.MSELoss()
 
@@ -149,6 +150,7 @@ def objective(
         for x, y in pbar:
             optimizer.zero_grad()
             x, y = x.to(device), y.to(device)
+            logger.debug(f"Data batch transferred to device: {device}")
             output = model(x)
             loss = criterion(output.view_as(y), y)
             mlflow.log_metric("train_loss", loss.item())

@@ -172,7 +172,8 @@ def objective(
 @click.argument("output_path", type=click.Path())
 @click.option(
     "--input_length",
-    type=int,
+@click.option(
+    "--output_length",
     default=60 * 3,
     help="Input length for the time series data.",
 )

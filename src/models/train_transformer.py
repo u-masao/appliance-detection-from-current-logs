@@ -105,8 +105,8 @@ def objective(trial, input_path, output_path, fraction, num_epochs, study, input
     # Data
     df = load_data(input_path, fraction)
     # Split data into train, validation, and test sets sequentially
-    train_size = int(len(df) * 0.7)
-    val_size = int(len(df) * 0.15)
+    train_size = int(len(df) * train_ratio)
+    val_size = int(len(df) * val_ratio)
     train_df = df.iloc[:train_size]
     val_df = df.iloc[train_size : train_size + val_size]
     test_df = df.iloc[train_size + val_size :]
@@ -214,7 +214,18 @@ def objective(trial, input_path, output_path, fraction, num_epochs, study, input
     help="Batch size for the DataLoader.",
 )
 @click.option(
-    "--output_length",
+    "--train_ratio",
+    type=float,
+    default=0.7,
+    help="Ratio of data to use for training.",
+)
+@click.option(
+    "--val_ratio",
+    type=float,
+    default=0.15,
+    help="Ratio of data to use for validation.",
+)
+@click.option(
     type=int,
     default=5,
     help="Output length for the time series data.",
@@ -233,6 +244,8 @@ def main(
     data_fraction,
     num_epochs,
     n_trials,
+    train_ratio,
+    val_ratio,
 ):
     """
     Train the transformer model with the specified parameters.

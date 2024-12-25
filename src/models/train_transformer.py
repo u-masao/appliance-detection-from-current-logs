@@ -77,7 +77,7 @@ class TransformerModel(nn.Module):
 
 
 # Objective function for Optuna
-def objective(trial, input_path, output_path, fraction, num_epochs, study, input_length, batch_size):
+def objective(trial, input_path, output_path, fraction, num_epochs, study, input_length, batch_size, output_length):
     logger = logging.getLogger(__name__)
     # Load data to determine the number of columns
     df = pd.read_parquet(input_path)
@@ -97,7 +97,7 @@ def objective(trial, input_path, output_path, fraction, num_epochs, study, input
         embed_dim=embed_dim,
         num_heads=num_heads,
         num_layers=num_layers,
-        output_dim=5 * len(target_columns),
+        output_dim=output_length * len(target_columns),
     )
     optimizer = torch.optim.Adam(model.parameters(), lr=lr)
     criterion = nn.MSELoss()
@@ -213,6 +213,12 @@ def objective(trial, input_path, output_path, fraction, num_epochs, study, input
     default=32,
     help="Batch size for the DataLoader.",
 )
+@click.option(
+    "--output_length",
+    type=int,
+    default=5,
+    help="Output length for the time series data.",
+)
 def main(
     batch_size,
     input_length,
@@ -251,7 +257,7 @@ def main(
     study = optuna.create_study(direction="minimize")
     study.optimize(
         lambda trial: objective(
-            trial, input_path, output_path, data_fraction, num_epochs, study, input_length, batch_size
+            trial, input_path, output_path, data_fraction, num_epochs, study, input_length, batch_size, output_length
         ),
         n_trials=n_trials,
     )

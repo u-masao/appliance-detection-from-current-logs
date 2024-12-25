@@ -274,7 +274,7 @@ def main(
         embed_dim=embed_dim,
         num_heads=num_heads,
         num_layers=num_layers,
-        output_dim=output_dim,
+        output_dim=output_length * len(target_columns),
     )
     # Save the best model
     torch.save(model.state_dict(), output_path)

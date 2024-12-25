@@ -306,8 +306,8 @@ def main(
     study.optimize(
         lambda trial: objective(
             trial,
-            input_path,
-            output_path,
+            train_path,
+            model_output_path,
             data_fraction,
             num_epochs,
             study,
@@ -343,7 +343,7 @@ def main(
         output_dim=output_length * len(target_columns),
     )
     # Save the best model
-    torch.save(model.state_dict(), output_path)
+    torch.save(model.state_dict(), model_output_path)
 
 
 if __name__ == "__main__":

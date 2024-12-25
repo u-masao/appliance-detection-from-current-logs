@@ -221,12 +221,6 @@ def objective(
     help="Number of layers for the transformer model.",
 )
 @click.option(
-    "--output_dim",
-    type=int,
-    default=5 * len(target_columns),
-    help="Output dimension for the transformer model.",
-)
-@click.option(
     "--batch_size",
     type=int,
     default=32,
@@ -284,7 +278,8 @@ def main(
     mlflow.start_run(run_name=mlflow_run_name)
     mlflow.log_params({"input_path": input_path, "output_path": output_path})
 
-    # Determine the number of columns in the input data
+    # Define target columns for prediction
+    target_columns = ["watt_black", "watt_red", "watt_kitchen", "watt_living"]
     df = pd.read_parquet(input_path)
     num_columns = df.shape[1]
     study = optuna.create_study(direction="minimize")

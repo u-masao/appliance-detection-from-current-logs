@@ -88,7 +88,6 @@ def objective(
     train_ratio,
     val_ratio,
     force_cpu,
-    force_cpu,
 ):
     logger = logging.getLogger(__name__)
     # Define target columns for prediction

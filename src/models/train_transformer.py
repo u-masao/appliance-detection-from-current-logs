@@ -63,8 +63,10 @@ class TimeSeriesDataset(Dataset):
 # Objective function for Optuna
 def objective(
     trial,
-    input_path,
-    output_path,
+    train_path,
+    val_path,
+    test_path,
+    model_output_path,
     fraction,
     num_epochs,
     study,
@@ -170,8 +172,10 @@ def objective(
 
 
 @click.command()
-@click.argument("input_path", type=click.Path(exists=True))
-@click.argument("output_path", type=click.Path())
+@click.argument("train_path", type=click.Path(exists=True))
+@click.argument("val_path", type=click.Path(exists=True))
+@click.argument("test_path", type=click.Path(exists=True))
+@click.argument("model_output_path", type=click.Path())
 @click.option(
     "--input_length",
     type=int,
@@ -278,14 +282,21 @@ def main(
     """
     logger = logging.getLogger(__name__)
     logger.info("==== start process ====")
-    logger.info(f"Input path: {input_path}")
-    logger.info(f"Output path: {output_path}")
+    logger.info(f"Train path: {train_path}")
+    logger.info(f"Validation path: {val_path}")
+    logger.info(f"Test path: {test_path}")
+    logger.info(f"Model output path: {model_output_path}")
 
     mlflow.set_experiment("train_transformer")
     mlflow.start_run(run_name=mlflow_run_name)
-    mlflow.log_params({"input_path": input_path, "output_path": output_path})
+    mlflow.log_params({
+        "train_path": train_path,
+        "val_path": val_path,
+        "test_path": test_path,
+        "model_output_path": model_output_path
+    })
 
-    df = pd.read_parquet(input_path)
+    df = pd.read_parquet(train_path)
     num_columns = df.shape[1]
     # Define target columns for prediction
     target_columns = ["watt_black", "watt_red", "watt_kitchen", "watt_living"]

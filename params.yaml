@@ -3,6 +3,6 @@ train_model:
   n_trials: 50
   num_epochs: 10
   input_length: 180
-  batch_size: 32
+  batch_size: 128
   train_ratio: 0.7
   val_ratio: 0.15

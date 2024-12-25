@@ -113,7 +113,7 @@ def objective(
         num_layers=num_layers,
         output_dim=output_length * len(target_columns),
     )
-    model.to(device)
+    model = model.to(device)
     optimizer = torch.optim.Adam(model.parameters(), lr=lr)
     criterion = nn.MSELoss()
 

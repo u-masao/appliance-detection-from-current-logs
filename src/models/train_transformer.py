@@ -242,12 +242,12 @@ def main(
         n_trials=n_trials,
     )
     logger.info(f"Best trial: {study.best_trial}")
+    # Define the model with the best parameters
+    best_trial = study.best_trial
     # Use CLI options if provided, otherwise use best trial parameters
     embed_dim = embed_dim if embed_dim is not None else best_trial.params["embed_dim"]
     num_heads = num_heads if num_heads is not None else best_trial.params["num_heads"]
     num_layers = num_layers if num_layers is not None else best_trial.params["num_layers"]
-    # Define the model with the best parameters
-    best_trial = study.best_trial
     model = TransformerModel(
         input_dim=input_dim,
         embed_dim=embed_dim,

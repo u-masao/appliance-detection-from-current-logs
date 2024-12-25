@@ -172,7 +172,42 @@ def objective(trial, input_path, output_path, fraction, num_epochs, study):
     default=50,
     help="Number of Optuna trials.",
 )
+@click.option(
+    "--input_dim",
+    type=int,
+    default=60 * 3 * 13,
+    help="Input dimension for the transformer model.",
+)
+@click.option(
+    "--embed_dim",
+    type=int,
+    default=None,
+    help="Embedding dimension for the transformer model.",
+)
+@click.option(
+    "--num_heads",
+    type=int,
+    default=None,
+    help="Number of attention heads for the transformer model.",
+)
+@click.option(
+    "--num_layers",
+    type=int,
+    default=None,
+    help="Number of layers for the transformer model.",
+)
+@click.option(
+    "--output_dim",
+    type=int,
+    default=5 * 4,
+    help="Output dimension for the transformer model.",
+)
 def main(
+    input_dim,
+    embed_dim,
+    num_heads,
+    num_layers,
+    output_dim,
     input_path,
     output_path,
     mlflow_run_name,
@@ -207,15 +242,18 @@ def main(
         n_trials=n_trials,
     )
     logger.info(f"Best trial: {study.best_trial}")
-    # Save the best model
+    # Use CLI options if provided, otherwise use best trial parameters
+    embed_dim = embed_dim if embed_dim is not None else best_trial.params["embed_dim"]
+    num_heads = num_heads if num_heads is not None else best_trial.params["num_heads"]
+    num_layers = num_layers if num_layers is not None else best_trial.params["num_layers"]
     # Define the model with the best parameters
     best_trial = study.best_trial
     model = TransformerModel(
-        input_dim=60 * 3 * 13,
-        embed_dim=best_trial.params["embed_dim"],
-        num_heads=best_trial.params["num_heads"],
-        num_layers=best_trial.params["num_layers"],
-        output_dim=5 * 4,
+        input_dim=input_dim,
+        embed_dim=embed_dim,
+        num_heads=num_heads,
+        num_layers=num_layers,
+        output_dim=output_dim,
     )
     # Save the best model
     torch.save(model.state_dict(), output_path)

@@ -71,7 +71,8 @@ stages:
       size: 62374638
   train_model:
     cmd: python src/models/train_transformer.py data/interim/features.parquet models/best_model.pth
-      --data_fraction 0.01 --n_trials 2 --num_epochs 2
+      --data_fraction 0.01 --n_trials 5 --num_epochs 3 --input_length 180 --batch_size
+      4096 --train_ratio 0.7 --val_ratio 0.15
     deps:
     - path: data/interim/features.parquet
       hash: md5
@@ -79,10 +80,10 @@ stages:
       size: 62374638
     - path: src/models/train_transformer.py
       hash: md5
-      md5: f115af102aa6e17ac58a9580f6739789
-      size: 7059
+      md5: ceea11188cf77e063380bf7b683e19b0
+      size: 10180
     outs:
     - path: models/best_model.pth
       hash: md5
-      md5: 648514906081e09e8794057277ff384d
-      size: 6125758
+      md5: eec23f98f09575df838680b10a7a2ae1
+      size: 6806678

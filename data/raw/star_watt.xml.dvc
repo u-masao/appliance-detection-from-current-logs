@@ -1,0 +1,5 @@
+outs:
+- md5: 3e48c4b58b5edc3c96417d6b3a3c876f
+  size: 649685660
+  hash: md5
+  path: star_watt.xml

@@ -87,6 +87,7 @@ def objective(
     output_length,
     train_ratio,
     val_ratio,
+    force_cpu,
 ):
     logger = logging.getLogger(__name__)
     # Define target columns for prediction
@@ -316,6 +317,7 @@ def main(
             output_length,
             train_ratio,
             val_ratio,
+            force_cpu,
         ),
         n_trials=n_trials,
     )

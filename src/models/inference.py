@@ -3,7 +3,7 @@ import torch
 import numpy as np
 import matplotlib.pyplot as plt
 from torch.utils.data import DataLoader
-from train_transformer import TimeSeriesDataset
+from train_transformer import TimeSeriesDataset, load_data
 from model import TransformerModel
 from tqdm import tqdm
 
@@ -43,7 +43,10 @@ def run_inference(model, test_df, input_length, output_length, target_columns, b
 def main():
     parser = argparse.ArgumentParser(description="Run inference on a trained model.")
     parser.add_argument("--model-path", type=str, required=True, help="Path to the trained model file.")
-    parser.add_argument("--test-data", type=str, required=True, help="Path to the test data file.")
+    parser.add_argument("--input-path", type=str, required=True, help="Path to the input data file.")
+    parser.add_argument("--fraction", type=float, default=1.0, help="Fraction of data to load for testing.")
+    parser.add_argument("--train-ratio", type=float, default=0.7, help="Ratio of data to use for training.")
+    parser.add_argument("--val-ratio", type=float, default=0.15, help="Ratio of data to use for validation.")
     parser.add_argument("--input-length", type=int, required=True, help="Input sequence length.")
     parser.add_argument("--output-length", type=int, required=True, help="Output sequence length.")
     parser.add_argument("--target-columns", type=int, nargs='+', required=True, help="Indices of target columns.")
@@ -57,8 +60,11 @@ def main():
     model.load_state_dict(torch.load(args.model_path))
     model.to(args.device)
 
-    # Load test data
-    test_df = np.load(args.test_data)
+    # Load and split data
+    df = load_data(args.input_path, args.fraction)
+    train_size = int(len(df) * args.train_ratio)
+    val_size = int(len(df) * args.val_ratio)
+    test_df = df.iloc[train_size + val_size :]
 
     # Run inference
     run_inference(

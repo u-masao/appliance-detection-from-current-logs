@@ -77,7 +77,7 @@ class TransformerModel(nn.Module):
 
 
 # Objective function for Optuna
-def objective(trial, input_path, output_path, fraction, num_epochs, study, input_length, batch_size, output_length):
+def objective(trial, input_path, output_path, fraction, num_epochs, study, input_length, batch_size, output_length, train_ratio, val_ratio):
     logger = logging.getLogger(__name__)
     # Load data to determine the number of columns
     df = pd.read_parquet(input_path)
@@ -271,7 +271,7 @@ def main(
     study = optuna.create_study(direction="minimize")
     study.optimize(
         lambda trial: objective(
-            trial, input_path, output_path, data_fraction, num_epochs, study, input_length, batch_size, output_length
+            trial, input_path, output_path, data_fraction, num_epochs, study, input_length, batch_size, output_length, train_ratio, val_ratio
         ),
         n_trials=n_trials,
     )

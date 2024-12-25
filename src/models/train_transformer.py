@@ -180,11 +180,6 @@ def objective(
 @click.option(
     "--input_length",
     type=int,
-    default=180,
-    help="Input length for the time series data.",
-)
-@click.option(
-    "--output_length",
     default=60 * 3,
     help="Input length for the time series data.",
 )
@@ -260,7 +255,6 @@ def main(
     embed_dim,
     num_heads,
     num_layers,
-    output_dim,
     output_length,
     input_path,
     output_path,

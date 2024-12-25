@@ -227,6 +227,7 @@ def main(
     num_layers,
     output_dim,
     output_length,
+    input_path,
     output_path,
     mlflow_run_name,
     data_fraction,

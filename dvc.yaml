@@ -49,6 +49,10 @@ stages:
       --data_fraction ${train_model.data_fraction}
       --n_trials ${train_model.n_trials}
       --num_epochs ${train_model.num_epochs}
+      --input_length ${train_model.input_length}
+      --batch_size ${train_model.batch_size}
+      --train_ratio ${train_model.train_ratio}
+      --val_ratio ${train_model.val_ratio}
     deps:
       - src/models/train_transformer.py
       - data/interim/features.parquet

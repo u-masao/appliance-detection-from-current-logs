@@ -280,6 +280,7 @@ def main(
     n_trials,
     train_ratio,
     val_ratio,
+    force_cpu,
 ):
     """
     Train the transformer model with the specified parameters.

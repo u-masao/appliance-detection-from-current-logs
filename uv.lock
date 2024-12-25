@@ -3188,8 +3188,12 @@ name = "src"
 version = "0.0.1"
 source = { editable = "." }
 dependencies = [
+    { name = "black" },
     { name = "click" },
+    { name = "dvc" },
     { name = "fastparquet" },
+    { name = "flake8" },
+    { name = "isort" },
     { name = "lxml" },
     { name = "mlflow" },
     { name = "optuna" },
@@ -3198,32 +3202,20 @@ dependencies = [
     { name = "torch" },
 ]
 
-[package.dev-dependencies]
-dev = [
-    { name = "black" },
-    { name = "dvc" },
-    { name = "flake8" },
-    { name = "isort" },
-]
-
 [package.metadata]
 requires-dist = [
+    { name = "black", specifier = ">=24.10.0" },
     { name = "click", specifier = ">=8.1.8" },
+    { name = "dvc", specifier = ">=3.58.0" },
     { name = "fastparquet", specifier = ">=2024.11.0" },
+    { name = "flake8", specifier = ">=7.1.1" },
+    { name = "isort", specifier = ">=5.13.2" },
     { name = "lxml", specifier = ">=5.3.0" },
     { name = "mlflow", specifier = ">=2.19.0" },
     { name = "optuna", specifier = ">=4.1.0" },
     { name = "pandas", specifier = ">=2.2.3" },
     { name = "pyarrow", specifier = ">=18.1.0" },
     { name = "torch", specifier = ">=2.5.1" },
-]
-
-[package.metadata.requires-dev]
-dev = [
-    { name = "black", specifier = ">=24.10.0" },
-    { name = "dvc", specifier = ">=3.58.0" },
-    { name = "flake8", specifier = ">=7.1.1" },
-    { name = "isort", specifier = ">=5.13.2" },
 ]
 
 [[package]]

@@ -353,11 +353,6 @@ def main(
     logger.info("Model architecture:")
     logger.info(model)
 
-    # Output model weight distribution
-    logger.info("Model weight distribution:")
-    for name, param in model.named_parameters():
-        if param.requires_grad:
-            logger.info(f"{name}: {param.data}")
     torch.save(model.state_dict(), model_output_path)
 
 

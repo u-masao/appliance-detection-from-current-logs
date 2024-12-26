@@ -79,7 +79,7 @@ def objective(
     # Define target columns for prediction
     target_columns = ["watt_black", "watt_red", "watt_kitchen", "watt_living"]
     # Load data to determine the number of columns
-    num_heads = trial.suggest_int("num_heads", 1, 4)
+    num_heads = trial.suggest_int("num_heads", 2, 4, step=2)
     embed_dim = trial.suggest_int(
         "embed_dim", num_heads * 4, num_heads * 16, step=num_heads
     )

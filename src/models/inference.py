@@ -120,16 +120,7 @@ def main(
 
     # Load model and configuration
     # Load model and configuration
-    model, model_config = load_model(
-        model_path,
-        lambda: create_model(
-            input_dim=model_config["input_dim"],
-            embed_dim=model_config["embed_dim"],
-            num_heads=model_config["num_heads"],
-            num_layers=model_config["num_layers"],
-            output_dim=model_config["output_dim"],
-        ),
-    )
+    model, model_config = load_model(model_path)
     model.to(device)
 
     # Load and split data

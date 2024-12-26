@@ -90,6 +90,7 @@ stages:
       data/interim/infer_${item.dataname}.parquet
       --batch_size ${train_model.batch_size}
       --device cpu
+      --data_fraction ${train_model.data_fraction}
     deps:
       - src/models/inference.py
       - models/best_model.pth

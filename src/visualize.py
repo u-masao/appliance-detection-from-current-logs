@@ -14,7 +14,8 @@ def main():
         title="Parquet Data Viewer",
         description="Displays the first row of the specified Parquet file."
     )
-    interface.launch(share=False)
+    return interface
 
 if __name__ == "__main__":
-    main()
+    interface = main()
+    interface.launch(share=False)

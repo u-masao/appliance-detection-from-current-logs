@@ -27,21 +27,6 @@ stages:
     outs:
       - data/interim/dataset.parquet
 
-  split_data:
-    cmd: >-
-      python src/data/split_data.py
-      data/interim/features.parquet
-      data/processed/train.parquet
-      data/processed/val.parquet
-      data/processed/test.parquet
-    deps:
-      - src/data/split_data.py
-      - data/interim/features.parquet
-    outs:
-      - data/processed/train.parquet
-      - data/processed/val.parquet
-      - data/processed/test.parquet
-
   build_features:
     cmd: >-
       python src/features/build_features.py
@@ -53,35 +38,61 @@ stages:
     outs:
       - data/interim/features.parquet
 
+  split_data:
+    cmd: >-
+      python src/data/split_data.py
+      data/interim/features.parquet
+      data/interim/train.parquet
+      data/interim/val.parquet
+      data/interim/test.parquet
+      --train_ratio ${train_model.train_ratio}
+      --val_ratio ${train_model.val_ratio}
+      --input_length ${train_model.input_length}
+    deps:
+      - src/data/split_data.py
+      - data/interim/features.parquet
+    outs:
+      - data/interim/train.parquet
+      - data/interim/val.parquet
+      - data/interim/test.parquet
+
   train_model:
     cmd: >-
       python src/models/train_transformer.py
-      data/interim/features.parquet
+      data/interim/train.parquet
+      data/interim/val.parquet
+      data/interim/test.parquet
       models/best_model.pth
       --data_fraction ${train_model.data_fraction}
       --n_trials ${train_model.n_trials}
       --num_epochs ${train_model.num_epochs}
-      --input_length ${train_model.input_length}
       --batch_size ${train_model.batch_size}
-      --train_ratio ${train_model.train_ratio}
-      --val_ratio ${train_model.val_ratio}
+      --input_length ${train_model.input_length}
       --output_length ${train_model.output_length}
     deps:
       - src/models/train_transformer.py
-      - data/interim/features.parquet
+      - data/interim/train.parquet
+      - data/interim/val.parquet
+      - data/interim/test.parquet
     outs:
       - models/best_model.pth
 
   inference:
+    matrix:
+      dataname:
+        - train
+        - val
+        - test
     cmd: >-
       python src/models/inference.py
       models/best_model.pth
-      data/interim/features.parquet
-      --input_length ${train_model.input_length}
-      --output_length ${train_model.output_length}
+      data/interim/${item.dataname}.parquet
+      data/interim/infer_${item.dataname}.parquet
       --batch_size ${train_model.batch_size}
       --device cpu
     deps:
       - src/models/inference.py
       - models/best_model.pth
-      - data/interim/features.parquet
+      - data/interim/${item.dataname}.parquet
+    outs:
+      - data/interim/infer_${item.dataname}.parquet

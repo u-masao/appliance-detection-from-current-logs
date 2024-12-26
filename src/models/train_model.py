@@ -54,11 +54,11 @@ def setup_device(force_cpu):
 def create_and_configure_model(
     trial, input_length, num_columns, output_length, target_columns, device
 ):
-    num_heads = trial.suggest_int("num_heads", 2, 4, step=2)
+    num_heads = trial.suggest_int("num_heads", 8, 8, step=2)
     embed_dim = trial.suggest_int(
-        "embed_dim", num_heads * 4, num_heads * 16, step=num_heads
+        "embed_dim", num_heads * 16, num_heads * 16, step=num_heads
     )
-    num_layers = trial.suggest_int("num_layers", 1, 3)
+    num_layers = trial.suggest_int("num_layers", 3, 3)
     lr = trial.suggest_float("lr", 1e-4, 1e-2, log=True)
 
     model = create_model(

@@ -58,7 +58,7 @@ stages:
 
   train_model:
     cmd: >-
-      python src/models/train_transformer.py
+      python -m src.models.train_model
       data/interim/train.parquet
       data/interim/val.parquet
       data/interim/test.parquet
@@ -70,7 +70,9 @@ stages:
       --input_length ${train_model.input_length}
       --output_length ${train_model.output_length}
     deps:
-      - src/models/train_transformer.py
+      - src/models/train_model.py
+      - src/models/model.py
+      - src/models/dataset.py
       - data/interim/train.parquet
       - data/interim/val.parquet
       - data/interim/test.parquet
@@ -84,7 +86,7 @@ stages:
         - val
         - test
     cmd: >-
-      python src/models/inference.py
+      python -m src.models.inference
       models/best_model.pth
       data/interim/${item.dataname}.parquet
       data/interim/infer_${item.dataname}.parquet
@@ -93,6 +95,8 @@ stages:
       --data_fraction ${train_model.data_fraction}
     deps:
       - src/models/inference.py
+      - src/models/model.py
+      - src/models/dataset.py
       - models/best_model.pth
       - data/interim/${item.dataname}.parquet
     outs:

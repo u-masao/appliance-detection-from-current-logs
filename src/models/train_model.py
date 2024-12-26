@@ -11,7 +11,7 @@ from torch.utils.data import DataLoader
 from tqdm import tqdm
 
 from src.models.dataset import TimeSeriesDataset
-from src.models.model import TransformerModel
+from src.models.model import TransformerModel, save_model
 
 
 def load_data(file_path, fraction=1.0):
@@ -319,7 +319,7 @@ def main(
     logger.info("Model architecture:")
     logger.info(model)
 
-    torch.save(model.state_dict(), model_output_path)
+    save_model(model, model_output_path)
     # Save model configuration
     model_config = {
         "input_dim": input_length * (num_columns - 1),

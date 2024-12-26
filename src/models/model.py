@@ -31,13 +31,15 @@ def create_model(input_dim, embed_dim, num_heads, num_layers, output_dim):
     )
 
 
-def save_model(model, path):
-    """Save the model to the specified path."""
-    torch.save(model.state_dict(), path)
+def save_model(model, path, model_config=None):
+    """Save the model and its configuration to the specified path."""
+    torch.save({'state_dict': model.state_dict(), 'config': model_config}, path)
 
 
 def load_model(path, model_class, *args, **kwargs):
-    """Load a model from the specified path."""
+    """Load a model and its configuration from the specified path."""
+    checkpoint = torch.load(path)
     model = model_class(*args, **kwargs)
-    model.load_state_dict(torch.load(path))
-    return model
+    model.load_state_dict(checkpoint['state_dict'])
+    model_config = checkpoint.get('config', None)
+    return model, model_config

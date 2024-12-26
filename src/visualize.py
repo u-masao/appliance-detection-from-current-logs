@@ -9,13 +9,12 @@ feature_df = pd.read_parquet("data/interim/train.parquet").iloc[[0]]
 target_columns = ["watt_black", "watt_red", "watt_kitchen", "watt_living"]
 
 
-def load_and_display_first_row(row_number):
+def create_dataframes(row_number):
     sr = infer_df.iloc[row_number]
     train_df = pd.DataFrame(
         sr[sr.index.str.startswith("train_")].values.reshape(-1, 12),
         columns=feature_df.drop("gap", axis=1).columns,
     )
-
     actual_df = pd.DataFrame(
         sr[sr.index.str.startswith("actual_")].values.reshape(
             -1, len(target_columns)
@@ -31,10 +30,11 @@ def load_and_display_first_row(row_number):
     append_df = pd.concat(
         [actual_df, pred_df.add_prefix("pred_")], axis=1
     ).assign(predict=1)
-
     concat_df = pd.concat([train_df, append_df]).reset_index()
-    pred_columns = [f"pred_{x}" for x in target_columns]
+    return concat_df, append_df
 
+def create_plot(concat_df, append_df):
+    pred_columns = [f"pred_{x}" for x in target_columns]
     fig = plt.figure(figsize=(12, 4))
     gs = fig.add_gridspec(2, 4)
     full_ax = fig.add_subplot(gs[0, :])
@@ -59,6 +59,11 @@ def load_and_display_first_row(row_number):
     for ax in [full_ax] + detail_axes:
         ax.legend()
         ax.grid()
+    return fig
+
+def load_and_display_first_row(row_number):
+    concat_df, append_df = create_dataframes(row_number)
+    fig = create_plot(concat_df, append_df)
     return gr.Plot(value=fig), gr.DataFrame(concat_df)
 
 

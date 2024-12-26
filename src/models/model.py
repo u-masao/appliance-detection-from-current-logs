@@ -19,6 +19,7 @@ class TransformerModel(nn.Module):
         output = self.transformer(src, src)
         return self.fc_out(output.squeeze(1))  # Remove batch dimension
 
+
 def create_model(input_dim, embed_dim, num_heads, num_layers, output_dim):
     """Create a TransformerModel with the specified parameters."""
     return TransformerModel(
@@ -26,11 +27,14 @@ def create_model(input_dim, embed_dim, num_heads, num_layers, output_dim):
         embed_dim=embed_dim,
         num_heads=num_heads,
         num_layers=num_layers,
-        output_dim=output_dim
+        output_dim=output_dim,
     )
+
+
 def save_model(model, path):
     """Save the model to the specified path."""
     torch.save(model.state_dict(), path)
+
 
 def load_model(path, model_class, *args, **kwargs):
     """Load a model from the specified path."""

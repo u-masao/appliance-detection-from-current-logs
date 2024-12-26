@@ -11,7 +11,7 @@ from torch.utils.data import DataLoader
 from tqdm import tqdm
 
 from src.models.dataset import TimeSeriesDataset
-from src.models.model import TransformerModel, save_model, create_model
+from src.models.model import TransformerModel, create_model, save_model
 
 
 def load_data(file_path, fraction=1.0):
@@ -26,8 +26,6 @@ def load_data(file_path, fraction=1.0):
         )
     logger.info("Data loaded successfully")
     return df
-
-
 
 
 # Objective function for Optuna

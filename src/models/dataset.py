@@ -1,6 +1,7 @@
 import torch
 from torch.utils.data import IterableDataset
 
+
 # Custom Dataset
 class TimeSeriesDataset(IterableDataset):
     def __init__(self, data, input_length, output_length, target_columns):

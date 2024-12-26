@@ -7,12 +7,12 @@ import mlflow
 import numpy as np
 import pandas as pd
 import torch
-from src.models.model import create_model
 from torch.utils.data import DataLoader
 from tqdm import tqdm
-from src.models.train_model import load_data
 
 from src.models.dataset import TimeSeriesDataset
+from src.models.model import create_model
+from src.models.train_model import load_data
 
 
 def run_inference(

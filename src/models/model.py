@@ -1,3 +1,4 @@
+import torch
 import torch.nn as nn
 
 
@@ -17,3 +18,13 @@ class TransformerModel(nn.Module):
         src = self.embedding(src).unsqueeze(1)  # Add batch dimension
         output = self.transformer(src, src)
         return self.fc_out(output.squeeze(1))  # Remove batch dimension
+
+def save_model(model, path):
+    """Save the model to the specified path."""
+    torch.save(model.state_dict(), path)
+
+def load_model(path, model_class, *args, **kwargs):
+    """Load a model from the specified path."""
+    model = model_class(*args, **kwargs)
+    model.load_state_dict(torch.load(path))
+    return model

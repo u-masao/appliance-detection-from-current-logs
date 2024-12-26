@@ -14,7 +14,6 @@ from src.models.dataset import TimeSeriesDataset, load_data
 from src.models.model import TransformerModel, create_model, save_model
 
 
-
 # Objective function for Optuna
 def objective(
     trial,
@@ -102,7 +101,7 @@ def objective(
 
         avg_loss = total_loss / (i + 1)
         logger.info(f"Epoch {epoch+1} average training loss: {avg_loss}")
-        mlflow.log_metric("avg_loss.train", avg_loss, step=epoch+1)
+        mlflow.log_metric("avg_loss.train", avg_loss, step=epoch + 1)
         model.eval()
         val_loss = 0
         with torch.no_grad():

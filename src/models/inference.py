@@ -1,15 +1,25 @@
 import logging
-import click
-import mlflow
-import torch
-import numpy as np
-import matplotlib.pyplot as plt
-from torch.utils.data import DataLoader
-from train_transformer import TimeSeriesDataset, load_data
-from model import TransformerModel
-from tqdm import tqdm
 
-def run_inference(model, test_df, input_length, output_length, target_columns, batch_size, device):
+import click
+import matplotlib.pyplot as plt
+import mlflow
+import numpy as np
+import torch
+from model import TransformerModel
+from torch.utils.data import DataLoader
+from tqdm import tqdm
+from train_transformer import TimeSeriesDataset, load_data
+
+
+def run_inference(
+    model,
+    test_df,
+    input_length,
+    output_length,
+    target_columns,
+    batch_size,
+    device,
+):
     # Create test dataset and loader
     test_dataset = TimeSeriesDataset(
         test_df,
@@ -17,7 +27,9 @@ def run_inference(model, test_df, input_length, output_length, target_columns, b
         output_length=output_length,
         target_columns=target_columns,
     )
-    test_loader = DataLoader(test_dataset, batch_size=batch_size, shuffle=False)
+    test_loader = DataLoader(
+        test_dataset, batch_size=batch_size, shuffle=False
+    )
 
     model.eval()
     predictions = []
@@ -42,19 +54,62 @@ def run_inference(model, test_df, input_length, output_length, target_columns, b
     plt.title("Actual vs Predicted on Test Set")
     plt.legend()
     plt.show()
+
+
 @click.command()
 @click.argument("model_path", type=click.Path(exists=True))
 @click.argument("input_path", type=click.Path(exists=True))
-@click.option("--fraction", type=float, default=1.0, help="Fraction of data to load for testing.")
-@click.option("--train-ratio", type=float, default=0.7, help="Ratio of data to use for training.")
-@click.option("--val-ratio", type=float, default=0.15, help="Ratio of data to use for validation.")
-@click.option("--input-length", type=int, required=True, help="Input sequence length.")
-@click.option("--output-length", type=int, required=True, help="Output sequence length.")
-@click.option("--target-columns", type=int, multiple=True, required=True, help="Indices of target columns.")
-@click.option("--batch-size", type=int, default=32, help="Batch size for inference.")
-@click.option("--device", type=str, default="cpu", help="Device to run inference on (cpu or cuda).")
-@click.option("--mlflow-run-name", type=str, default="inference_run", help="Name of the MLflow run.")
-def main(model_path, input_path, fraction, train_ratio, val_ratio, input_length, output_length, target_columns, batch_size, device, mlflow_run_name):
+@click.option(
+    "--fraction",
+    type=float,
+    default=1.0,
+    help="Fraction of data to load for testing.",
+)
+@click.option(
+    "--train_ratio",
+    type=float,
+    default=0.7,
+    help="Ratio of data to use for training.",
+)
+@click.option(
+    "--val_ratio",
+    type=float,
+    default=0.15,
+    help="Ratio of data to use for validation.",
+)
+@click.option(
+    "--input_length", type=int, required=True, help="Input sequence length."
+)
+@click.option(
+    "--output_length", type=int, required=True, help="Output sequence length."
+)
+@click.option(
+    "--batch_size", type=int, default=32, help="Batch size for inference."
+)
+@click.option(
+    "--device",
+    type=str,
+    default="cpu",
+    help="Device to run inference on (cpu or cuda).",
+)
+@click.option(
+    "--mlflow_run_name",
+    type=str,
+    default="inference_run",
+    help="Name of the MLflow run.",
+)
+def main(
+    model_path,
+    input_path,
+    fraction,
+    train_ratio,
+    val_ratio,
+    input_length,
+    output_length,
+    batch_size,
+    device,
+    mlflow_run_name,
+):
     logger = logging.getLogger(__name__)
     logger.info("==== start inference process ====")
     logger.info(f"Model path: {model_path}")
@@ -63,9 +118,16 @@ def main(model_path, input_path, fraction, train_ratio, val_ratio, input_length,
     mlflow.set_experiment("inference")
     mlflow.start_run(run_name=mlflow_run_name)
     mlflow.log_params({"model_path": model_path, "input_path": input_path})
+    target_columns = ["watt_black", "watt_red", "watt_kitchen", "watt_living"]
 
     # Load model
-    model = TransformerModel(input_dim=len(target_columns), embed_dim=64, num_heads=4, num_layers=2, output_dim=len(target_columns))
+    model = TransformerModel(
+        input_dim=len(target_columns),
+        embed_dim=64,
+        num_heads=4,
+        num_layers=2,
+        output_dim=len(target_columns),
+    )
     model.load_state_dict(torch.load(model_path))
     model.to(device)
 
@@ -73,7 +135,7 @@ def main(model_path, input_path, fraction, train_ratio, val_ratio, input_length,
     df = load_data(input_path, fraction)
     train_size = int(len(df) * train_ratio)
     val_size = int(len(df) * val_ratio)
-    test_df = df.iloc[train_size + val_size:]
+    test_df = df.iloc[train_size + val_size :]
 
     # Run inference
     run_inference(
@@ -83,11 +145,12 @@ def main(model_path, input_path, fraction, train_ratio, val_ratio, input_length,
         output_length=output_length,
         target_columns=target_columns,
         batch_size=batch_size,
-        device=device
+        device=device,
     )
 
     mlflow.end_run()
     logger.info("==== end inference process ====")
+
 
 if __name__ == "__main__":
     main()

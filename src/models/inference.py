@@ -45,6 +45,9 @@ def run_inference(
     predictions = np.concatenate(predictions, axis=0)
     actuals = np.concatenate(actuals, axis=0)
 
+    print(predictions)
+    print(actuals)
+
     # Plotting
     plt.figure(figsize=(10, 6))
     plt.plot(actuals[:100], label="Actual")
@@ -53,35 +56,32 @@ def run_inference(
     plt.ylabel("Value")
     plt.title("Actual vs Predicted on Test Set")
     plt.legend()
-    plt.show()
+    plt.savefig("reports/figures/compare.png")
+
+    return predictions, actuals
 
 
 @click.command()
 @click.argument("model_path", type=click.Path(exists=True))
 @click.argument("input_path", type=click.Path(exists=True))
+@click.argument("output_path", type=click.Path())
+@click.option(
+    "--input_length",
+    type=int,
+    default=60 * 3,
+    help="Input length for the time series data.",
+)
+@click.option(
+    "--output_length",
+    type=int,
+    default=5,
+    help="Output length for the time series data.",
+)
 @click.option(
     "--fraction",
     type=float,
     default=1.0,
     help="Fraction of data to load for testing.",
-)
-@click.option(
-    "--train_ratio",
-    type=float,
-    default=0.7,
-    help="Ratio of data to use for training.",
-)
-@click.option(
-    "--val_ratio",
-    type=float,
-    default=0.15,
-    help="Ratio of data to use for validation.",
-)
-@click.option(
-    "--input_length", type=int, required=True, help="Input sequence length."
-)
-@click.option(
-    "--output_length", type=int, required=True, help="Output sequence length."
 )
 @click.option(
     "--batch_size", type=int, default=32, help="Batch size for inference."
@@ -101,9 +101,8 @@ def run_inference(
 def main(
     model_path,
     input_path,
+    output_path,
     fraction,
-    train_ratio,
-    val_ratio,
     input_length,
     output_length,
     batch_size,
@@ -130,19 +129,18 @@ def main(
             "Model configuration file not found. Ensure the model was trained with the configuration saved."
         )
     model = TransformerModel(**model_config)
-    model.load_state_dict(torch.load(model_path, map_location=device, weights_only=True))
+    model.load_state_dict(
+        torch.load(model_path, map_location=device, weights_only=True)
+    )
     model.to(device)
 
     # Load and split data
     df = load_data(input_path, fraction)
-    train_size = int(len(df) * train_ratio)
-    val_size = int(len(df) * val_ratio)
-    test_df = df.iloc[train_size + val_size :]
 
     # Run inference
     run_inference(
         model=model,
-        test_df=test_df,
+        test_df=df,
         input_length=input_length,
         output_length=output_length,
         target_columns=target_columns,

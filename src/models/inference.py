@@ -118,19 +118,9 @@ def main(
     mlflow.log_params({"model_path": model_path, "input_path": input_path})
     target_columns = ["watt_black", "watt_red", "watt_kitchen", "watt_living"]
 
-    # Load model configuration
-    try:
-        model_config = torch.load(
-            model_path.replace(".pth", "_config.pth"), weights_only=True
-        )
-    except FileNotFoundError:
-        raise RuntimeError(
-            "Model configuration file not found. Ensure the model was trained with the configuration saved."
-        )
-    model = create_model(**model_config)
-    model.load_state_dict(
-        torch.load(model_path, map_location=device, weights_only=True)
-    )
+    # Load model and configuration
+    model, model_config = load_model(model_path, create_model)
+    model.to(device)
     model.to(device)
 
     # Load and split data

@@ -358,8 +358,6 @@ def main(
     logger.info("Model architecture:")
     logger.info(model)
 
-    save_model(model, model_output_path)
-    # Save model configuration
     model_config = {
         "input_dim": input_length * (num_columns - 1),
         "embed_dim": embed_dim,
@@ -367,7 +365,7 @@ def main(
         "num_layers": num_layers,
         "output_dim": output_length * len(target_columns),
     }
-    torch.save(model_config, model_output_path.replace(".pth", "_config.pth"))
+    save_model(model, model_output_path, model_config=model_config)
 
 
 if __name__ == "__main__":

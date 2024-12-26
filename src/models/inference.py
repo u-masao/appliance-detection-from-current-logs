@@ -78,7 +78,7 @@ def run_inference(
     help="Output length for the time series data.",
 )
 @click.option(
-    "--fraction",
+    "--data_fraction",
     type=float,
     default=1.0,
     help="Fraction of data to load for testing.",
@@ -102,7 +102,7 @@ def main(
     model_path,
     input_path,
     output_path,
-    fraction,
+    data_fraction,
     input_length,
     output_length,
     batch_size,
@@ -135,7 +135,7 @@ def main(
     model.to(device)
 
     # Load and split data
-    df = load_data(input_path, fraction)
+    df = load_data(input_path, fraction=data_fraction)
 
     # Run inference
     run_inference(

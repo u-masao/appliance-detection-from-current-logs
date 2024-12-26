@@ -102,17 +102,20 @@ def objective(
         logger.info(f"Epoch {epoch+1} started")
         model.train()
         pbar = tqdm(train_loader, desc=f"Epoch {epoch+1} [Train]", leave=False)
-        for x, y in pbar:
+        total_loss = 0
+        for i, (x, y) in enumerate(pbar):
             optimizer.zero_grad()
             x, y = x.to(device), y.to(device)
             output = model(x)
             loss = criterion(output.view_as(y), y)
-            mlflow.log_metric("train_loss", loss.item())
+            total_loss += loss.item()
             loss.backward()
             optimizer.step()
             pbar.set_postfix({"loss": loss.item()})
 
-        # Validation
+        avg_loss = total_loss / (i + 1)
+        logger.info(f"Epoch {epoch+1} average training loss: {avg_loss}")
+        mlflow.log_metric("avg_loss.train", avg_loss, step=epoch+1)
         model.eval()
         val_loss = 0
         with torch.no_grad():

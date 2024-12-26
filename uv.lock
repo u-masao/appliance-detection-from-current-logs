@@ -1442,6 +1442,15 @@ wheels = [
 ]
 
 [[package]]
+name = "japanize-matplotlib"
+version = "1.1.3"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "matplotlib" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/aa/85/08a4b7fe8987582d99d9bb7ad0ff1ec75439359a7f9690a0dbf2dbf98b15/japanize-matplotlib-1.1.3.tar.gz", hash = "sha256:e89e7d9e109820962650e59a130403b59b33915fde3871a265a5891d9bf5e079", size = 4118887 }
+
+[[package]]
 name = "jinja2"
 version = "3.1.5"
 source = { registry = "https://pypi.org/simple" }
@@ -3194,6 +3203,7 @@ dependencies = [
     { name = "fastparquet" },
     { name = "flake8" },
     { name = "isort" },
+    { name = "japanize-matplotlib" },
     { name = "lxml" },
     { name = "mlflow" },
     { name = "optuna" },
@@ -3210,6 +3220,7 @@ requires-dist = [
     { name = "fastparquet", specifier = ">=2024.11.0" },
     { name = "flake8", specifier = ">=7.1.1" },
     { name = "isort", specifier = ">=5.13.2" },
+    { name = "japanize-matplotlib", specifier = ">=1.1.3" },
     { name = "lxml", specifier = ">=5.3.0" },
     { name = "mlflow", specifier = ">=2.19.0" },
     { name = "optuna", specifier = ">=4.1.0" },
@@ -3217,6 +3228,9 @@ requires-dist = [
     { name = "pyarrow", specifier = ">=18.1.0" },
     { name = "torch", specifier = ">=2.5.1" },
 ]
+
+[package.metadata.requires-dev]
+dev = []
 
 [[package]]
 name = "sympy"

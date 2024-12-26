@@ -43,7 +43,7 @@ def load_model(path):
     """Load a TransformerModel and its configuration from the specified path."""
     checkpoint = torch.load(path)
     model_config = checkpoint["config"]
-    model = TransformerModel(
+    model = create_model(
         input_dim=model_config["input_dim"],
         embed_dim=model_config["embed_dim"],
         num_heads=model_config["num_heads"],

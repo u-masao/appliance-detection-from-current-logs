@@ -355,8 +355,8 @@ def main(
         output_dim=output_length * len(target_columns),
     )
     # Output model architecture
-    logger.info("Model architecture:")
-    logger.info(model)
+    logger.debug("Model architecture:")
+    logger.debug(model)
 
     model_config = {
         "input_dim": input_length * (num_columns - 1),

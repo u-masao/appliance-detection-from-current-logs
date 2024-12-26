@@ -33,6 +33,7 @@ def create_dataframes(row_number):
     concat_df = pd.concat([train_df, append_df]).reset_index()
     return concat_df, append_df
 
+
 def create_plot(concat_df, append_df):
     pred_columns = [f"pred_{x}" for x in target_columns]
     fig = plt.figure(figsize=(12, 4))
@@ -59,9 +60,11 @@ def create_plot(concat_df, append_df):
     for ax in [full_ax] + detail_axes:
         ax.legend()
         ax.grid()
+    fig.tight_layout()
     return fig
 
-def load_and_display_first_row(row_number):
+
+def load_and_display_row(row_number):
     concat_df, append_df = create_dataframes(row_number)
     fig = create_plot(concat_df, append_df)
     return gr.Plot(value=fig), gr.DataFrame(concat_df)
@@ -75,7 +78,7 @@ with gr.Blocks() as demo:
     output_dataframe = gr.DataFrame()
 
     row_number.change(
-        fn=load_and_display_first_row,
+        fn=load_and_display_row,
         inputs=row_number,
         outputs=[output_box, output_dataframe],
     )

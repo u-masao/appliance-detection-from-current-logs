@@ -11,7 +11,7 @@ from torch.utils.data import DataLoader
 from tqdm import tqdm
 
 from src.models.dataset import TimeSeriesDataset
-from src.models.model import TransformerModel, save_model
+from src.models.model import TransformerModel, save_model, create_model
 
 
 def load_data(file_path, fraction=1.0):
@@ -88,7 +88,7 @@ def objective(
     logger.info(f"Using device: {device}")
 
     num_columns = train_df.shape[1]
-    model = TransformerModel(
+    model = create_model(
         input_dim=input_length * (num_columns - 1),
         embed_dim=embed_dim,
         num_heads=num_heads,

@@ -39,10 +39,16 @@ def save_model(model, path, model_config=None):
     )
 
 
-def load_model(path, model_class, *args, **kwargs):
-    """Load a model and its configuration from the specified path."""
+def load_model(path):
+    """Load a TransformerModel and its configuration from the specified path."""
     checkpoint = torch.load(path)
-    model = model_class(*args, **kwargs)
+    model_config = checkpoint["config"]
+    model = TransformerModel(
+        input_dim=model_config["input_dim"],
+        embed_dim=model_config["embed_dim"],
+        num_heads=model_config["num_heads"],
+        num_layers=model_config["num_layers"],
+        output_dim=model_config["output_dim"],
+    )
     model.load_state_dict(checkpoint["state_dict"])
-    model_config = checkpoint.get("config", None)
     return model, model_config

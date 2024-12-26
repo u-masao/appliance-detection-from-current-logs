@@ -7,7 +7,8 @@ import pandas as pd
 import torch
 import torch.nn as nn
 from sklearn.model_selection import train_test_split
-from torch.utils.data import DataLoader, IterableDataset
+from torch.utils.data import DataLoader
+from src.models.dataset import TimeSeriesDataset
 from tqdm import tqdm
 
 from src.models.model import TransformerModel

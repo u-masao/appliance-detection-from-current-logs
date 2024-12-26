@@ -10,22 +10,9 @@ from sklearn.model_selection import train_test_split
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 
-from src.models.dataset import TimeSeriesDataset
+from src.models.dataset import TimeSeriesDataset, load_data
 from src.models.model import TransformerModel, create_model, save_model
 
-
-def load_data(file_path, fraction=1.0):
-    logger = logging.getLogger(__name__)
-    logger.info(f"Loading data from {file_path}")
-    df = pd.read_parquet(file_path)
-    logger.info(f"Data types:\n{df.dtypes}")
-    if fraction < 1.0:
-        df = df.iloc[: int(len(df) * fraction)]
-        logger.info(
-            f"Data reduced to {len(df)} samples for development (sequentially)"
-        )
-    logger.info("Data loaded successfully")
-    return df
 
 
 # Objective function for Optuna

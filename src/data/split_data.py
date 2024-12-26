@@ -1,7 +1,9 @@
 import logging
-import mlflow
+
 import click
+import mlflow
 import pandas as pd
+
 
 @click.command()
 @click.argument("input_path", type=click.Path(exists=True))
@@ -26,7 +28,15 @@ import pandas as pd
     default=0,
     help="Number of rows to skip between splits.",
 )
-def main(input_path, output_train_path, output_val_path, output_test_path, train_ratio, val_ratio, input_length):
+def main(
+    input_path,
+    output_train_path,
+    output_val_path,
+    output_test_path,
+    train_ratio,
+    val_ratio,
+    input_length,
+):
     logger = logging.getLogger(__name__)
     mlflow.start_run()
     logger.info("==== start data splitting ====")
@@ -36,7 +46,9 @@ def main(input_path, output_train_path, output_val_path, output_test_path, train
     train_size = int(len(df) * train_ratio)
     val_size = int(len(df) * val_ratio)
     train_df = df.iloc[:train_size]
-    val_df = df.iloc[train_size + input_length : train_size + input_length + val_size]
+    val_df = df.iloc[
+        train_size + input_length : train_size + input_length + val_size
+    ]
     test_df = df.iloc[train_size + input_length + val_size + input_length :]
 
     train_df.to_parquet(output_train_path)
@@ -61,6 +73,7 @@ def main(input_path, output_train_path, output_val_path, output_test_path, train
     logger.info("Data splitting completed")
     logger.info("==== end data splitting ====")
     mlflow.end_run()
+
 
 if __name__ == "__main__":
     log_fmt = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"

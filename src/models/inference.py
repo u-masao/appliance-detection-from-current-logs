@@ -7,7 +7,7 @@ import mlflow
 import numpy as np
 import pandas as pd
 import torch
-from model import TransformerModel
+from src.models.model import TransformerModel
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 from train_transformer import load_data

@@ -36,19 +36,26 @@ class TimeSeriesDataset(IterableDataset):
         self.output_length = output_length
 
     def __iter__(self):
-        for idx in range(len(self.data) - self.input_length - self.output_length):
+        for idx in range(
+            len(self.data) - self.input_length - self.output_length
+        ):
             x_df = self.data.iloc[idx : idx + self.input_length]
-            if x_df['gap'].sum() > 0:
+            if x_df["gap"].sum() > 0:
                 continue  # Skip this data if there is a gap
-            x = x_df.to_numpy(dtype="float32").flatten()
+            x = x_df.drop("gap", axis=1).to_numpy(dtype="float32").flatten()
             y = (
                 self.data.iloc[
-                    idx + self.input_length : idx + self.input_length + self.output_length
+                    idx
+                    + self.input_length : idx
+                    + self.input_length
+                    + self.output_length
                 ][self.target_columns]
                 .to_numpy(dtype="float32")
                 .flatten()
             )
-            yield torch.tensor(x, dtype=torch.float32), torch.tensor(y, dtype=torch.float32)
+            yield torch.tensor(x, dtype=torch.float32), torch.tensor(
+                y, dtype=torch.float32
+            )
 
 
 # Objective function for Optuna
@@ -98,9 +105,7 @@ def objective(
         output_length=output_length,
         target_columns=target_columns,
     )
-    train_loader = DataLoader(
-        train_dataset, batch_size=batch_size
-    )
+    train_loader = DataLoader(train_dataset, batch_size=batch_size)
     val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False)
 
     # Set device
@@ -112,7 +117,7 @@ def objective(
 
     num_columns = train_df.shape[1]
     model = TransformerModel(
-        input_dim=input_length * num_columns,
+        input_dim=input_length * (num_columns - 1),
         embed_dim=embed_dim,
         num_heads=num_heads,
         num_layers=num_layers,
@@ -121,7 +126,6 @@ def objective(
     logger.info(f"Model transferred to device: {device}")
     optimizer = torch.optim.Adam(model.parameters(), lr=lr)
     criterion = nn.MSELoss()
-
 
     # Training loop
     for epoch in range(num_epochs):
@@ -333,7 +337,7 @@ def main(
     train_df = load_data(train_path, fraction=data_fraction)
     num_columns = train_df.shape[1]
     model = TransformerModel(
-        input_dim=input_length * num_columns,
+        input_dim=input_length * (num_columns - 1),
         embed_dim=embed_dim,
         num_heads=num_heads,
         num_layers=num_layers,
@@ -346,13 +350,13 @@ def main(
     torch.save(model.state_dict(), model_output_path)
     # Save model configuration
     model_config = {
-        "input_dim": input_length * num_columns,
+        "input_dim": input_length * (num_columns - 1),
         "embed_dim": embed_dim,
         "num_heads": num_heads,
         "num_layers": num_layers,
         "output_dim": output_length * len(target_columns),
     }
-    torch.save(model_config, model_output_path.replace('.pth', '_config.pth'))
+    torch.save(model_config, model_output_path.replace(".pth", "_config.pth"))
 
 
 if __name__ == "__main__":

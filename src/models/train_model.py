@@ -308,7 +308,7 @@ def main(
     # Load data to determine the number of columns
     train_df = load_data(train_path, fraction=data_fraction)
     num_columns = train_df.shape[1]
-    model = TransformerModel(
+    model = create_model(
         input_dim=input_length * (num_columns - 1),
         embed_dim=embed_dim,
         num_heads=num_heads,

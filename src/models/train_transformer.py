@@ -39,8 +39,12 @@ class TimeSeriesDataset(Dataset):
         return len(self.data) - self.input_length - self.output_length
 
     def __getitem__(self, idx):
+        x_df= self.data.iloc[idx : idx + self.input_length]
+        if x_df['gap'].sum() > 0:
+            print('detect gap')
+            raise IndexError('detect gap')
         x = (
-            self.data.iloc[idx : idx + self.input_length]
+            x_df
             .to_numpy(dtype="float32")
             .flatten()
         )
@@ -138,6 +142,10 @@ def objective(
         model.train()
         pbar = tqdm(train_loader, desc=f"Epoch {epoch+1} [Train]", leave=False)
         for x, y in pbar:
+            print(x)
+            if any(z is None for z in x):
+                print(x)
+                continue
             optimizer.zero_grad()
             x, y = x.to(device), y.to(device)
             logger.debug(f"Data batch transferred to device: {device}")

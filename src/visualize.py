@@ -7,26 +7,17 @@ def load_and_display_first_row(parquet_file):
     return first_row.to_dict()
 
 with gr.Blocks() as demo:
-        gr.Markdown("# Parquet Data Viewer")
-        gr.Markdown("Displays the first row of the specified Parquet file.")
-        
-        with gr.Row():
-            input_box = gr.Textbox(value="data/interim/infer_train.parquet", label="Parquet File Path")
-            output_box = gr.JSON(label="First Row Data")
-        
-        input_box.change(fn=load_and_display_first_row, inputs=input_box, outputs=output_box)
+    gr.Markdown("# Parquet Data Viewer")
+    gr.Markdown("Displays the first row of the specified Parquet file.")
     
-    def main():
-        gr.Markdown("# Parquet Data Viewer")
-        gr.Markdown("Displays the first row of the specified Parquet file.")
-        
-        with gr.Row():
-            input_box = gr.Textbox(value="data/interim/infer_train.parquet", label="Parquet File Path")
-            output_box = gr.JSON(label="First Row Data")
-        
-        input_box.change(fn=load_and_display_first_row, inputs=input_box, outputs=output_box)
+    with gr.Row():
+        input_box = gr.Textbox(value="data/interim/infer_train.parquet", label="Parquet File Path")
+        output_box = gr.JSON(label="First Row Data")
     
-        return demo
+    input_box.change(fn=load_and_display_first_row, inputs=input_box, outputs=output_box)
+
+def main():
+    return demo
 
 if __name__ == "__main__":
     interface = main()

@@ -1,3 +1,6 @@
+import logging
+
+import pandas as pd
 import torch
 from torch.utils.data import IterableDataset
 
@@ -33,16 +36,11 @@ class TimeSeriesDataset(IterableDataset):
             )
 
 
-import logging
-
-import pandas as pd
-
-
 def load_data(file_path, fraction=1.0):
     logger = logging.getLogger(__name__)
     logger.info(f"Loading data from {file_path}")
     df = pd.read_parquet(file_path)
-    logger.info(f"Data types:\n{df.dtypes}")
+    logger.debug(f"Data types:\n{df.dtypes}")
     if fraction < 1.0:
         df = df.iloc[: int(len(df) * fraction)]
         logger.info(

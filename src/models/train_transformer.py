@@ -129,13 +129,8 @@ def objective(
         model.train()
         pbar = tqdm(train_loader, desc=f"Epoch {epoch+1} [Train]", leave=False)
         for x, y in pbar:
-            print(x)
-            if any(z is None for z in x):
-                print(x)
-                continue
             optimizer.zero_grad()
             x, y = x.to(device), y.to(device)
-            logger.debug(f"Data batch transferred to device: {device}")
             output = model(x)
             loss = criterion(output.view_as(y), y)
             mlflow.log_metric("train_loss", loss.item())

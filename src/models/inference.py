@@ -120,15 +120,10 @@ def main(
     mlflow.log_params({"model_path": model_path, "input_path": input_path})
     target_columns = ["watt_black", "watt_red", "watt_kitchen", "watt_living"]
 
-    # Load model
-    model = TransformerModel(
-        input_dim=len(target_columns),
-        embed_dim=64,
-        num_heads=4,
-        num_layers=2,
-        output_dim=len(target_columns),
-    )
-    model.load_state_dict(torch.load(model_path))
+    # Load model configuration
+    model_config = torch.load(model_path.replace('.pth', '_config.pth'))
+    model = TransformerModel(**model_config)
+    model.load_state_dict(torch.load(model_path, map_location=device))
     model.to(device)
 
     # Load and split data

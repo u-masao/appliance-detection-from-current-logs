@@ -354,7 +354,13 @@ def main(
         "num_layers": num_layers,
         "output_dim": output_length * len(target_columns),
     }
-    model = create_model(model_config)
+    model = create_model(
+        input_dim=model_config["input_dim"],
+        embed_dim=model_config["embed_dim"],
+        num_heads=model_config["num_heads"],
+        num_layers=model_config["num_layers"],
+        output_dim=model_config["output_dim"],
+    )
     # Output model architecture
     logger.debug("Model architecture:")
     logger.debug(model)

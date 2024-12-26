@@ -347,13 +347,14 @@ def main(
     # Load data to determine the number of columns
     train_df = load_data(train_path, fraction=data_fraction)
     num_columns = train_df.shape[1]
-    model = create_model(
-        input_dim=input_length * (num_columns - 1),
-        embed_dim=embed_dim,
-        num_heads=num_heads,
-        num_layers=num_layers,
-        output_dim=output_length * len(target_columns),
-    )
+    model_config = {
+        "input_dim": input_length * (num_columns - 1),
+        "embed_dim": embed_dim,
+        "num_heads": num_heads,
+        "num_layers": num_layers,
+        "output_dim": output_length * len(target_columns),
+    }
+    model = create_model(model_config)
     # Output model architecture
     logger.debug("Model architecture:")
     logger.debug(model)

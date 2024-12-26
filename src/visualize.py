@@ -1,24 +1,79 @@
 import gradio as gr
+import japanize_matplotlib  # noqa: F401
+import matplotlib.pyplot as plt
 import pandas as pd
 
-def load_and_display_first_row(parquet_file):
-    df = pd.read_parquet(parquet_file)
-    first_row = df.iloc[0]
-    return first_row.to_dict()
+input_filepath = "data/interim/infer_train.parquet"
+infer_df = pd.read_parquet(input_filepath)
+feature_df = pd.read_parquet("data/interim/train.parquet").iloc[[0]]
+target_columns = ["watt_black", "watt_red", "watt_kitchen", "watt_living"]
+
+
+def load_and_display_first_row(row_number):
+    sr = infer_df.iloc[row_number]
+    train_df = pd.DataFrame(
+        sr[sr.index.str.startswith("train_")].values.reshape(-1, 12),
+        columns=feature_df.drop("gap", axis=1).columns,
+    )
+
+    actual_df = pd.DataFrame(
+        sr[sr.index.str.startswith("actual_")].values.reshape(
+            -1, len(target_columns)
+        ),
+        columns=target_columns,
+    )
+    pred_df = pd.DataFrame(
+        sr[sr.index.str.startswith("pred_")].values.reshape(
+            -1, len(target_columns)
+        ),
+        columns=target_columns,
+    )
+    append_df = pd.concat(
+        [actual_df, pred_df.add_prefix("pred_")], axis=1
+    ).assign(predict=1)
+
+    concat_df = pd.concat([train_df, append_df]).reset_index()
+    pred_columns = [f"pred_{x}" for x in target_columns]
+
+    fig = plt.figure(figsize=(12, 4))
+    gs = fig.add_gridspec(2, 4)
+    full_ax = fig.add_subplot(gs[0, :])
+    detail_axes = [
+        fig.add_subplot(gs[1, x], sharey=full_ax)
+        for x in range(len(target_columns))
+    ]
+
+    for column in [target_columns + ["predict"]]:
+        full_ax.plot(concat_df[column], label=column, alpha=0.8)
+
+    for index, (actual_column, pred_column) in enumerate(
+        zip(target_columns, pred_columns)
+    ):
+        detail_axes[index].plot(
+            append_df[actual_column], label=actual_column, alpha=0.8
+        )
+        detail_axes[index].plot(
+            append_df[pred_column], label=actual_column, alpha=0.8
+        )
+
+    for ax in [full_ax] + detail_axes:
+        ax.legend()
+        ax.grid()
+    return gr.Plot(value=fig), gr.DataFrame(concat_df)
+
 
 with gr.Blocks() as demo:
     gr.Markdown("# Parquet Data Viewer")
-    gr.Markdown("Displays the first row of the specified Parquet file.")
-    
-    with gr.Row():
-        input_box = gr.Textbox(value="data/interim/infer_train.parquet", label="Parquet File Path")
-        output_box = gr.JSON(label="First Row Data")
-    
-    input_box.change(fn=load_and_display_first_row, inputs=input_box, outputs=output_box)
 
-def main():
-    return demo
+    row_number = gr.Number(value=0, minimum=0, maximum=len(infer_df))
+    output_box = gr.Plot()
+    output_dataframe = gr.DataFrame()
+
+    row_number.change(
+        fn=load_and_display_first_row,
+        inputs=row_number,
+        outputs=[output_box, output_dataframe],
+    )
 
 if __name__ == "__main__":
-    interface = main()
-    interface.launch(share=False)
+    demo.launch(share=False)

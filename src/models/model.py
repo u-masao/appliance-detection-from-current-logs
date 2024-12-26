@@ -1,5 +1,6 @@
 import torch.nn as nn
 
+
 # Transformer Model
 class TransformerModel(nn.Module):
     def __init__(

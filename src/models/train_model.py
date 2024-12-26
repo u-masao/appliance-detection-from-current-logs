@@ -114,7 +114,9 @@ def train_and_evaluate_model(
                 val_loss += loss
                 pbar.set_postfix({"loss": loss})
 
-        mlflow.log_metric("val_loss", val_loss)
+        avg_val_loss = val_loss / len(val_loader)
+        logger.info(f"Epoch {epoch+1} average validation loss: {avg_val_loss}")
+        mlflow.log_metric("avg_loss.val", avg_val_loss, step=epoch + 1)
     return val_loss
 
 

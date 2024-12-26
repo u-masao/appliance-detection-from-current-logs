@@ -7,7 +7,7 @@ import pandas as pd
 import torch
 import torch.nn as nn
 from sklearn.model_selection import train_test_split
-from torch.utils.data import DataLoader, Dataset
+from torch.utils.data import DataLoader, IterableDataset
 from tqdm import tqdm
 
 from src.models.model import TransformerModel
@@ -28,40 +28,27 @@ def load_data(file_path, fraction=1.0):
 
 
 # Custom Dataset
-class TimeSeriesDataset(Dataset):
+class TimeSeriesDataset(IterableDataset):
     def __init__(self, data, input_length, output_length, target_columns):
         self.target_columns = target_columns
         self.data = data
         self.input_length = input_length
         self.output_length = output_length
 
-    def __len__(self):
-        return len(self.data) - self.input_length - self.output_length
-
-    def __getitem__(self, idx):
-        x_df= self.data.iloc[idx : idx + self.input_length]
-        if x_df['gap'].sum() > 0:
-            print('detect gap')
-            raise IndexError('detect gap')
-        x = (
-            x_df
-            .to_numpy(dtype="float32")
-            .flatten()
-        )
-        y = (
-            self.data.iloc[
-                idx
-                + self.input_length : idx
-                + self.input_length
-                + self.output_length
-            ][self.target_columns]
-            .to_numpy(dtype="float32")
-            .flatten()
-        )
-
-        return torch.tensor(x, dtype=torch.float32), torch.tensor(
-            y, dtype=torch.float32
-        )
+    def __iter__(self):
+        for idx in range(len(self.data) - self.input_length - self.output_length):
+            x_df = self.data.iloc[idx : idx + self.input_length]
+            if x_df['gap'].sum() > 0:
+                continue  # Skip this data if there is a gap
+            x = x_df.to_numpy(dtype="float32").flatten()
+            y = (
+                self.data.iloc[
+                    idx + self.input_length : idx + self.input_length + self.output_length
+                ][self.target_columns]
+                .to_numpy(dtype="float32")
+                .flatten()
+            )
+            yield torch.tensor(x, dtype=torch.float32), torch.tensor(y, dtype=torch.float32)
 
 
 # Objective function for Optuna

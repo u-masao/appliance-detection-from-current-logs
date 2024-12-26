@@ -20,15 +20,16 @@ class TransformerModel(nn.Module):
         return self.fc_out(output.squeeze(1))  # Remove batch dimension
 
 
-def create_model(input_dim, embed_dim, num_heads, num_layers, output_dim):
-    """Create a TransformerModel with the specified parameters."""
-    return TransformerModel(
-        input_dim=input_dim,
-        embed_dim=embed_dim,
-        num_heads=num_heads,
-        num_layers=num_layers,
-        output_dim=output_dim,
+def create_model(model_config):
+    """Create and initialize a TransformerModel with the specified parameters."""
+    model = TransformerModel(
+        input_dim=model_config["input_dim"],
+        embed_dim=model_config["embed_dim"],
+        num_heads=model_config["num_heads"],
+        num_layers=model_config["num_layers"],
+        output_dim=model_config["output_dim"],
     )
+    return model
 
 
 def save_model(model, path, model_config=None):

@@ -7,7 +7,7 @@ import mlflow
 import numpy as np
 import pandas as pd
 import torch
-from src.models.model import TransformerModel
+from src.models.model import TransformerModel, create_model
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 from src.models.train_model import load_data
@@ -127,7 +127,7 @@ def main(
         raise RuntimeError(
             "Model configuration file not found. Ensure the model was trained with the configuration saved."
         )
-    model = TransformerModel(**model_config)
+    model = create_model(**model_config)
     model.load_state_dict(
         torch.load(model_path, map_location=device, weights_only=True)
     )

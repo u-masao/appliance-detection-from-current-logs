@@ -10,7 +10,7 @@ import torch
 from src.models.model import TransformerModel
 from torch.utils.data import DataLoader
 from tqdm import tqdm
-from src.models.train_transformer import load_data
+from src.models.train_model import load_data
 
 from src.models.dataset import TimeSeriesDataset
 

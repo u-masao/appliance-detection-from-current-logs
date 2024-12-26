@@ -99,7 +99,7 @@ def objective(
         target_columns=target_columns,
     )
     train_loader = DataLoader(
-        train_dataset, batch_size=batch_size, shuffle=True
+        train_dataset, batch_size=batch_size
     )
     val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False)
 

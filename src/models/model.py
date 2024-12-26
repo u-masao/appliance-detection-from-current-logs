@@ -28,6 +28,7 @@ def create_model(input_dim, embed_dim, num_heads, num_layers, output_dim):
         num_layers=num_layers,
         output_dim=output_dim
     )
+def save_model(model, path):
     """Save the model to the specified path."""
     torch.save(model.state_dict(), path)
 

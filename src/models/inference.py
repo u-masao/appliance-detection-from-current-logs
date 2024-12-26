@@ -122,7 +122,7 @@ def main(
 
     # Load model configuration
     try:
-        model_config = torch.load(model_path.replace('.pth', '_config.pth'))
+        model_config = torch.load(model_path.replace('.pth', '_config.pth'), weights_only=True)
     except FileNotFoundError:
         raise RuntimeError("Model configuration file not found. Ensure the model was trained with the configuration saved.")
     model = TransformerModel(**model_config)

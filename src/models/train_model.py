@@ -14,38 +14,7 @@ from src.models.dataset import TimeSeriesDataset, load_data
 from src.models.model import TransformerModel, create_model, save_model
 
 
-# Objective function for Optuna
-def objective(
-    trial,
-    train_path,
-    val_path,
-    test_path,
-    model_output_path,
-    fraction,
-    num_epochs,
-    study,
-    input_length,
-    batch_size,
-    output_length,
-    train_ratio,
-    val_ratio,
-    force_cpu,
-):
-    logger = logging.getLogger(__name__)
-    # Define target columns for prediction
-    target_columns = ["watt_black", "watt_red", "watt_kitchen", "watt_living"]
-    # Load data to determine the number of columns
-    num_heads = trial.suggest_int("num_heads", 2, 4, step=2)
-    embed_dim = trial.suggest_int(
-        "embed_dim", num_heads * 4, num_heads * 16, step=num_heads
-    )
-    num_layers = trial.suggest_int("num_layers", 1, 3)
-    lr = trial.suggest_float("lr", 1e-4, 1e-2, log=True)
-
-    logger.info(f"params: {num_heads=}, {embed_dim=}, {num_layers=}, {lr=}")
-
-    # Data
-    # Load pre-split data
+def load_and_prepare_data(train_path, val_path, test_path, fraction, input_length, output_length, batch_size, target_columns):
     train_df = load_data(train_path, fraction=fraction)
     val_df = load_data(val_path, fraction=fraction)
     test_df = load_data(test_path, fraction=fraction)
@@ -63,15 +32,22 @@ def objective(
     )
     train_loader = DataLoader(train_dataset, batch_size=batch_size)
     val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False)
+    return train_loader, val_loader, train_df.shape[1]
 
-    # Set device
+def setup_device(force_cpu):
     if force_cpu:
-        device = torch.device("cpu")
+        return torch.device("cpu")
     else:
-        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    logger.info(f"Using device: {device}")
+        return torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-    num_columns = train_df.shape[1]
+def create_and_configure_model(trial, input_length, num_columns, output_length, target_columns, device):
+    num_heads = trial.suggest_int("num_heads", 2, 4, step=2)
+    embed_dim = trial.suggest_int(
+        "embed_dim", num_heads * 4, num_heads * 16, step=num_heads
+    )
+    num_layers = trial.suggest_int("num_layers", 1, 3)
+    lr = trial.suggest_float("lr", 1e-4, 1e-2, log=True)
+
     model = create_model(
         input_dim=input_length * (num_columns - 1),
         embed_dim=embed_dim,
@@ -79,11 +55,11 @@ def objective(
         num_layers=num_layers,
         output_dim=output_length * len(target_columns),
     ).to(device)
-    logger.info(f"Model transferred to device: {device}")
     optimizer = torch.optim.Adam(model.parameters(), lr=lr)
     criterion = nn.MSELoss()
+    return model, optimizer, criterion, lr, num_heads, embed_dim, num_layers
 
-    # Training loop
+def train_and_evaluate_model(model, train_loader, val_loader, optimizer, criterion, device, num_epochs, logger):
     for epoch in range(num_epochs):
         logger.info(f"Epoch {epoch+1} started")
         model.train()
@@ -116,9 +92,38 @@ def objective(
                 pbar.set_postfix({"loss": loss})
 
         mlflow.log_metric("val_loss", val_loss)
+    return val_loss
+
+def objective(
+    trial,
+    train_path,
+    val_path,
+    test_path,
+    model_output_path,
+    fraction,
+    num_epochs,
+    study,
+    input_length,
+    batch_size,
+    output_length,
+    train_ratio,
+    val_ratio,
+    force_cpu,
+):
+    logger = logging.getLogger(__name__)
+    target_columns = ["watt_black", "watt_red", "watt_kitchen", "watt_living"]
+    train_loader, val_loader, num_columns = load_and_prepare_data(
+        train_path, val_path, test_path, fraction, input_length, output_length, batch_size, target_columns
+    )
+    device = setup_device(force_cpu)
+    logger.info(f"Using device: {device}")
+    model, optimizer, criterion, lr, num_heads, embed_dim, num_layers = create_and_configure_model(
+        trial, input_length, num_columns, output_length, target_columns, device
+    )
+    logger.info(f"params: {num_heads=}, {embed_dim=}, {num_layers=}, {lr=}")
+    val_loss = train_and_evaluate_model(model, train_loader, val_loader, optimizer, criterion, device, num_epochs, logger)
     mlflow.end_run()
     logger.info("Training completed")
-
     logger.info(f"Final validation loss: {val_loss}")
     logger.info("==== end process ====")
     return val_loss

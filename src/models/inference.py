@@ -13,6 +13,7 @@ from tqdm import tqdm
 from src.models.dataset import TimeSeriesDataset
 from src.models.model import create_model
 from src.models.train_model import load_data
+from src.models.model import load_model
 
 
 def run_inference(

@@ -23,6 +23,9 @@ lint:
 	uv run black src -l 79
 	uv run flake8 src
 
+## visualize
+visualize:
+	PYTHONPATH=. uv run gradio src/visualize.py
 
 #################################################################################
 # PROJECT RULES                                                                 #

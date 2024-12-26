@@ -103,6 +103,7 @@ def train_and_evaluate_model(
         mlflow.log_metric("avg_loss.train", avg_loss, step=epoch + 1)
         model.eval()
         val_loss = 0
+        val_iterations = 0
         with torch.no_grad():
             pbar = tqdm(
                 val_loader, desc=f"Epoch {epoch+1} [Validation]", leave=False
@@ -112,9 +113,10 @@ def train_and_evaluate_model(
                 output = model(x)
                 loss = criterion(output.view_as(y), y).item()
                 val_loss += loss
+                val_iterations += 1
                 pbar.set_postfix({"loss": loss})
 
-        avg_val_loss = val_loss / len(val_loader)
+        avg_val_loss = val_loss / val_iterations
         logger.info(f"Epoch {epoch+1} average validation loss: {avg_val_loss}")
         mlflow.log_metric("avg_loss.val", avg_val_loss, step=epoch + 1)
     return val_loss

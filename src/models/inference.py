@@ -1,9 +1,11 @@
 import logging
+import math
 
 import click
 import matplotlib.pyplot as plt
 import mlflow
 import numpy as np
+import pandas as pd
 import torch
 from model import TransformerModel
 from torch.utils.data import DataLoader
@@ -32,33 +34,28 @@ def run_inference(
     )
 
     model.eval()
+    trains = []
     predictions = []
     actuals = []
     with torch.no_grad():
         for x, y in tqdm(test_loader, desc="Inference [Test]"):
             x, y = x.to(device), y.to(device)
             output = model(x)
+            trains.append(x.cpu().numpy())
             predictions.append(output.cpu().numpy())
             actuals.append(y.cpu().numpy())
 
     # Convert lists to arrays
+    trains = np.concatenate(trains, axis=0)
     predictions = np.concatenate(predictions, axis=0)
     actuals = np.concatenate(actuals, axis=0)
 
-    print(predictions)
-    print(actuals)
+    train_df = pd.DataFrame(trains).add_prefix("train_")
+    pred_df = pd.DataFrame(predictions).add_prefix("pred_")
+    actual_df = pd.DataFrame(actuals).add_prefix("actual_")
+    concat_df = pd.concat([train_df, pred_df, actual_df], axis=1)
 
-    # Plotting
-    plt.figure(figsize=(10, 6))
-    plt.plot(actuals[:100], label="Actual")
-    plt.plot(predictions[:100], label="Predicted")
-    plt.xlabel("Time Step")
-    plt.ylabel("Value")
-    plt.title("Actual vs Predicted on Test Set")
-    plt.legend()
-    plt.savefig("reports/figures/compare.png")
-
-    return predictions, actuals
+    return concat_df
 
 
 @click.command()
@@ -138,7 +135,7 @@ def main(
     df = load_data(input_path, fraction=data_fraction)
 
     # Run inference
-    run_inference(
+    output_df = run_inference(
         model=model,
         test_df=df,
         input_length=input_length,
@@ -147,6 +144,8 @@ def main(
         batch_size=batch_size,
         device=device,
     )
+
+    output_df.to_parquet(output_path)
 
     mlflow.end_run()
     logger.info("==== end inference process ====")

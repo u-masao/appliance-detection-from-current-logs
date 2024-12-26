@@ -344,6 +344,15 @@ def main(
     logger.info(model)
 
     torch.save(model.state_dict(), model_output_path)
+    # Save model configuration
+    model_config = {
+        "input_dim": input_length * num_columns,
+        "embed_dim": embed_dim,
+        "num_heads": num_heads,
+        "num_layers": num_layers,
+        "output_dim": output_length * len(target_columns),
+    }
+    torch.save(model_config, model_output_path.replace('.pth', '_config.pth'))
 
 
 if __name__ == "__main__":

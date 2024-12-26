@@ -121,7 +121,10 @@ def main(
     target_columns = ["watt_black", "watt_red", "watt_kitchen", "watt_living"]
 
     # Load model configuration
-    model_config = torch.load(model_path.replace('.pth', '_config.pth'))
+    try:
+        model_config = torch.load(model_path.replace('.pth', '_config.pth'))
+    except FileNotFoundError:
+        raise RuntimeError("Model configuration file not found. Ensure the model was trained with the configuration saved.")
     model = TransformerModel(**model_config)
     model.load_state_dict(torch.load(model_path, map_location=device))
     model.to(device)

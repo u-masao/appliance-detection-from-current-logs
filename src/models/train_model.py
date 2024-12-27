@@ -148,15 +148,13 @@ def objective(
     )
     device = setup_device(force_cpu)
     logger.info(f"Using device: {device}")
-    model, optimizer, criterion, lr = (
-        create_and_configure_model(
-            trial,
-            input_length,
-            num_columns,
-            output_length,
-            target_columns,
-            device,
-        )
+    model, optimizer, criterion, lr = create_and_configure_model(
+        trial,
+        input_length,
+        num_columns,
+        output_length,
+        target_columns,
+        device,
     )
     logger.info(f"params: {lr=}")
     val_loss = train_and_evaluate_model(

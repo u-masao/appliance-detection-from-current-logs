@@ -18,12 +18,18 @@ repro:
 
 ## formatting and lint
 .PHONY: lint
+LINT_TARGET=src tests
 lint:
-	uv run isort src
-	uv run black src -l 79
-	uv run flake8 src
+	uv run isort $(LINT_TARGET)
+	uv run black -l 79 $(LINT_TARGET)
+	uv run flake8 $(LINT_TARGET)
+
+.PHONY: test
+test:
+	PYTHONPATH=. uv run pytest -s tests
 
 ## visualize
+.PHONY: visualize
 visualize:
 	PYTHONPATH=. uv run gradio src/visualize.py
 

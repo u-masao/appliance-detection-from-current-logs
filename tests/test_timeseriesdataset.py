@@ -28,5 +28,15 @@ def test_timeseriesdataset():
 
     # データセットのアイテムをテスト
     x, y = dataset[0]
-    assert torch.equal(x, torch.tensor([[1, 2], [2, 3], [3, 4]], dtype=torch.float32))
+    assert torch.equal(
+        x,
+        torch.tensor(
+            [
+                [1, 2, 10, 15, 20, 25],
+                [2, 3, 20, 25, 30, 35],
+                [3, 4, 30, 35, 40, 45],
+            ],
+            dtype=torch.float32,
+        ),
+    )
     assert torch.equal(y, torch.tensor([[40, 45, 50, 55], [50, 55, 60, 65]], dtype=torch.float32))

@@ -1,6 +1,6 @@
 import logging
-import random
 import math
+import random
 
 import click
 import matplotlib.pyplot as plt

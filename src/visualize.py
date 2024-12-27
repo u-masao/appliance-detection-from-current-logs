@@ -35,6 +35,7 @@ def create_dataframes(row_number):
 
 
 def create_plot(concat_df, append_df):
+    plt.close()
     pred_columns = [f"pred_{x}" for x in target_columns]
     fig = plt.figure(figsize=(12, 4))
     gs = fig.add_gridspec(2, 4)

@@ -1,3 +1,4 @@
+import math
 import torch
 import torch.nn as nn
 
@@ -15,9 +16,8 @@ class PositionalEncoding(nn.Module):
 
     def forward(self, x):
         return x + self.pe[:x.size(0), :]
-    def __init__(
-        self, input_dim, embed_dim, num_heads, num_layers, output_dim
-    ):
+class TransformerModel(nn.Module):
+    def __init__(self, input_dim, embed_dim, num_heads, num_layers, output_dim):
         super(TransformerModel, self).__init__()
         self.embedding = nn.Linear(input_dim, embed_dim)
         self.positional_encoding = PositionalEncoding(embed_dim)

@@ -158,7 +158,7 @@ def objective(
             device,
         )
     )
-    logger.info(f"params: {num_heads=}, {embed_dim=}, {num_layers=}, {lr=}")
+    logger.info(f"params: {lr=}")
     val_loss = train_and_evaluate_model(
         model,
         train_loader,

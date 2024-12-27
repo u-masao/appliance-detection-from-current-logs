@@ -16,7 +16,7 @@ class TimeSeriesModel(nn.Module):
         self.fc3 = nn.Linear(64, output_dim)
 
     def forward(self, x):
-        x = x.flatten()
+        x = x.view(x.size(0), -1)
         x = self.dropout1(torch.relu(self.bn1(self.fc1(x))))
         x = self.dropout2(torch.relu(self.bn2(self.fc2(x))))
         return self.fc3(x)

@@ -45,7 +45,7 @@ def run_inference(
             x, y = x.to(device), y.to(device)
             output = model(x)
             trains.append(x.cpu().numpy())
-            predictions.append(output.cpu().numpy().resize(-1,output_length,len(target_columns)))
+            predictions.append(output.cpu().numpy().reshape(-1, output_length, len(target_columns)))
             actuals.append(y.cpu().numpy())
 
     # Convert lists to arrays

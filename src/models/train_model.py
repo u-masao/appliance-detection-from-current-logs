@@ -57,7 +57,7 @@ def setup_device(force_cpu):
 def create_and_configure_model(
     trial, input_length, num_columns, output_length, target_columns, device
 ):
-    lr = trial.suggest_float("lr", 1e-5, 1e-2, log=True)
+    lr = trial.suggest_float("lr", 1e-4, 1e-2, log=True)
 
     model = create_model(
         input_dim=input_length * (num_columns - 1),

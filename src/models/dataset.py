@@ -21,16 +21,12 @@ class TimeSeriesDataset(IterableDataset):
             if x_df["gap"].sum() > 0:
                 continue  # Skip this data if there is a gap
             x = x_df.drop("gap", axis=1).to_numpy(dtype="float32")
-            y = (
-                self.data.iloc[
-                    idx
-                    + self.input_length : idx
-                    + self.input_length
-                    + self.output_length
-                ][self.target_columns]
-                .to_numpy(dtype="float32")
-                .flatten()
-            )
+            y = self.data.iloc[
+                idx
+                + self.input_length : idx
+                + self.input_length
+                + self.output_length
+            ][self.target_columns].to_numpy(dtype="float32")
             yield torch.tensor(x, dtype=torch.float32), torch.tensor(
                 y, dtype=torch.float32
             )

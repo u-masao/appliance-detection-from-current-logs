@@ -12,7 +12,7 @@ from torch.utils.data import DataLoader
 from tqdm import tqdm
 
 from src.models.dataset import TimeSeriesDataset, load_data
-from src.models.model import TransformerModel, create_model, save_model
+from src.models.model import create_model, save_model
 
 
 def load_and_prepare_data(

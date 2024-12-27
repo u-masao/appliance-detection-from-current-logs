@@ -22,11 +22,11 @@ class PositionalEncoding(nn.Module):
         return x + self.pe[: x.size(0), :]
 
 
-class TransformerModel(nn.Module):
+class TimeSeriesModel(nn.Module):
     def __init__(
         self, input_dim, embed_dim, num_heads, num_layers, output_dim
     ):
-        super(TransformerModel, self).__init__()
+        super(TimeSeriesModel, self).__init__()
         self.embedding = nn.Linear(input_dim, embed_dim)
         self.positional_encoding = PositionalEncoding(embed_dim)
         self.transformer = nn.Transformer(
@@ -42,8 +42,8 @@ class TransformerModel(nn.Module):
 
 
 def create_model(input_dim, embed_dim, num_heads, num_layers, output_dim):
-    """Create and initialize a TransformerModel with the specified parameters."""
-    model = TransformerModel(
+    """Create and initialize a TimeSeriesModel with the specified parameters."""
+    model = TimeSeriesModel(
         input_dim=input_dim,
         embed_dim=embed_dim,
         num_heads=num_heads,
@@ -61,7 +61,7 @@ def save_model(model, path, model_config=None):
 
 
 def load_model(path):
-    """Load a TransformerModel and its configuration from the specified path."""
+    """Load a TimeSeriesModel and its configuration from the specified path."""
     checkpoint = torch.load(path)
     model_config = checkpoint["config"]
     model = create_model(

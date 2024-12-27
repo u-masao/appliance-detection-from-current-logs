@@ -7,6 +7,7 @@ import mlflow
 import optuna
 import optuna.storages
 import pandas as pd
+from optuna.samplers import TPESampler
 import torch
 import torch.nn as nn
 from sklearn.model_selection import train_test_split
@@ -322,7 +323,8 @@ def main(
     storage = optuna.storages.RDBStorage(
         url="sqlite:///./data/interim/optuna_study.db"
     )
-    study = optuna.create_study(storage=storage, direction="minimize")
+    sampler = TPESampler(seed=seed)
+    study = optuna.create_study(storage=storage, direction="minimize", sampler=sampler)
 
     study.optimize(
         lambda trial: objective(

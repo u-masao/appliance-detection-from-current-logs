@@ -23,8 +23,8 @@ class TimeSeriesDataset(Dataset):
     def _compute_valid_indices(self):
         valid_indices = []
         for idx in range(len(self.data) - self.input_length - self.output_length):
-            x_df = self.data.iloc[idx : idx + self.input_length]
-            if x_df["gap"].sum() == 0:
+            xy_df = self.data.iloc[idx : idx + self.input_length + self.output_length]
+            if xy_df["gap"].sum() == 0:
                 valid_indices.append(idx)
         return valid_indices
 

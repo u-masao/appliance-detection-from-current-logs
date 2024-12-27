@@ -24,6 +24,7 @@ def run_inference(
     batch_size,
     device,
 ):
+    logger = logging.getLogger(__name__)
     # Create test dataset and loader
     test_dataset = TimeSeriesDataset(
         test_df,
@@ -40,17 +41,19 @@ def run_inference(
     predictions = []
     actuals = []
     with torch.no_grad():
-        for x, y in tqdm(test_loader, desc="Inference [Test]"):
+        for x, y in tqdm(test_loader, desc="Inference"):
             x, y = x.to(device), y.to(device)
             output = model(x)
             trains.append(x.cpu().numpy())
-            predictions.append(output.cpu().numpy())
+            predictions.append(output.cpu().numpy().resize(-1,output_length,len(target_columns)))
             actuals.append(y.cpu().numpy())
 
     # Convert lists to arrays
     trains = np.concatenate(trains, axis=0)
     predictions = np.concatenate(predictions, axis=0)
     actuals = np.concatenate(actuals, axis=0)
+
+    logger.info(f"shapes: {trains.shape=}, {predictions.shape=}, {actuals.shape=}")
 
     train_df = pd.DataFrame(trains).add_prefix("train_")
     pred_df = pd.DataFrame(predictions).add_prefix("pred_")
@@ -119,7 +122,6 @@ def main(
     target_columns = ["watt_black", "watt_red", "watt_kitchen", "watt_living"]
 
     # Load model and configuration
-    # Load model and configuration
     model, model_config = load_model(model_path)
     model.to(device)
 
@@ -144,4 +146,6 @@ def main(
 
 
 if __name__ == "__main__":
+    log_fmt = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    logging.basicConfig(level=logging.INFO, format=log_fmt)
     main()

@@ -46,6 +46,7 @@ def run_inference(
         input_length=input_length,
         output_length=output_length,
         target_columns=target_columns,
+        seed=seed,
     )
     generator = torch.Generator().manual_seed(seed)
     test_loader = DataLoader(

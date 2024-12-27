@@ -292,6 +292,7 @@ def main(
     train_ratio,
     val_ratio,
     force_cpu,
+    seed,
 ):
     """
     Train the transformer model with the specified parameters.

@@ -293,6 +293,12 @@ def objective(
     default=False,
     help="Force the use of CPU even if a GPU is available.",
 )
+@click.option(
+    "--seed",
+    type=int,
+    default=42,
+    help="Random seed for reproducibility.",
+)
 def main(
     batch_size,
     input_length,

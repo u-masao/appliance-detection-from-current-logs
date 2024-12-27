@@ -44,16 +44,18 @@ def run_inference(
         for x, y in tqdm(test_loader, desc="Inference"):
             x, y = x.to(device), y.to(device)
             output = model(x)
-            trains.append(x.cpu().numpy())
-            predictions.append(output.cpu().numpy().reshape(-1, output_length, len(target_columns)))
-            actuals.append(y.cpu().numpy())
+            trains.append(x.cpu().numpy().reshape(len(x), -1))
+            predictions.append(output.cpu().numpy().reshape(len(x), -1))
+            actuals.append(y.cpu().numpy().reshape(len(x), -1))
 
     # Convert lists to arrays
     trains = np.concatenate(trains, axis=0)
     predictions = np.concatenate(predictions, axis=0)
     actuals = np.concatenate(actuals, axis=0)
 
-    logger.info(f"shapes: {trains.shape=}, {predictions.shape=}, {actuals.shape=}")
+    logger.info(
+        f"shapes: {trains.shape=}, {predictions.shape=}, {actuals.shape=}"
+    )
 
     train_df = pd.DataFrame(trains).add_prefix("train_")
     pred_df = pd.DataFrame(predictions).add_prefix("pred_")

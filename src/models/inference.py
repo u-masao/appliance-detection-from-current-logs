@@ -16,6 +16,12 @@ from src.models.model import create_model, load_model
 from src.models.train_model import load_data
 
 
+@click.option(
+    "--seed",
+    type=int,
+    default=42,
+    help="Random seed for reproducibility.",
+)
 def run_inference(
     model,
     test_df,
@@ -24,9 +30,9 @@ def run_inference(
     target_columns,
     batch_size,
     device,
+    seed,
 ):
     # Set random seeds for reproducibility
-    seed = 42
     random.seed(seed)
     np.random.seed(seed)
     torch.manual_seed(seed)

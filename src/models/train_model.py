@@ -56,11 +56,16 @@ def setup_device(force_cpu):
         return torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
+@click.option(
+    "--seed",
+    type=int,
+    default=42,
+    help="Random seed for reproducibility.",
+)
 def create_and_configure_model(
-    trial, input_length, num_columns, output_length, target_columns, device, force_cpu
+    trial, input_length, num_columns, output_length, target_columns, device, force_cpu, seed
 ):
     # Set random seeds for reproducibility
-    seed = 42
     random.seed(seed)
     np.random.seed(seed)
     torch.manual_seed(seed)

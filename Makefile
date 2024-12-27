@@ -15,6 +15,10 @@ PYTHON_INTERPRETER = uv run python
 repro:
 	uv run dvc repro
 
+### mlflow ui
+.PHONY: mlflow_ui
+mlflow_ui:
+	uv run mlflow ui
 
 ## formatting and lint
 .PHONY: lint

@@ -62,7 +62,7 @@ def create_and_configure_model(
     lr = trial.suggest_float("lr", 1e-5, 1e-2, log=True)
 
     model = create_model(
-        input_dim=input_length * (num_columns - 1),
+        input_dim=input_length * num_columns,
         output_dim=output_length * len(target_columns),
     ).to(device)
     optimizer = torch.optim.Adam(model.parameters(), lr=lr)

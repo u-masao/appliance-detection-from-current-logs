@@ -57,6 +57,7 @@ def setup_device(force_cpu):
 def create_and_configure_model(
     trial, input_length, num_columns, output_length, target_columns, device
 ):
+    logger = logging.getLogger(__name__)
     lr = trial.suggest_float("lr", 1e-4, 1e-2, log=True)
     logger.info(f"params: {lr=}")
     mlflow.log_params({"lr": lr})

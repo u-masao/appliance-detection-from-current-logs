@@ -36,6 +36,7 @@ def load_and_prepare_data(
         output_length=output_length,
         target_columns=target_columns,
         seed=seed,
+        seed=seed,
     )
     val_dataset = TimeSeriesDataset(
         val_df,

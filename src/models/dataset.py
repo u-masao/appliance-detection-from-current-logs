@@ -20,7 +20,7 @@ class TimeSeriesDataset(IterableDataset):
             x_df = self.data.iloc[idx : idx + self.input_length]
             if x_df["gap"].sum() > 0:
                 continue  # Skip this data if there is a gap
-            x = x_df.drop("gap", axis=1).to_numpy(dtype="float32").flatten()
+            x = x_df.drop("gap", axis=1).to_numpy(dtype="float32")
             y = (
                 self.data.iloc[
                     idx

@@ -27,7 +27,6 @@ def load_and_prepare_data(
     batch_size,
     target_columns,
     seed,
-    seed,
 ):
     train_df = load_data(train_path, fraction=fraction)
     val_df = load_data(val_path, fraction=fraction)

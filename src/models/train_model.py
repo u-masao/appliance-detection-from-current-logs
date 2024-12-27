@@ -91,7 +91,7 @@ def create_and_configure_model(
         torch.cuda.manual_seed_all(seed)
 
     logger = logging.getLogger(__name__)
-    lr = trial.suggest_float("lr", 5e-3, 5e-2, log=True)
+    lr = trial.suggest_float("lr", 1e-4, 1e-1, log=True)
     logger.info(f"params: {lr=}")
     mlflow.log_params({"lr": lr})
 
@@ -114,8 +114,8 @@ def train_and_evaluate_model(
     num_epochs,
     logger,
 ):
-    min_train_loss = float('inf')
-    min_val_loss = float('inf')
+    min_train_loss = float("inf")
+    min_val_loss = float("inf")
 
     for epoch in range(num_epochs):
         # train

@@ -61,7 +61,6 @@ stages:
       python -m src.models.train_model
       data/interim/train.parquet
       data/interim/val.parquet
-      data/interim/test.parquet
       models/best_model.pth
       --data_fraction ${train_model.data_fraction}
       --n_trials ${train_model.n_trials}
@@ -75,7 +74,6 @@ stages:
       - src/models/dataset.py
       - data/interim/train.parquet
       - data/interim/val.parquet
-      - data/interim/test.parquet
     outs:
       - models/best_model.pth
 
@@ -93,6 +91,8 @@ stages:
       --batch_size ${train_model.batch_size}
       --device cpu
       --data_fraction ${train_model.data_fraction}
+      --input_length ${train_model.input_length}
+      --output_length ${train_model.output_length}
     deps:
       - src/models/inference.py
       - src/models/model.py

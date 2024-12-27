@@ -58,7 +58,7 @@ def create_and_configure_model(
     trial, input_length, num_columns, output_length, target_columns, device
 ):
     logger = logging.getLogger(__name__)
-    lr = trial.suggest_float("lr", 1e-4, 1e-2, log=True)
+    lr = trial.suggest_float("lr", 5e-3, 5e-2, log=True)
     logger.info(f"params: {lr=}")
     mlflow.log_params({"lr": lr})
 
@@ -82,22 +82,25 @@ def train_and_evaluate_model(
     logger,
 ):
     for epoch in range(num_epochs):
+        # train
         model.train()
         pbar = tqdm(train_loader, desc=f"Epoch {epoch+1} [Train]", leave=False)
-        total_loss = 0
+        train_loss = 0
         for i, (x, y) in enumerate(pbar):
             optimizer.zero_grad()
             x, y = x.to(device), y.to(device)
             output = model(x)
             loss = criterion(output.view_as(y), y)
-            total_loss += loss.item()
+            train_loss += loss.item()
             loss.backward()
             optimizer.step()
-            pbar.set_postfix({"loss": loss.item()})
+            avg_train_loss = train_loss / (i + 1)
+            pbar.set_postfix({"avg. loss": avg_train_loss})
 
-        avg_loss = total_loss / (i + 1)
-        logger.info(f"Epoch {epoch+1} average training loss: {avg_loss}")
-        mlflow.log_metric("avg_loss.train", avg_loss, step=epoch + 1)
+        mlflow.log_metric("avg_loss.train", avg_train_loss, step=epoch + 1)
+        mlflow.log_metric("loss.train", train_loss, step=epoch + 1)
+
+        # validation
         model.eval()
         val_loss = 0
         val_iterations = 0
@@ -105,17 +108,18 @@ def train_and_evaluate_model(
             pbar = tqdm(
                 val_loader, desc=f"Epoch {epoch+1} [Validation]", leave=False
             )
-            for x, y in pbar:
+            for i, (x, y) in enumerate(pbar):
                 x, y = x.to(device), y.to(device)
                 output = model(x)
                 loss = criterion(output.view_as(y), y).item()
                 val_loss += loss
                 val_iterations += 1
                 pbar.set_postfix({"loss": loss})
+                avg_val_loss = val_loss / (i + 1)
+                pbar.set_postfix({"avg. loss": avg_val_loss})
 
-        avg_val_loss = val_loss / val_iterations
-        logger.info(f"Epoch {epoch+1} average validation loss: {avg_val_loss}")
         mlflow.log_metric("avg_loss.val", avg_val_loss, step=epoch + 1)
+        mlflow.log_metric("loss.val", val_loss, step=epoch + 1)
     return val_loss
 
 

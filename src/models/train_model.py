@@ -40,8 +40,12 @@ def load_and_prepare_data(
         output_length=output_length,
         target_columns=target_columns,
     )
-    train_loader = DataLoader(train_dataset, batch_size=batch_size, num_workers=4)
-    val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False, num_workers=4)
+    train_loader = DataLoader(
+        train_dataset, batch_size=batch_size, num_workers=4
+    )
+    val_loader = DataLoader(
+        val_dataset, batch_size=batch_size, shuffle=False, num_workers=4
+    )
     return train_loader, val_loader, train_df.shape[1]
 
 
@@ -311,7 +315,9 @@ def main(
 
     # Define target columns for prediction
     target_columns = ["watt_black", "watt_red", "watt_kitchen", "watt_living"]
-    storage = optuna.storages.RDBStorage(url="sqlite:///optuna_study.db")
+    storage = optuna.storages.RDBStorage(
+        url="sqlite:///./data/interim/optuna_study.db"
+    )
     study = optuna.create_study(storage=storage, direction="minimize")
 
     study.optimize(

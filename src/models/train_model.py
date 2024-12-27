@@ -117,7 +117,7 @@ def train_and_evaluate_model(
     for epoch in range(num_epochs):
         # train
         model.train()
-        pbar = tqdm(train_loader, desc=f"Epoch {epoch+1} [Train]", leave=False)
+        pbar = tqdm(train_loader, desc=f"Epoch {epoch+1} [Train]", leave=True)
         train_loss = 0
         for i, (x, y) in enumerate(pbar):
             optimizer.zero_grad()
@@ -139,7 +139,7 @@ def train_and_evaluate_model(
         val_iterations = 0
         with torch.no_grad():
             pbar = tqdm(
-                val_loader, desc=f"Epoch {epoch+1} [Validation]", leave=False
+                val_loader, desc=f"Epoch {epoch+1} [Validation]", leave=True
             )
             for i, (x, y) in enumerate(pbar):
                 x, y = x.to(device), y.to(device)

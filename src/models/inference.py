@@ -16,12 +16,6 @@ from src.models.model import create_model, load_model
 from src.models.train_model import load_data
 
 
-@click.option(
-    "--seed",
-    type=int,
-    default=42,
-    help="Random seed for reproducibility.",
-)
 def run_inference(
     model,
     test_df,
@@ -46,7 +40,6 @@ def run_inference(
         input_length=input_length,
         output_length=output_length,
         target_columns=target_columns,
-        seed=seed,
     )
     generator = torch.Generator().manual_seed(seed)
     test_loader = DataLoader(
@@ -119,6 +112,12 @@ def run_inference(
     default="inference_run",
     help="Name of the MLflow run.",
 )
+@click.option(
+    "--seed",
+    type=int,
+    default=42,
+    help="Random seed for reproducibility.",
+)
 def main(
     model_path,
     input_path,
@@ -129,6 +128,7 @@ def main(
     batch_size,
     device,
     mlflow_run_name,
+    seed,
 ):
     logger = logging.getLogger(__name__)
     logger.info("==== start inference process ====")
@@ -156,6 +156,7 @@ def main(
         target_columns=target_columns,
         batch_size=batch_size,
         device=device,
+        seed=seed,
     )
 
     output_df.to_parquet(output_path)

@@ -35,7 +35,6 @@ def load_and_prepare_data(
         input_length=input_length,
         output_length=output_length,
         target_columns=target_columns,
-        seed=seed,
     )
     val_dataset = TimeSeriesDataset(
         val_df,
@@ -171,6 +170,7 @@ def objective(
     train_ratio,
     val_ratio,
     force_cpu,
+    seed,
 ):
     logger = logging.getLogger(__name__)
     mlflow.start_run()
@@ -183,6 +183,7 @@ def objective(
         output_length,
         batch_size,
         target_columns,
+        seed=seed,
     )
     device = setup_device(force_cpu)
     logger.info(f"Using device: {device}")
@@ -193,6 +194,8 @@ def objective(
         output_length,
         target_columns,
         device,
+        force_cpu,
+        seed,
     )
     val_loss = train_and_evaluate_model(
         model,
@@ -368,6 +371,7 @@ def main(
             train_ratio,
             val_ratio,
             force_cpu,
+            seed,
         ),
         n_trials=n_trials,
         n_jobs=-1,  # Use all available cores

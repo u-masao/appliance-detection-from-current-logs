@@ -6,6 +6,7 @@ import torch.nn as nn
 
 class TimeSeriesModel(nn.Module):
     def __init__(self, input_dim, output_dim):
+        super(TimeSeriesModel, self).__init__()
         self.fc1 = nn.Linear(input_dim, 128)
         self.bn1 = nn.BatchNorm1d(128)
         self.dropout1 = nn.Dropout(0.3)

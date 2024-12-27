@@ -23,22 +23,20 @@ class PositionalEncoding(nn.Module):
 
 
 class TimeSeriesModel(nn.Module):
-    def __init__(
-        self, input_dim, embed_dim, num_heads, num_layers, output_dim
-    ):
+    def __init__(self, input_dim, output_dim):
         super(TimeSeriesModel, self).__init__()
-        self.embedding = nn.Linear(input_dim, embed_dim)
-        self.positional_encoding = PositionalEncoding(embed_dim)
-        self.transformer = nn.Transformer(
-            embed_dim, num_heads, num_layers, batch_first=True
-        )
-        self.fc_out = nn.Linear(embed_dim, output_dim)
+        self.fc1 = nn.Linear(input_dim, 128)
+        self.bn1 = nn.BatchNorm1d(128)
+        self.dropout1 = nn.Dropout(0.3)
+        self.fc2 = nn.Linear(128, 64)
+        self.bn2 = nn.BatchNorm1d(64)
+        self.dropout2 = nn.Dropout(0.3)
+        self.fc3 = nn.Linear(64, output_dim)
 
-    def forward(self, src):
-        src = self.embedding(src)  # Apply embedding
-        src = self.positional_encoding(src)
-        output = self.transformer(src)
-        return self.fc_out(output)  # Output layer
+    def forward(self, x):
+        x = self.dropout1(torch.relu(self.bn1(self.fc1(x))))
+        x = self.dropout2(torch.relu(self.bn2(self.fc2(x))))
+        return self.fc3(x)
 
 
 def create_model(input_dim, embed_dim, num_heads, num_layers, output_dim):

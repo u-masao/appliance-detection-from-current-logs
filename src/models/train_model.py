@@ -1,4 +1,5 @@
 import logging
+import random
 
 import click
 import mlflow
@@ -57,6 +58,14 @@ def setup_device(force_cpu):
 def create_and_configure_model(
     trial, input_length, num_columns, output_length, target_columns, device
 ):
+    # Set random seeds for reproducibility
+    seed = 42
+    random.seed(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    if not force_cpu and torch.cuda.is_available():
+        torch.cuda.manual_seed_all(seed)
+
     logger = logging.getLogger(__name__)
     lr = trial.suggest_float("lr", 5e-3, 5e-2, log=True)
     logger.info(f"params: {lr=}")

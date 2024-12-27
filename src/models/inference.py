@@ -1,4 +1,5 @@
 import logging
+import random
 import math
 
 import click
@@ -24,6 +25,14 @@ def run_inference(
     batch_size,
     device,
 ):
+    # Set random seeds for reproducibility
+    seed = 42
+    random.seed(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    if device == "cuda":
+        torch.cuda.manual_seed_all(seed)
+
     logger = logging.getLogger(__name__)
     # Create test dataset and loader
     test_dataset = TimeSeriesDataset(

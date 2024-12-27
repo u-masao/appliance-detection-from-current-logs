@@ -18,7 +18,6 @@ from src.models.model import create_model, save_model
 def load_and_prepare_data(
     train_path,
     val_path,
-    test_path,
     fraction,
     input_length,
     output_length,
@@ -27,7 +26,6 @@ def load_and_prepare_data(
 ):
     train_df = load_data(train_path, fraction=fraction)
     val_df = load_data(val_path, fraction=fraction)
-    test_df = load_data(test_path, fraction=fraction)
     train_dataset = TimeSeriesDataset(
         train_df,
         input_length=input_length,
@@ -122,7 +120,6 @@ def objective(
     trial,
     train_path,
     val_path,
-    test_path,
     model_output_path,
     fraction,
     num_epochs,
@@ -139,7 +136,6 @@ def objective(
     train_loader, val_loader, num_columns = load_and_prepare_data(
         train_path,
         val_path,
-        test_path,
         fraction,
         input_length,
         output_length,
@@ -177,7 +173,6 @@ def objective(
 @click.command()
 @click.argument("train_path", type=click.Path(exists=True))
 @click.argument("val_path", type=click.Path(exists=True))
-@click.argument("test_path", type=click.Path(exists=True))
 @click.argument("model_output_path", type=click.Path())
 @click.option(
     "--input_length",
@@ -266,7 +261,6 @@ def main(
     output_length,
     train_path,
     val_path,
-    test_path,
     model_output_path,
     mlflow_run_name,
     data_fraction,
@@ -289,7 +283,6 @@ def main(
     logger.info("==== start process ====")
     logger.info(f"Train path: {train_path}")
     logger.info(f"Validation path: {val_path}")
-    logger.info(f"Test path: {test_path}")
     logger.info(f"Model output path: {model_output_path}")
 
     mlflow.set_experiment("train_model")
@@ -298,7 +291,6 @@ def main(
         {
             "train_path": train_path,
             "val_path": val_path,
-            "test_path": test_path,
             "model_output_path": model_output_path,
         }
     )
@@ -315,7 +307,6 @@ def main(
             trial,
             train_path,
             val_path,
-            test_path,
             model_output_path,
             data_fraction,
             num_epochs,
@@ -334,17 +325,6 @@ def main(
     # Define the model with the best parameters
     best_trial = study.best_trial
     # Use CLI options if provided, otherwise use best trial parameters
-    embed_dim = (
-        embed_dim if embed_dim is not None else best_trial.params["embed_dim"]
-    )
-    num_heads = (
-        num_heads if num_heads is not None else best_trial.params["num_heads"]
-    )
-    num_layers = (
-        num_layers
-        if num_layers is not None
-        else best_trial.params["num_layers"]
-    )
 
     # Load data to determine the number of columns
     train_df = load_data(train_path, fraction=data_fraction)

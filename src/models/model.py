@@ -15,9 +15,9 @@ class TransformerModel(nn.Module):
         self.fc_out = nn.Linear(embed_dim, output_dim)
 
     def forward(self, src):
-        src = self.embedding(src).unsqueeze(1)  # Add batch dimension
-        output = self.transformer(src, src)
-        return self.fc_out(output.squeeze(1))  # Remove batch dimension
+        src = self.embedding(src)  # Apply embedding
+        output = self.transformer(src)  # Process sequence
+        return self.fc_out(output)  # Output layer
 
 
 def create_model(input_dim, embed_dim, num_heads, num_layers, output_dim):

@@ -62,7 +62,7 @@ def create_and_configure_model(
     lr = trial.suggest_float("lr", 1e-5, 1e-2, log=True)
 
     model = create_model(
-        input_dim=input_length * num_columns,
+        input_dim=input_length * (num_columns - 1),
         output_dim=output_length * len(target_columns),
     ).to(device)
     optimizer = torch.optim.Adam(model.parameters(), lr=lr)
@@ -351,29 +351,12 @@ def main(
     num_columns = train_df.shape[1]
     model_config = {
         "input_dim": input_length * (num_columns - 1),
-        "embed_dim": embed_dim,
-        "num_heads": num_heads,
-        "num_layers": num_layers,
         "output_dim": output_length * len(target_columns),
     }
-    model = create_model(
-        input_dim=model_config["input_dim"],
-        embed_dim=model_config["embed_dim"],
-        num_heads=model_config["num_heads"],
-        num_layers=model_config["num_layers"],
-        output_dim=model_config["output_dim"],
-    )
+    model = create_model(**model_config)
     # Output model architecture
     logger.debug("Model architecture:")
     logger.debug(model)
-
-    model_config = {
-        "input_dim": input_length * (num_columns - 1),
-        "embed_dim": embed_dim,
-        "num_heads": num_heads,
-        "num_layers": num_layers,
-        "output_dim": output_length * len(target_columns),
-    }
     save_model(model, model_output_path, model_config=model_config)
 
 

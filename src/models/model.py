@@ -17,8 +17,10 @@ class TimeSeriesModel(nn.Module):
 
     def forward(self, x):
         x = x.view(x.size(0), -1)
-        x = self.dropout1(torch.relu(self.bn1(self.fc1(x))))
-        x = self.dropout2(torch.relu(self.bn2(self.fc2(x))))
+        # x = self.dropout1(torch.relu(self.bn1(self.fc1(x))))
+        # x = self.dropout2(torch.relu(self.bn2(self.fc2(x))))
+        x = torch.relu(self.fc1(x))
+        x = torch.relu(self.fc2(x))
         return self.fc3(x)
 
 

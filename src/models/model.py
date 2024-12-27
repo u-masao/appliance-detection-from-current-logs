@@ -39,13 +39,10 @@ class TimeSeriesModel(nn.Module):
         return self.fc3(x)
 
 
-def create_model(input_dim, embed_dim, num_heads, num_layers, output_dim):
+def create_model(input_dim, output_dim):
     """Create and initialize a TimeSeriesModel with the specified parameters."""
     model = TimeSeriesModel(
         input_dim=input_dim,
-        embed_dim=embed_dim,
-        num_heads=num_heads,
-        num_layers=num_layers,
         output_dim=output_dim,
     )
     return model

@@ -59,23 +59,15 @@ def setup_device(force_cpu):
 def create_and_configure_model(
     trial, input_length, num_columns, output_length, target_columns, device
 ):
-    num_heads = trial.suggest_int("num_heads", 8, 8, step=2)
-    embed_dim = trial.suggest_int(
-        "embed_dim", num_heads * 16, num_heads * 16, step=num_heads
-    )
-    num_layers = trial.suggest_int("num_layers", 3, 3)
     lr = trial.suggest_float("lr", 1e-5, 1e-2, log=True)
 
     model = create_model(
         input_dim=input_length * (num_columns - 1),
-        embed_dim=embed_dim,
-        num_heads=num_heads,
-        num_layers=num_layers,
         output_dim=output_length * len(target_columns),
     ).to(device)
     optimizer = torch.optim.Adam(model.parameters(), lr=lr)
     criterion = nn.MSELoss()
-    return model, optimizer, criterion, lr, num_heads, embed_dim, num_layers
+    return model, optimizer, criterion, lr
 
 
 def train_and_evaluate_model(

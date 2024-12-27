@@ -1,15 +1,15 @@
 import logging
 import random
-import numpy as np
 
 import click
 import mlflow
+import numpy as np
 import optuna
 import optuna.storages
 import pandas as pd
-from optuna.samplers import TPESampler
 import torch
 import torch.nn as nn
+from optuna.samplers import TPESampler
 from sklearn.model_selection import train_test_split
 from torch.utils.data import DataLoader
 from tqdm import tqdm
@@ -45,10 +45,18 @@ def load_and_prepare_data(
     )
     generator = torch.Generator().manual_seed(seed)
     train_loader = DataLoader(
-        train_dataset, batch_size=batch_size, num_workers=4, shuffle=True, generator=generator
+        train_dataset,
+        batch_size=batch_size,
+        num_workers=4,
+        shuffle=True,
+        generator=generator,
     )
     val_loader = DataLoader(
-        val_dataset, batch_size=batch_size, shuffle=False, num_workers=4, generator=generator
+        val_dataset,
+        batch_size=batch_size,
+        shuffle=False,
+        num_workers=4,
+        generator=generator,
     )
     return train_loader, val_loader, train_df.shape[1]
 
@@ -67,7 +75,14 @@ def setup_device(force_cpu):
     help="Random seed for reproducibility.",
 )
 def create_and_configure_model(
-    trial, input_length, num_columns, output_length, target_columns, device, force_cpu, seed
+    trial,
+    input_length,
+    num_columns,
+    output_length,
+    target_columns,
+    device,
+    force_cpu,
+    seed,
 ):
     # Set random seeds for reproducibility
     random.seed(seed)
@@ -328,7 +343,9 @@ def main(
         url="sqlite:///./data/interim/optuna_study.db"
     )
     sampler = TPESampler(seed=seed)
-    study = optuna.create_study(storage=storage, direction="minimize", sampler=sampler)
+    study = optuna.create_study(
+        storage=storage, direction="minimize", sampler=sampler
+    )
 
     study.optimize(
         lambda trial: objective(

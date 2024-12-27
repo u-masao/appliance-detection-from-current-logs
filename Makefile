@@ -37,6 +37,10 @@ test:
 visualize:
 	PYTHONPATH=. uv run gradio src/visualize.py
 
+## train force
+train:
+	uv run dvc repro -s -f train_model inference
+
 #################################################################################
 # PROJECT RULES                                                                 #
 #################################################################################

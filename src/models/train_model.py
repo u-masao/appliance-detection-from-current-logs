@@ -1,5 +1,6 @@
 import logging
 import random
+import numpy as np
 
 import click
 import mlflow
@@ -56,7 +57,7 @@ def setup_device(force_cpu):
 
 
 def create_and_configure_model(
-    trial, input_length, num_columns, output_length, target_columns, device
+    trial, input_length, num_columns, output_length, target_columns, device, force_cpu
 ):
     # Set random seeds for reproducibility
     seed = 42

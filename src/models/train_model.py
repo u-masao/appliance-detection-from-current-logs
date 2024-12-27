@@ -58,6 +58,8 @@ def create_and_configure_model(
     trial, input_length, num_columns, output_length, target_columns, device
 ):
     lr = trial.suggest_float("lr", 1e-4, 1e-2, log=True)
+    logger.info(f"params: {lr=}")
+    mlflow.log_params({"lr": lr})
 
     model = create_model(
         input_dim=input_length * (num_columns - 1),
@@ -65,7 +67,7 @@ def create_and_configure_model(
     ).to(device)
     optimizer = torch.optim.Adam(model.parameters(), lr=lr)
     criterion = nn.MSELoss()
-    return model, optimizer, criterion, lr
+    return model, optimizer, criterion
 
 
 def train_and_evaluate_model(
@@ -132,6 +134,7 @@ def objective(
     force_cpu,
 ):
     logger = logging.getLogger(__name__)
+    mlflow.start_run()
     target_columns = ["watt_black", "watt_red", "watt_kitchen", "watt_living"]
     train_loader, val_loader, num_columns = load_and_prepare_data(
         train_path,
@@ -144,7 +147,7 @@ def objective(
     )
     device = setup_device(force_cpu)
     logger.info(f"Using device: {device}")
-    model, optimizer, criterion, lr = create_and_configure_model(
+    model, optimizer, criterion = create_and_configure_model(
         trial,
         input_length,
         num_columns,
@@ -152,7 +155,6 @@ def objective(
         target_columns,
         device,
     )
-    logger.info(f"params: {lr=}")
     val_loss = train_and_evaluate_model(
         model,
         train_loader,

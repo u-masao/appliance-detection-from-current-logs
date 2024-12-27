@@ -41,11 +41,12 @@ def load_and_prepare_data(
         output_length=output_length,
         target_columns=target_columns,
     )
+    generator = torch.Generator().manual_seed(seed)
     train_loader = DataLoader(
-        train_dataset, batch_size=batch_size, num_workers=4
+        train_dataset, batch_size=batch_size, num_workers=4, shuffle=True, generator=generator
     )
     val_loader = DataLoader(
-        val_dataset, batch_size=batch_size, shuffle=False, num_workers=4
+        val_dataset, batch_size=batch_size, shuffle=False, num_workers=4, generator=generator
     )
     return train_loader, val_loader, train_df.shape[1]
 

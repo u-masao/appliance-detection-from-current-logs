@@ -47,8 +47,9 @@ def run_inference(
         output_length=output_length,
         target_columns=target_columns,
     )
+    generator = torch.Generator().manual_seed(seed)
     test_loader = DataLoader(
-        test_dataset, batch_size=batch_size, shuffle=False
+        test_dataset, batch_size=batch_size, shuffle=False, generator=generator
     )
 
     model.eval()

@@ -40,8 +40,8 @@ def load_and_prepare_data(
         output_length=output_length,
         target_columns=target_columns,
     )
-    train_loader = DataLoader(train_dataset, batch_size=batch_size)
-    val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False)
+    train_loader = DataLoader(train_dataset, batch_size=batch_size, num_workers=4)
+    val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False, num_workers=4)
     return train_loader, val_loader, train_df.shape[1]
 
 
@@ -332,6 +332,7 @@ def main(
             force_cpu,
         ),
         n_trials=n_trials,
+        n_jobs=-1,  # Use all available cores
     )
     logger.info(f"Best trial: {study.best_trial}")
     # Define the model with the best parameters

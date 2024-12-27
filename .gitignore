@@ -174,3 +174,4 @@ cython_debug/
 /mlruns/
 /reports/figures/
 /nohup.out
+/data/raw/data.zip

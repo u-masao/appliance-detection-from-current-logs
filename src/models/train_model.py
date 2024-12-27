@@ -114,6 +114,9 @@ def train_and_evaluate_model(
     num_epochs,
     logger,
 ):
+    min_train_loss = float('inf')
+    min_val_loss = float('inf')
+
     for epoch in range(num_epochs):
         # train
         model.train()
@@ -130,8 +133,10 @@ def train_and_evaluate_model(
             avg_train_loss = train_loss / (i + 1)
             pbar.set_postfix({"avg. loss": avg_train_loss})
 
+        min_train_loss = min(min_train_loss, avg_train_loss)
         mlflow.log_metric("avg_loss.train", avg_train_loss, step=epoch + 1)
         mlflow.log_metric("loss.train", train_loss, step=epoch + 1)
+        mlflow.log_metric("min_loss.train", min_train_loss, step=epoch + 1)
 
         # validation
         model.eval()
@@ -151,8 +156,11 @@ def train_and_evaluate_model(
                 avg_val_loss = val_loss / (i + 1)
                 pbar.set_postfix({"avg. loss": avg_val_loss})
 
+        min_val_loss = min(min_val_loss, avg_val_loss)
         mlflow.log_metric("avg_loss.val", avg_val_loss, step=epoch + 1)
         mlflow.log_metric("loss.val", val_loss, step=epoch + 1)
+        mlflow.log_metric("min_loss.val", min_val_loss, step=epoch + 1)
+
     return val_loss
 
 

@@ -59,7 +59,7 @@ def create_and_configure_model(
         "embed_dim", num_heads * 16, num_heads * 16, step=num_heads
     )
     num_layers = trial.suggest_int("num_layers", 3, 3)
-    lr = trial.suggest_float("lr", 1e-4, 1e-2, log=True)
+    lr = trial.suggest_float("lr", 1e-5, 1e-2, log=True)
 
     model = create_model(
         input_dim=input_length * (num_columns - 1),
@@ -84,7 +84,6 @@ def train_and_evaluate_model(
     logger,
 ):
     for epoch in range(num_epochs):
-        logger.info(f"Epoch {epoch+1} started")
         model.train()
         pbar = tqdm(train_loader, desc=f"Epoch {epoch+1} [Train]", leave=False)
         total_loss = 0

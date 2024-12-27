@@ -3,9 +3,9 @@ import logging
 import click
 import mlflow
 import optuna
+import optuna.storages
 import pandas as pd
 import torch
-import optuna.storages
 import torch.nn as nn
 from sklearn.model_selection import train_test_split
 from torch.utils.data import DataLoader
@@ -311,9 +311,7 @@ def main(
 
     # Define target columns for prediction
     target_columns = ["watt_black", "watt_red", "watt_kitchen", "watt_living"]
-    storage = optuna.storages.RDBStorage(
-        url="sqlite:///optuna_study.db"
-    )
+    storage = optuna.storages.RDBStorage(url="sqlite:///optuna_study.db")
     study = optuna.create_study(storage=storage, direction="minimize")
 
     study.optimize(

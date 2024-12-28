@@ -32,11 +32,11 @@ class PositionalEncoding(nn.Module):
 
 
 class TimeSeriesModel(nn.Module):
-    def __init__(self, input_length, input_dim, output_length, output_dim, hidden_dim: int = 1024):
+    def __init__(self, input_sequence_length, input_dim, output_sequence_length, output_dim, hidden_dim: int = 1024):
         super(TimeSeriesModel, self).__init__()
-        self.input_length = input_length
-        self.output_length = output_length
-        self.positional_encoding = PositionalEncoding(input_length)
+        self.input_length = input_sequence_length
+        self.output_length = output_sequence_length
+        self.positional_encoding = PositionalEncoding(input_sequence_length)
         self.transformer = nn.Transformer(
             d_model=input_dim,
             nhead=8,

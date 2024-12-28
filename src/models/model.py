@@ -64,15 +64,15 @@ class TimeSeriesModel(nn.Module):
         logger.info(f"{self.positional_encoding=}")
 
         self.transformer = nn.Transformer(
-            d_model=hidden_dim,
+            d_model=embed_dim,
             nhead=nhead,
             num_encoder_layers=num_encoder_layers,
             num_decoder_layers=num_decoder_layers,
-            dim_feedforward=hidden_dim * dim_feedforward_ratio,
+            dim_feedforward=embed_dim * dim_feedforward_ratio,
             dropout=dropout,
             activation="relu",
         )
-        self.fc_out = nn.Linear(hidden_dim, output_dim)
+        self.fc_out = nn.Linear(embed_dim, output_dim)
 
     def forward(self, src, tgt=None):  # B, Seq, F
         logger = logging.getLogger(__name__)

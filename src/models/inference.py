@@ -53,7 +53,7 @@ def run_inference(
     with torch.no_grad():
         for x, y in tqdm(test_loader, desc="Inference"):
             x, y = x.to(device), y.to(device)
-            output = model(x)
+            output, embed = model(x, y)
             trains.append(x.cpu().numpy().reshape(len(x), -1))
             predictions.append(output.cpu().numpy().reshape(len(x), -1))
             actuals.append(y.cpu().numpy().reshape(len(x), -1))

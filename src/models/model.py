@@ -37,13 +37,14 @@ class TimeSeriesModel(nn.Module):
 
     def forward(self, x):
         # Reshape x to (sequence_length, batch_size, input_dim)
-        batch_size, sequence_length, input_dim = x.size()
+        batch_size, sequence_length, _ = x.size()
         x = x.permute(1, 0, 2)  # (sequence_length, batch_size, input_dim)
         x = self.positional_encoding(x)
         x = self.transformer(x, x)
         x = self.fc_out(x)
         # Reshape back to (batch_size, sequence_length, output_dim)
         x = x.permute(1, 0, 2)
+        x = x.contiguous().view(batch_size, sequence_length, -1)
         return F.relu(x)
 
 

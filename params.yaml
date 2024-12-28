@@ -7,4 +7,4 @@ train_model:
   batch_size: 32
   train_ratio: 0.7
   val_ratio: 0.15
-  hidden_dim: 512
+  hidden_dim: 128

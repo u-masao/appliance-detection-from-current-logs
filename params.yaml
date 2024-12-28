@@ -1,11 +1,11 @@
 train_model:
-  data_fraction: 0.1
-  n_trials: 20
-  num_epochs: 30
+  data_fraction: 0.01
+  n_trials: 4
+  num_epochs: 10
   input_length: 360
   output_length: 5
   batch_size: 32
   train_ratio: 0.7
   val_ratio: 0.15
   embed_dim: 64
-  num_workers: 4
+  num_workers: 2

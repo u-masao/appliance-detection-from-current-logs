@@ -104,6 +104,7 @@ def create_and_configure_model(
         output_dim=len(target_columns),
         hidden_dim=hidden_dim,
     ).to(device)
+
     optimizer = torch.optim.Adam(model.parameters(), lr=lr)
     criterion = nn.MSELoss()
     return model, optimizer, criterion
@@ -415,6 +416,7 @@ def main(
         "hidden_dim": hidden_dim,
     }
     model = create_model(**model_config)
+
     # Output model architecture
     logger.debug("Model architecture:")
     logger.debug(model)

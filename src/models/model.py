@@ -51,7 +51,7 @@ class TimeSeriesModel(nn.Module):
         self.input_length = input_sequence_length
         self.output_length = output_sequence_length
         self.positional_encoding = PositionalEncoding(input_sequence_length)
-        logger.info(f"{self.positional_encoding.size()=}")
+        logger.info(f"{self.positional_encoding=}")
 
         self.transformer = nn.Transformer(
             d_model=hidden_dim,

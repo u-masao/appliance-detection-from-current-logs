@@ -32,7 +32,7 @@ class PositionalEncoding(nn.Module):
     def forward(self, x):
         logger = logging.getLogger(__name__)
         logger.info(f"PositionalEncoding.{x.size()=}")
-        pe = self.pe[: x.size(0), :]
+        pe = self.pe[: x.size(0), : x.size(2)]
         logger.info(f"PositionalEncoding.{pe.size()=}")
         return x + pe
 

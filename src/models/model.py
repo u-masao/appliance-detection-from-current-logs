@@ -53,7 +53,8 @@ class TimeSeriesModel(nn.Module):
         logger = logging.getLogger(__name__)
         self.input_length = input_sequence_length
         self.output_length = output_sequence_length
-        self.positional_encoding = PositionalEncoding(input_sequence_length)
+        self.embedding = nn.Linear(input_dim, hidden_dim)
+        self.positional_encoding = PositionalEncoding(hidden_dim)
         logger.info(f"{self.positional_encoding=}")
 
         self.transformer = nn.Transformer(
@@ -72,18 +73,17 @@ class TimeSeriesModel(nn.Module):
         logger.info(f"TimeSeriesModel.forward(),input {x.size()=}")
         # Reshape x to (input_length, batch_size, input_dim)
         batch_size, sequence_length, _ = x.size()
-        x = x.permute(1, 0, 2)  # (input_sequence_length, batch_size, input_dim)
+        x = self.embedding(x)
+        x = x.permute(1, 0, 2)  # (input_sequence_length, batch_size, hidden_dim)
         logger.info(f"TimeSeriesModel.forward(),permute {x.size()=}")
         x = self.positional_encoding(x)
         logger.info(f"TimeSeriesModel.forward(),pe {x.size()=}")
-        x = self.transformer(x, x)
+        x = self.transformer(x, x[:self.output_length])
         logger.info(f"TimeSeriesModel.forward(),transformer {x.size()=}")
         x = self.fc_out(x)
         logger.info(f"TimeSeriesModel.forward(),fc_out {x.size()=}")
-        x = x.permute(1, 0, 2)  # (batch_size, output_sequence_length, output_dim)
+        x = x.permute(1, 0, 2)  # (batch_size, output_sequence_length, hidden_dim)
         logger.info(f"TimeSeriesModel.forward(),permute {x.size()=}")
-        x = x.contiguous().view(batch_size, self.output_length, -1)
-        logger.info(f"TimeSeriesModel.forward(),contiguous {x.size()=}")
         return F.relu(x)
 
 

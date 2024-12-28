@@ -68,7 +68,7 @@ stages:
       --batch_size ${train_model.batch_size}
       --input_length ${train_model.input_length}
       --output_length ${train_model.output_length}
-      --hidden_dim ${train_model.hidden_dim}
+      --embed_dim ${train_model.embed_dim}
     deps:
       - src/models/train_model.py
       - src/models/model.py

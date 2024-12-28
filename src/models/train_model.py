@@ -78,7 +78,7 @@ def create_and_configure_model(
     input_length,
     num_columns,
     output_length,
-    hidden_dim,
+    embed_dim,
     target_columns,
     device,
     force_cpu,
@@ -102,7 +102,7 @@ def create_and_configure_model(
         input_dim=num_columns - 1,
         output_sequence_length=output_length,
         output_dim=len(target_columns),
-        hidden_dim=hidden_dim,
+        embed_dim=embed_dim,
     ).to(device)
 
     optimizer = torch.optim.Adam(model.parameters(), lr=lr)
@@ -181,7 +181,7 @@ def objective(
     input_length,
     batch_size,
     output_length,
-    hidden_dim,
+    embed_dim,
     train_ratio,
     val_ratio,
     force_cpu,
@@ -207,7 +207,7 @@ def objective(
         input_length,
         num_columns,
         output_length,
-        hidden_dim,
+        embed_dim,
         target_columns,
         device,
         force_cpu,
@@ -265,7 +265,7 @@ def objective(
     help="Number of Optuna trials.",
 )
 @click.option(
-    "--hidden_dim",
+    "--embed_dim",
     type=int,
     default=None,
     help="Hidden dimension for the model.",
@@ -331,7 +331,7 @@ def main(
     num_heads,
     num_layers,
     output_length,
-    hidden_dim,
+    embed_dim,
     train_path,
     val_path,
     model_output_path,
@@ -391,7 +391,7 @@ def main(
             input_length,
             batch_size,
             output_length,
-            hidden_dim,
+            embed_dim,
             train_ratio,
             val_ratio,
             force_cpu,
@@ -413,7 +413,7 @@ def main(
         "input_dim": num_columns - 1,
         "output_sequence_length": output_length,
         "output_dim": len(target_columns),
-        "hidden_dim": hidden_dim,
+        "embed_dim": embed_dim,
     }
     model = create_model(**model_config)
 

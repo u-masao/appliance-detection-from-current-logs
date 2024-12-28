@@ -35,7 +35,9 @@ class PositionalEncoding(nn.Module):
         x = x.permute(1, 0, 2)  #  B, Seq, F
         pe = self.pe[:, : x.size(0), : x.size(2)]  # B, Seq, F
         logger.info(f"PositionalEncoding.{pe.size()=}")
-        return x + pe
+        x = x + pe
+        logger.info(f"PositionalEncoding.{x.size()=}")
+        return x
 
 
 class TimeSeriesModel(nn.Module):

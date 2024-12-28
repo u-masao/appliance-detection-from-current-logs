@@ -18,6 +18,7 @@ class PositionalEncoding(nn.Module):
         print('self.pe.size():', self.pe.size())
 
     def forward(self, x):
+        print('x.size():', x.size())
         return x + self.pe[:x.size(0), :]
 
 class TimeSeriesModel(nn.Module):

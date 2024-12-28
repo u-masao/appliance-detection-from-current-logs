@@ -16,7 +16,7 @@ def test_timeseries_model_forward():
         input_dim=input_dim,
         output_sequence_length=output_sequence_length,
         output_dim=output_dim,
-        embed_dim=embed_dim
+        embed_dim=embed_dim,
     )
     print(model)
     model.eval()  # Set model to evaluation mode
@@ -28,5 +28,12 @@ def test_timeseries_model_forward():
     tgt, embed = model(dummy_input)
 
     # Check if the output shapes are as expected
-    assert tgt.shape == (batch_size, output_sequence_length, output_dim), f"Expected tgt shape {(batch_size, output_sequence_length, output_dim)}, but got {tgt.shape}"
-    assert embed.shape == (batch_size, embed_dim), f"Expected embed shape {(batch_size, embed_dim)}, but got {embed.shape}"
+    assert tgt.shape == (
+        batch_size,
+        output_sequence_length,
+        output_dim,
+    ), f"Expected tgt shape {(batch_size, output_sequence_length, output_dim)}, but got {tgt.shape}"
+    assert embed.shape == (
+        batch_size,
+        embed_dim,
+    ), f"Expected embed shape {(batch_size, embed_dim)}, but got {embed.shape}"

@@ -41,6 +41,7 @@ class TimeSeriesModel(nn.Module):
         self.fc_out = nn.Linear(input_dim, output_dim)
 
     def forward(self, x):
+        print(f'TimeSeriesModel.forward(), x.size():', x.size())
         # Reshape x to (sequence_length, batch_size, input_dim)
         batch_size, sequence_length, _ = x.size()
         x = x.permute(1, 0, 2)  # (sequence_length, batch_size, input_dim)

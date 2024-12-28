@@ -1,6 +1,6 @@
 import torch
 
-from src.models.model import TimeSeriesModel
+from src.models.model import TimeSeriesModel, PositionalEncoding
 
 
 def test_positional_encoding():

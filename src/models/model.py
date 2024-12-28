@@ -8,20 +8,12 @@ class TimeSeriesModel(nn.Module):
     def __init__(self, input_dim, output_dim, hidden_dim: int = 1024):
         super(TimeSeriesModel, self).__init__()
         self.fc1 = nn.Linear(input_dim, hidden_dim)
-        # self.bn1 = nn.BatchNorm1d(128)
-        # self.dropout1 = nn.Dropout(0.3)
-        self.fc2 = nn.Linear(hidden_dim, hidden_dim // 2)
-        # self.bn2 = nn.BatchNorm1d(64)
-        # self.dropout2 = nn.Dropout(0.3)
-        self.fc3 = nn.Linear(hidden_dim // 2, output_dim)
+        self.fc2 = nn.Linear(hidden_dim, output_dim)
 
     def forward(self, x):
         x = x.view(x.size(0), -1)
-        # x = self.dropout1(torch.relu(self.bn1(self.fc1(x))))
-        # x = self.dropout2(torch.relu(self.bn2(self.fc2(x))))
         x = torch.relu(self.fc1(x))
-        x = torch.relu(self.fc2(x))
-        return self.fc3(x)
+        return torch.relu(self.fc2(x))
 
 
 def create_model(input_dim, output_dim, hidden_dim):

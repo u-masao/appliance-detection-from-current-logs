@@ -91,8 +91,8 @@ def create_and_configure_model(
         torch.cuda.manual_seed_all(seed)
 
     logger = logging.getLogger(__name__)
-    # lr = trial.suggest_float("lr", 1e-4, 1e-1, log=True)
-    lr = 0.00010234736295408926
+    lr = trial.suggest_float("lr", 1e-5, 1.03e-4, log=True)
+    # lr = 0.00010234736295408926
     logger.info(f"params: {lr=}")
     mlflow.log_params({"lr": lr})
 

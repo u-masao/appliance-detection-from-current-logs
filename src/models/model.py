@@ -15,9 +15,11 @@ class PositionalEncoding(nn.Module):
         pe[:, 1::2] = torch.cos(position * div_term)
         pe = pe.unsqueeze(0).transpose(0, 1)
         self.register_buffer('pe', pe)
+        print(type(self.pe))
 
     def forward(self, x):
         return x + self.pe[:x.size(0), :]
+
 class TimeSeriesModel(nn.Module):
     def __init__(self, input_dim, output_dim, hidden_dim: int = 1024):
         super(TimeSeriesModel, self).__init__()

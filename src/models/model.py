@@ -21,6 +21,7 @@ class PositionalEncoding(nn.Module):
         print('x.size():', x.size())
         print('x.size():', x.size())
         pe = self.pe[:x.size(0), :]
+        print('pe.size():', pe.size())
         print('pe:', pe)
         return x + pe
 

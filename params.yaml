@@ -1,6 +1,6 @@
 train_model:
   data_fraction: 0.1
-  n_trials: 10
+  n_trials: 20
   num_epochs: 30
   input_length: 360
   output_length: 5

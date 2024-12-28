@@ -67,12 +67,12 @@ class TimeSeriesModel(nn.Module):
         )
         self.fc_out = nn.Linear(input_dim, output_dim)
 
-    def forward(self, x):
+    def forward(self, x):  # B,Seq,F
         logger = logging.getLogger(__name__)
         logger.info(f"TimeSeriesModel.forward(),input {x.size()=}")
         # Reshape x to (input_length, batch_size, input_dim)
         batch_size, sequence_length, _ = x.size()
-        x = x.permute(1, 0, 2)  # (input_length, batch_size, input_dim)
+        x = x.permute(1, 0, 2)  # S
         logger.info(f"TimeSeriesModel.forward(),permute {x.size()=}")
         x = self.positional_encoding(x)
         logger.info(f"TimeSeriesModel.forward(),pe {x.size()=}")

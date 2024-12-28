@@ -102,7 +102,7 @@ class TimeSeriesModel(nn.Module):
         assert src.size()[2] == self.input_dim
 
         # tgt check
-        if tgt:
+        if tgt is not None:
             logger.info(f"TimeSeriesModel.forward(), tgt {src.size()=}")
             assert tgt.size()[0] == batch_size
             assert tgt.size()[1] == self.output_sequence_length

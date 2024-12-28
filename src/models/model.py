@@ -15,7 +15,7 @@ class PositionalEncoding(nn.Module):
 
         # logging
         logger.info("PositionalEncoding.__init__(): %s", d_model)
-        pe = torch.zeros(max_len, d_model)
+        pe = torch.zeros(max_len, self.input_length)
 
         logger.info(f"{pe.size()=}")
         position = torch.arange(0, max_len, dtype=torch.float).unsqueeze(1)
@@ -53,7 +53,7 @@ class TimeSeriesModel(nn.Module):
         logger = logging.getLogger(__name__)
         self.input_length = input_sequence_length
         self.output_length = output_sequence_length
-        self.positional_encoding = PositionalEncoding(input_sequence_length)
+        self.positional_encoding = PositionalEncoding(hidden_dim)
         logger.info(f"{self.positional_encoding=}")
 
         self.transformer = nn.Transformer(

@@ -5,15 +5,15 @@ import torch.nn as nn
 
 
 class TimeSeriesModel(nn.Module):
-    def __init__(self, input_dim, output_dim):
+    def __init__(self, input_dim, output_dim, hidden_dim: int = 1024):
         super(TimeSeriesModel, self).__init__()
-        self.fc1 = nn.Linear(input_dim, 128)
+        self.fc1 = nn.Linear(input_dim, hidden_dim)
         # self.bn1 = nn.BatchNorm1d(128)
         # self.dropout1 = nn.Dropout(0.3)
-        self.fc2 = nn.Linear(128, 64)
+        self.fc2 = nn.Linear(hidden_dim, hidden_dim // 2)
         # self.bn2 = nn.BatchNorm1d(64)
         # self.dropout2 = nn.Dropout(0.3)
-        self.fc3 = nn.Linear(64, output_dim)
+        self.fc3 = nn.Linear(hidden_dim // 2, output_dim)
 
     def forward(self, x):
         x = x.view(x.size(0), -1)

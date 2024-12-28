@@ -24,15 +24,20 @@ class PositionalEncoding(nn.Module):
 
     def forward(self, x):
         print("x.size():", x.size())
-        print("x.size():", x.size())
         pe = self.pe[: x.size(0), :]
         print("pe.size():", pe.size())
-        print("pe:", pe)
         return x + pe
 
 
 class TimeSeriesModel(nn.Module):
-    def __init__(self, input_sequence_length, input_dim, output_sequence_length, output_dim, hidden_dim: int = 1024):
+    def __init__(
+        self,
+        input_sequence_length,
+        input_dim,
+        output_sequence_length,
+        output_dim,
+        hidden_dim: int = 1024,
+    ):
         super(TimeSeriesModel, self).__init__()
         self.input_length = input_sequence_length
         self.output_length = output_sequence_length
@@ -53,6 +58,7 @@ class TimeSeriesModel(nn.Module):
         # Reshape x to (input_length, batch_size, input_dim)
         batch_size, sequence_length, _ = x.size()
         x = x.permute(1, 0, 2)  # (input_length, batch_size, input_dim)
+        print(f"TimeSeriesModel.forward(),permute x.size():", x.size())
         x = self.positional_encoding(x)
         print(f"TimeSeriesModel.forward(),pe x.size():", x.size())
         x = self.transformer(x, x)
@@ -61,7 +67,9 @@ class TimeSeriesModel(nn.Module):
         print(f"TimeSeriesModel.forward(),fc_out x.size():", x.size())
         # Reshape back to (batch_size, output_length, output_dim)
         x = x.permute(1, 0, 2)
+        print(f"TimeSeriesModel.forward(),permute x.size():", x.size())
         x = x.contiguous().view(batch_size, self.output_length, -1)
+        print(f"TimeSeriesModel.forward(),contiguous x.size():", x.size())
         return F.relu(x)
 
 

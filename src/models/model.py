@@ -14,10 +14,10 @@ class PositionalEncoding(nn.Module):
         logger = logging.getLogger(__name__)
 
         # logging
-        logger.info("PositionalEncoding.__init__(): %s", d_model)
+        logger.debug("PositionalEncoding.__init__(): %s", d_model)
         pe = torch.zeros(max_len, d_model)
 
-        logger.info(f"{pe.size()=}")
+        logger.debug(f"{pe.size()=}")
         position = torch.arange(0, max_len, dtype=torch.float).unsqueeze(1)
         div_term = torch.exp(
             torch.arange(0, d_model, 2).float()
@@ -27,18 +27,18 @@ class PositionalEncoding(nn.Module):
         pe[:, 1::2] = torch.cos(position * div_term)
         pe = pe.unsqueeze(0)
         self.register_buffer("pe", pe)
-        logger.info(f"{self.pe.size()=}")  # B, Seq, E
+        logger.debug(f"{self.pe.size()=}")  # B, Seq, E
         assert self.pe.size()[0] == 1
         assert self.pe.size()[1] == max_len
         assert self.pe.size()[2] == d_model
 
     def forward(self, x):  # B, Seq, E
         logger = logging.getLogger(__name__)
-        logger.info(f"PositionalEncoding.forward(): {x.size()=}")
+        logger.debug(f"PositionalEncoding.forward(): {x.size()=}")
         pe = self.pe[:, : x.size(1), :]  # 1, Seq, E
-        logger.info(f"PositionalEncoding.{pe.size()=}")
+        logger.debug(f"PositionalEncoding.{pe.size()=}")
         x = x + pe
-        logger.info(f"PositionalEncoding.{x.size()=}")
+        logger.debug(f"PositionalEncoding.{x.size()=}")
         return x
 
 
@@ -96,7 +96,7 @@ class TimeSeriesModel(nn.Module):
 
     def forward(self, src, tgt):  # (B, inSeq, inF), (B, outSeq, outF)
         logger = logging.getLogger(__name__)
-        logger.info(f"TimeSeriesModel.forward(), src {src.size()=}")
+        logger.debug(f"TimeSeriesModel.forward(), src {src.size()=}")
         batch_size = src.size()[0]
 
         # src check
@@ -105,7 +105,7 @@ class TimeSeriesModel(nn.Module):
 
         # tgt check
         if tgt is not None:
-            logger.info(f"TimeSeriesModel.forward(), tgt {src.size()=}")
+            logger.debug(f"TimeSeriesModel.forward(), tgt {src.size()=}")
             assert tgt.size()[0] == batch_size
             assert tgt.size()[1] == self.output_sequence_length
             assert tgt.size()[2] == self.output_dim
@@ -118,14 +118,14 @@ class TimeSeriesModel(nn.Module):
 
         # positional_encoding
         src = self.positional_encoding(src)  # (B, inSec, E)
-        logger.info(f"TimeSeriesModel.forward(), PE {src.size()=}")
+        logger.debug(f"TimeSeriesModel.forward(), PE {src.size()=}")
         assert src.size()[0] == batch_size
         assert src.size()[1] == self.input_sequence_length
         assert src.size()[2] == self.embed_dim
 
         # transformer
         memory = self.encoder(src)  # B, inSec, E
-        logger.info(f"TimeSeriesModel.forward(), encoder {memory.size()=}")
+        logger.debug(f"TimeSeriesModel.forward(), encoder {memory.size()=}")
         assert src.size()[0] == batch_size
         assert src.size()[1] == self.input_sequence_length
         assert src.size()[2] == self.embed_dim
@@ -136,10 +136,10 @@ class TimeSeriesModel(nn.Module):
         tgt = self.decoder(tgt, memory)  # (B, outSec, E), (B, outSec, E)
         tgt = self.tgt_output_projection(tgt)  # (B, outSec, outF)
         tgt = F.relu(tgt)  # value >= 0
-        logger.info(f"TimeSeriesModel.forward(), decoder {tgt.size()=}")
+        logger.debug(f"TimeSeriesModel.forward(), decoder {tgt.size()=}")
 
         embed = memory.mean(dim=1)
-        logger.info(f"TimeSeriesModel.forward(), embed {embed.size()=}")
+        logger.debug(f"TimeSeriesModel.forward(), embed {embed.size()=}")
         assert embed.size()[0] == batch_size
         assert embed.size()[1] == self.embed_dim
 

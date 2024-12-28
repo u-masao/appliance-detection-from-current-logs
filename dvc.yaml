@@ -68,6 +68,7 @@ stages:
       --batch_size ${train_model.batch_size}
       --input_length ${train_model.input_length}
       --output_length ${train_model.output_length}
+      --hidden_dim ${train_model.hidden_dim}
     deps:
       - src/models/train_model.py
       - src/models/model.py
@@ -93,6 +94,7 @@ stages:
       --data_fraction ${train_model.data_fraction}
       --input_length ${train_model.input_length}
       --output_length ${train_model.output_length}
+      --hidden_dim ${train_model.hidden_dim}
     deps:
       - src/models/inference.py
       - src/models/model.py

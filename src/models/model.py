@@ -1,6 +1,6 @@
+import logging
 import math
 
-import logging
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -9,9 +9,15 @@ import torch.nn.functional as F
 class PositionalEncoding(nn.Module):
     def __init__(self, d_model, max_len=5000):
         super(PositionalEncoding, self).__init__()
-        print("PositionalEncoding.__init__(): d_model", d_model)
+
+        # init logger
+        logger = logging.getLogger(__name__)
+
+        # logging
+        logger.info("PositionalEncoding.__init__(): %s", d_model)
         pe = torch.zeros(max_len, d_model)
-        print("PositionalEncoding.__init__(): pe.size()", pe.size())
+
+        logger.info(f"{pe.size()=}")
         position = torch.arange(0, max_len, dtype=torch.float).unsqueeze(1)
         div_term = torch.exp(
             torch.arange(0, d_model, 2).float()
@@ -21,12 +27,13 @@ class PositionalEncoding(nn.Module):
         pe[:, 1::2] = torch.cos(position * div_term)
         pe = pe.unsqueeze(0)
         self.register_buffer("pe", pe)
-        print("self.pe.size():", self.pe.size())
+        logger.info(f"{self.pe.size()=}")
 
     def forward(self, x):
-        print("x.size():", x.size())
+        logger = logging.getLogger(__name__)
+        logger.info(f"{x.size()=}")
         pe = self.pe[: x.size(0), :]
-        print("pe.size():", pe.size())
+        logger.info(f"{pe.size()=}")
         return x + pe
 
 
@@ -38,7 +45,6 @@ class TimeSeriesModel(nn.Module):
         output_sequence_length,
         output_dim,
         hidden_dim: int = 1024,
-        d_model: int = 128,
     ):
         super(TimeSeriesModel, self).__init__()
         logger = logging.getLogger(__name__)
@@ -48,33 +54,33 @@ class TimeSeriesModel(nn.Module):
         logger.info(f"{self.positional_encoding.size()=}")
 
         self.transformer = nn.Transformer(
-            d_model=d_model,
+            d_model=hidden_dim,
             nhead=8,
             num_encoder_layers=3,
             num_decoder_layers=3,
-            dim_feedforward=hidden_dim,
+            dim_feedforward=hidden_dim * 8,
             dropout=0.1,
             activation="relu",
         )
         self.fc_out = nn.Linear(input_dim, output_dim)
 
     def forward(self, x):
-        print(f"TimeSeriesModel.forward(),input x.size():", x.size())
+        logger = logging.getLogger(__name__)
+        logger.info(f"TimeSeriesModel.forward(),input {x.size()=}")
         # Reshape x to (input_length, batch_size, input_dim)
         batch_size, sequence_length, _ = x.size()
         x = x.permute(1, 0, 2)  # (input_length, batch_size, input_dim)
-        print(f"TimeSeriesModel.forward(),permute x.size():", x.size())
+        logger.info(f"TimeSeriesModel.forward(),permute {x.size()=}")
         x = self.positional_encoding(x)
-        print(f"TimeSeriesModel.forward(),pe x.size():", x.size())
+        logger.info(f"TimeSeriesModel.forward(),pe {x.size()=}")
         x = self.transformer(x, x)
-        print(f"TimeSeriesModel.forward(),transformer x.size():", x.size())
+        logger.info(f"TimeSeriesModel.forward(),transformer {x.size()=}")
         x = self.fc_out(x)
-        print(f"TimeSeriesModel.forward(),fc_out x.size():", x.size())
-        # Reshape back to (batch_size, output_length, output_dim)
+        logger.info(f"TimeSeriesModel.forward(),fc_out {x.size()=}")
         x = x.permute(1, 0, 2)
-        print(f"TimeSeriesModel.forward(),permute x.size():", x.size())
+        logger.info(f"TimeSeriesModel.forward(),permute {x.size()=}")
         x = x.contiguous().view(batch_size, self.output_length, -1)
-        print(f"TimeSeriesModel.forward(),contiguous x.size():", x.size())
+        logger.info(f"TimeSeriesModel.forward(),contiguous {x.size()=}")
         return F.relu(x)
 
 
@@ -84,13 +90,12 @@ def create_model(
     output_sequence_length,
     output_dim,
     hidden_dim,
+    nhead: int = 8,
 ):
     """Create and initialize a TimeSeriesModel with the specified parameters."""
-    # Ensure input_dim is divisible by nhead
-    nhead = 8
-    if input_dim % nhead != 0:
+    if hidden_dim % nhead != 0:
         raise ValueError("input_dim must be divisible by nhead")
-    
+
     model = TimeSeriesModel(
         input_sequence_length=input_sequence_length,
         input_dim=input_dim,

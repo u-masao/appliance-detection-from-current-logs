@@ -18,6 +18,7 @@ class PositionalEncoding(nn.Module):
 
     def forward(self, x):
         return x + self.pe[:x.size(0), :]
+class TimeSeriesModel(nn.Module):
     def __init__(self, input_dim, output_dim, hidden_dim: int = 1024):
         super(TimeSeriesModel, self).__init__()
         self.positional_encoding = PositionalEncoding(input_dim)

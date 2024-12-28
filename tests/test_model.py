@@ -1,6 +1,6 @@
 import torch
 
-from src.models.model import TimeSeriesModel, PositionalEncoding
+from src.models.model import PositionalEncoding, TimeSeriesModel
 
 
 def test_positional_encoding():
@@ -24,7 +24,9 @@ def test_positional_encoding():
     )
 
     # Check if the positional encoding is applied (output should not be all zeros)
-    assert not torch.all(encoded_output == 0), "Positional encoding not applied"
+    assert not torch.all(
+        encoded_output == 0
+    ), "Positional encoding not applied"
     input_sequence_length = 10
     input_dim = 3
     output_sequence_length = 4

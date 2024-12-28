@@ -23,9 +23,10 @@ def test_timeseries_model_forward():
     # Create a dummy input tensor with the shape (batch_size, input_sequence_length, input_dim)
     dummy_input = torch.randn(batch_size, input_sequence_length, input_dim)
 
-    # Perform a forward pass and catch any exceptions
+    # Create a dummy target tensor with the shape (batch_size, output_sequence_length, output_dim)
+    dummy_target = torch.randn(batch_size, output_sequence_length, output_dim)
     try:
-        tgt, embed = model(dummy_input)
+        tgt, embed = model(dummy_input, dummy_target)
     except Exception as e:
         assert False, f"Model forward pass raised an exception: {e}"
     # Perform a forward pass and ensure tgt is not None

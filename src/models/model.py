@@ -7,33 +7,32 @@ import torch.nn.functional as F
 
 
 class PositionalEncoding(nn.Module):
-    def __init__(self, input_sequence_length, max_len=5000):
+    def __init__(self, d_model, max_len=5000):
         super(PositionalEncoding, self).__init__()
 
         # init logger
         logger = logging.getLogger(__name__)
 
         # logging
-        logger.info("PositionalEncoding.__init__(): %s", input_sequence_length)
-        pe = torch.zeros(max_len, 12)
+        logger.info("PositionalEncoding.__init__(): %s", d_model)
+        pe = torch.zeros(max_len, d_model)
 
         logger.info(f"{pe.size()=}")
         position = torch.arange(0, max_len, dtype=torch.float).unsqueeze(1)
         div_term = torch.exp(
-            torch.arange(0, input_sequence_length, 2).float()
-            * (-math.log(10000.0) / input_sequence_length)
+            torch.arange(0, d_model, 2).float()
+            * (-math.log(10000.0) / d_model)
         )
         pe[:, 0::2] = torch.sin(position * div_term)
         pe[:, 1::2] = torch.cos(position * div_term)
-        pe = pe.unsqueeze(1)
+        pe = pe.unsqueeze(0)
         self.register_buffer("pe", pe)
-        logger.info(f"{self.pe.size()=}")
+        logger.info(f"{self.pe.size()=}")  # B, Seq, H
 
-    def forward(self, x): # Seq, B, F
+    def forward(self, x):  # B, Seq, H
         logger = logging.getLogger(__name__)
-        logger.info(f"PositionalEncoding.{x.size()=}")
-        x = x.permute(1, 0, 2)  #  B, Seq, F
-        pe = self.pe[:, : x.size(0), :].expand(x.size(1), -1, -1)  # B, Seq, F
+        logger.info(f"PositionalEncoding.forward(): {x.size()=}")
+        pe = self.pe[:, : x.size(1), :]  # 1, Seq, H
         logger.info(f"PositionalEncoding.{pe.size()=}")
         x = x + pe
         logger.info(f"PositionalEncoding.{x.size()=}")
@@ -43,46 +42,70 @@ class PositionalEncoding(nn.Module):
 class TimeSeriesModel(nn.Module):
     def __init__(
         self,
-        input_sequence_length,
-        input_dim,
-        output_sequence_length,
-        output_dim,
-        hidden_dim,
+        input_sequence_length: int,
+        input_dim: int,
+        output_sequence_length: int,
+        output_dim: int,
+        hidden_dim: int,
+        nhead: int = 8,
+        num_encoder_layers: int = 3,
+        num_decoder_layers: int = 3,
+        dim_feedforward_ratio: int = 8,
+        dropout=0.1,
     ):
         super(TimeSeriesModel, self).__init__()
         logger = logging.getLogger(__name__)
-        self.input_length = input_sequence_length
-        self.output_length = output_sequence_length
+        self.input_sequence_length = input_sequence_length
+        self.output_sequence_length = output_sequence_length
+        self.hidden_dim = hidden_dim
+
         self.embedding = nn.Linear(input_dim, hidden_dim)
         self.positional_encoding = PositionalEncoding(hidden_dim)
         logger.info(f"{self.positional_encoding=}")
 
         self.transformer = nn.Transformer(
             d_model=hidden_dim,
-            nhead=8,
-            num_encoder_layers=3,
-            num_decoder_layers=3,
-            dim_feedforward=hidden_dim * 8,
-            dropout=0.1,
+            nhead=nhead,
+            num_encoder_layers=num_encoder_layers,
+            num_decoder_layers=num_decoder_layers,
+            dim_feedforward=hidden_dim * dim_feedforward_ratio,
+            dropout=dropout,
             activation="relu",
         )
         self.fc_out = nn.Linear(hidden_dim, output_dim)
 
-    def forward(self, x):  # B,Seq,F
+    def forward(self, x):  # B, Seq, F
         logger = logging.getLogger(__name__)
         logger.info(f"TimeSeriesModel.forward(),input {x.size()=}")
-        # Reshape x to (input_length, batch_size, input_dim)
-        batch_size, sequence_length, _ = x.size()
-        x = self.embedding(x)
-        x = x.permute(1, 0, 2)  # (input_sequence_length, batch_size, hidden_dim)
-        logger.info(f"TimeSeriesModel.forward(),permute {x.size()=}")
+        batch_size, sequence_length, input_dim = x.size()
+
+        # convert feature to embedding
+        x = self.embedding(x)  # B, Seq, H
+        assert x.size()[2] == self.hidden_dim
+
+        # positional_encoding
         x = self.positional_encoding(x)
-        logger.info(f"TimeSeriesModel.forward(),pe {x.size()=}")
-        x = self.transformer(x, x[:self.output_length])
+        logger.info(f"TimeSeriesModel.forward(), PE {x.size()=}")
+        assert x.size()[0] == batch_size
+        assert x.size()[1] == sequence_length
+        assert x.size()[2] == self.hidden_dim
+
+        # permute
+        x = x.permute(1, 0, 2)  # Seq, B, H
+        assert x.size()[0] == sequence_length
+        assert x.size()[1] == batch_size
+        assert x.size()[2] == self.hidden_dim
+
+        # transformer
+        x = self.transformer(x, x) # [: self.output_length])
         logger.info(f"TimeSeriesModel.forward(),transformer {x.size()=}")
+
+        assert False
         x = self.fc_out(x)
         logger.info(f"TimeSeriesModel.forward(),fc_out {x.size()=}")
-        x = x.permute(1, 0, 2)  # (batch_size, output_sequence_length, hidden_dim)
+        x = x.permute(
+            1, 0, 2
+        )  # (batch_size, output_sequence_length, hidden_dim)
         logger.info(f"TimeSeriesModel.forward(),permute {x.size()=}")
         return F.relu(x)
 

@@ -131,7 +131,7 @@ def train_and_evaluate_model(
         for i, (x, y) in enumerate(pbar):
             optimizer.zero_grad()
             x, y = x.to(device), y.to(device)
-            output = model(x)
+            output = model(x, y)
             loss = criterion(output.view_as(y), y)
             train_loss += loss.item()
             loss.backward()
@@ -154,7 +154,7 @@ def train_and_evaluate_model(
             )
             for i, (x, y) in enumerate(pbar):
                 x, y = x.to(device), y.to(device)
-                output = model(x)
+                output = model(x, y)
                 loss = criterion(output.view_as(y), y).item()
                 val_loss += loss
                 val_iterations += 1

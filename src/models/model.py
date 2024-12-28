@@ -81,6 +81,11 @@ def create_model(
     hidden_dim,
 ):
     """Create and initialize a TimeSeriesModel with the specified parameters."""
+    # Ensure input_dim is divisible by nhead
+    nhead = 8
+    if input_dim % nhead != 0:
+        raise ValueError("input_dim must be divisible by nhead")
+    
     model = TimeSeriesModel(
         input_sequence_length=input_sequence_length,
         input_dim=input_dim,

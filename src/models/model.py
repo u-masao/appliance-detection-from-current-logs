@@ -29,10 +29,11 @@ class PositionalEncoding(nn.Module):
         self.register_buffer("pe", pe)
         logger.info(f"{self.pe.size()=}")
 
-    def forward(self, x):
+    def forward(self, x): # Seq, B, F
         logger = logging.getLogger(__name__)
         logger.info(f"PositionalEncoding.{x.size()=}")
-        pe = self.pe[:, : x.size(0), : x.size(2)]
+        x = x.permute(1, 0, 2)  #  B, Seq, F
+        pe = self.pe[:, : x.size(0), : x.size(2)]  # B, Seq, F
         logger.info(f"PositionalEncoding.{pe.size()=}")
         return x + pe
 

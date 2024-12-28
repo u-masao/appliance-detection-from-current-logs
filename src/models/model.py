@@ -24,11 +24,12 @@ class TimeSeriesModel(nn.Module):
         return self.fc3(x)
 
 
-def create_model(input_dim, output_dim):
+def create_model(input_dim, output_dim, hidden_dim):
     """Create and initialize a TimeSeriesModel with the specified parameters."""
     model = TimeSeriesModel(
         input_dim=input_dim,
         output_dim=output_dim,
+        hidden_dim=hidden_dim,
     )
     return model
 
@@ -47,6 +48,7 @@ def load_model(path):
     model = create_model(
         input_dim=model_config["input_dim"],
         output_dim=model_config["output_dim"],
+        hidden_dim=model_config["hidden_dim"],
     )
     model.load_state_dict(checkpoint["state_dict"])
     return model, model_config

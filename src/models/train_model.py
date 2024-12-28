@@ -99,6 +99,7 @@ def create_and_configure_model(
     model = create_model(
         input_dim=input_length * (num_columns - 1),
         output_dim=output_length * len(target_columns),
+        hidden_dim=hidden_dim,
     ).to(device)
     optimizer = torch.optim.Adam(model.parameters(), lr=lr)
     criterion = nn.MSELoss()
@@ -258,6 +259,12 @@ def objective(
     help="Number of Optuna trials.",
 )
 @click.option(
+    "--hidden_dim",
+    type=int,
+    default=None,
+    help="Hidden dimension for the model.",
+)
+@click.option(
     "--embed_dim",
     type=int,
     default=None,
@@ -318,6 +325,7 @@ def main(
     num_heads,
     num_layers,
     output_length,
+    hidden_dim,
     train_path,
     val_path,
     model_output_path,
@@ -396,6 +404,7 @@ def main(
     model_config = {
         "input_dim": input_length * (num_columns - 1),
         "output_dim": output_length * len(target_columns),
+        "hidden_dim": hidden_dim,
     }
     model = create_model(**model_config)
     # Output model architecture

@@ -41,16 +41,19 @@ class TimeSeriesModel(nn.Module):
         self.fc_out = nn.Linear(input_dim, output_dim)
 
     def forward(self, x):
-        print(f'TimeSeriesModel.forward(), x.size():', x.size())
+        print(f'TimeSeriesModel.forward(),input x.size():', x.size())
         # Reshape x to (sequence_length, batch_size, input_dim)
-        batch_size, sequence_length, _ = x.size()
-        x = x.permute(1, 0, 2)  # (sequence_length, batch_size, input_dim)
+        # batch_size, sequence_length, _ = x.size()
+        # x = x.permute(1, 0, 2)  # (sequence_length, batch_size, input_dim)
         x = self.positional_encoding(x)
+        print(f'TimeSeriesModel.forward(),pe x.size():', x.size())
         x = self.transformer(x, x)
+        print(f'TimeSeriesModel.forward(),transformer x.size():', x.size())
         x = self.fc_out(x)
+        print(f'TimeSeriesModel.forward(),fc_out x.size():', x.size())
         # Reshape back to (batch_size, sequence_length, output_dim)
-        x = x.permute(1, 0, 2)
-        x = x.contiguous().view(batch_size, sequence_length, -1)
+        # x = x.permute(1, 0, 2)
+        # x = x.contiguous().view(batch_size, sequence_length, -1)
         return F.relu(x)
 
 

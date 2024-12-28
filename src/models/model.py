@@ -14,14 +14,14 @@ class PositionalEncoding(nn.Module):
         logger = logging.getLogger(__name__)
 
         # logging
-        logger.info("PositionalEncoding.__init__(): %s", d_model)
+        logger.info("PositionalEncoding.__init__(): %s", input_sequence_length)
         pe = torch.zeros(max_len, input_sequence_length)
 
         logger.info(f"{pe.size()=}")
         position = torch.arange(0, max_len, dtype=torch.float).unsqueeze(1)
         div_term = torch.exp(
-            torch.arange(0, d_model, 2).float()
-            * (-math.log(10000.0) / d_model)
+            torch.arange(0, input_sequence_length, 2).float()
+            * (-math.log(10000.0) / input_sequence_length)
         )
         pe[:, 0::2] = torch.sin(position * div_term)
         pe[:, 1::2] = torch.cos(position * div_term)

@@ -69,6 +69,7 @@ stages:
       --input_length ${train_model.input_length}
       --output_length ${train_model.output_length}
       --embed_dim ${train_model.embed_dim}
+      --num_workers ${train_model.num_workers}
     deps:
       - src/models/train_model.py
       - src/models/model.py
@@ -90,7 +91,6 @@ stages:
       data/interim/${item.dataname}.parquet
       data/interim/infer_${item.dataname}.parquet
       --batch_size ${train_model.batch_size}
-      --device cpu
       --data_fraction ${train_model.data_fraction}
       --input_length ${train_model.input_length}
       --output_length ${train_model.output_length}

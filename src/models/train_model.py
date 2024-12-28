@@ -27,6 +27,7 @@ def load_and_prepare_data(
     batch_size,
     target_columns,
     seed,
+    num_workers,
 ):
     train_df = load_data(train_path, fraction=fraction)
     val_df = load_data(val_path, fraction=fraction)
@@ -46,7 +47,7 @@ def load_and_prepare_data(
     train_loader = DataLoader(
         train_dataset,
         batch_size=batch_size,
-        num_workers=4,
+        num_workers=num_workers,
         shuffle=True,
         generator=generator,
     )
@@ -54,7 +55,7 @@ def load_and_prepare_data(
         val_dataset,
         batch_size=batch_size,
         shuffle=False,
-        num_workers=4,
+        num_workers=num_workers,
         generator=generator,
     )
     return train_loader, val_loader, train_df.shape[1]
@@ -186,6 +187,7 @@ def objective(
     val_ratio,
     force_cpu,
     seed,
+    num_workers,
 ):
     logger = logging.getLogger(__name__)
     mlflow.start_run()
@@ -199,6 +201,7 @@ def objective(
         batch_size,
         target_columns,
         seed=seed,
+        num_workers=num_workers,
     )
     device = setup_device(force_cpu)
     logger.info(f"Using device: {device}")
@@ -318,6 +321,12 @@ def objective(
     default=42,
     help="Random seed for reproducibility.",
 )
+@click.option(
+    "--num_workers",
+    type=int,
+    default=4,
+    help="Number of dataloader workers"
+)
 def main(
     batch_size,
     input_length,
@@ -336,6 +345,7 @@ def main(
     val_ratio,
     force_cpu,
     seed,
+    num_workers,
 ):
     """
     Train the transformer model with the specified parameters.
@@ -389,6 +399,7 @@ def main(
             val_ratio,
             force_cpu,
             seed,
+            num_workers,
         ),
         n_trials=n_trials,
         n_jobs=-1,  # Use all available cores

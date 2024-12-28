@@ -27,12 +27,15 @@ class PositionalEncoding(nn.Module):
         pe[:, 1::2] = torch.cos(position * div_term)
         pe = pe.unsqueeze(0)
         self.register_buffer("pe", pe)
-        logger.info(f"{self.pe.size()=}")  # B, Seq, H
+        logger.info(f"{self.pe.size()=}")  # B, Seq, E
+        assert self.pe.size()[0] == 1
+        assert self.pe.size()[1] == max_len
+        assert self.pe.size()[2] == d_model
 
-    def forward(self, x):  # B, Seq, H
+    def forward(self, x):  # B, Seq, E
         logger = logging.getLogger(__name__)
         logger.info(f"PositionalEncoding.forward(): {x.size()=}")
-        pe = self.pe[:, : x.size(1), :]  # 1, Seq, H
+        pe = self.pe[:, : x.size(1), :]  # 1, Seq, E
         logger.info(f"PositionalEncoding.{pe.size()=}")
         x = x + pe
         logger.info(f"PositionalEncoding.{x.size()=}")
@@ -50,68 +53,93 @@ class TimeSeriesModel(nn.Module):
         nhead: int = 8,
         num_encoder_layers: int = 3,
         num_decoder_layers: int = 3,
-        dim_feedforward_ratio: int = 8,
+        ff_dim: int = 32,
         dropout=0.1,
     ):
         super(TimeSeriesModel, self).__init__()
+        # init logger
         logger = logging.getLogger(__name__)
+
+        # fields
         self.input_sequence_length = input_sequence_length
+        self.input_dim = input_dim
         self.output_sequence_length = output_sequence_length
-        self.hidden_dim = embed_dim
+        self.output_dim = output_dim
+        self.embed_dim = embed_dim
 
-        self.embedding = nn.Linear(input_dim, embed_dim)
-        self.positional_encoding = PositionalEncoding(input_sequence_length)
-        logger.info(f"{self.positional_encoding=}")
-
-        self.transformer = nn.Transformer(
-            d_model=embed_dim,
-            nhead=nhead,
-            num_encoder_layers=num_encoder_layers,
-            num_decoder_layers=num_decoder_layers,
-            dim_feedforward=embed_dim * dim_feedforward_ratio,
-            dropout=dropout,
-            activation="relu",
+        # layers
+        self.input_projection = nn.Linear(input_dim, embed_dim)
+        self.positional_encoding = PositionalEncoding(embed_dim)
+        self.encoder = nn.TransformerEncoder(
+            nn.TransformerEncoderLayer(
+                d_model=embed_dim,
+                nhead=nhead,
+                dim_feedforward=ff_dim,
+                dropout=dropout,
+                batch_first=True,
+            ),
+            num_layers=num_encoder_layers,
         )
-        self.fc_out = nn.Linear(embed_dim, output_dim)
+        self.decoder = nn.TransformerDecoder(
+            nn.TransformerDecoderLayer(
+                d_model=embed_dim,
+                nhead=nhead,
+                dim_feedforward=ff_dim,
+                dropout=dropout,
+                batch_first=True,
+            ),
+            num_layers=num_decoder_layers,
+        )
+        self.output_projection = nn.Linear(embed_dim, output_dim)
 
-    def forward(self, src, tgt=None):  # B, Seq, F
+    def forward(self, src, tgt=None):  # (B, inSeq, inF), (B, outSeq, outF)
         logger = logging.getLogger(__name__)
         logger.info(f"TimeSeriesModel.forward(), src {src.size()=}")
-        batch_size, sequence_length, input_dim = src.size()
+        batch_size = src.size()[0]
 
-        # convert feature to embedding
-        src = self.embedding(src)  # B, Seq, H
-        assert src.size()[2] == self.hidden_dim
+        # src check
+        assert src.size()[1] == self.input_sequence_length
+        assert src.size()[2] == self.input_dim
+
+        # tgt check
+        if tgt:
+            logger.info(f"TimeSeriesModel.forward(), tgt {src.size()=}")
+            assert tgt.size()[0] == batch_size
+            assert tgt.size()[1] == self.output_sequence_length
+            assert tgt.size()[2] == self.output_dim
+
+        # input projection
+        src = self.input_projection(src)  # (B, inSec, E)
+        assert src.size()[0] == batch_size
+        assert src.size()[1] == self.input_sequence_length
+        assert src.size()[2] == self.embed_dim
 
         # positional_encoding
-        src = self.positional_encoding(src)
+        src = self.positional_encoding(src)  # (B, inSec, E)
         logger.info(f"TimeSeriesModel.forward(), PE {src.size()=}")
         assert src.size()[0] == batch_size
-        assert src.size()[1] == sequence_length
-        assert src.size()[2] == self.hidden_dim
-
-        # permute
-        src = src.permute(1, 0, 2)  # Seq, B, H
-        assert src.size()[0] == sequence_length
-        assert src.size()[1] == batch_size
-        assert src.size()[2] == self.hidden_dim
+        assert src.size()[1] == self.input_sequence_length
+        assert src.size()[2] == self.embed_dim
 
         # transformer
-        memory = self.transformer.encoder(src)
+        memory = self.encoder(src)  # B, inSec, E
         logger.info(f"TimeSeriesModel.forward(), encoder {memory.size()=}")
+        assert src.size()[0] == batch_size
+        assert src.size()[1] == self.input_sequence_length
+        assert src.size()[2] == self.embed_dim
 
         if tgt is not None:
-            tgt = self.embedding(tgt)
-            tgt = self.positional_encoding(tgt)
-            tgt = tgt.permute(1, 0, 2)
-            tgt = self.transformer.decoder(tgt, memory)
-            tgt = self.fc_out(tgt)
-            tgt = tgt.permute(1, 0, 2)
-            tgt = F.relu(tgt)
+            tgt = self.embedding(tgt)  # B, outSec, E
+            tgt = self.positional_encoding(tgt)  # B, outSec, E
+            tgt = self.decoder(tgt, memory)  # (B, outSec, E), (B, outSec, E)
+            tgt = self.output_projection(tgt)  # (B, outSec, outF)
+            tgt = F.relu(tgt)  # value >= 0
             logger.info(f"TimeSeriesModel.forward(), decoder {tgt.size()=}")
 
-        embed = memory.mean(dim=0)
+        embed = memory.mean(dim=1)
         logger.info(f"TimeSeriesModel.forward(), embed {embed.size()=}")
+        assert embed.size()[0] == batch_size
+        assert embed.size()[1] == self.embed_dim
 
         return tgt, embed
 
@@ -121,11 +149,11 @@ def create_model(
     input_dim,
     output_sequence_length,
     output_dim,
-    hidden_dim,
+    embed_dim,
     nhead: int = 8,
 ):
     """Create and initialize a TimeSeriesModel with the specified parameters."""
-    if hidden_dim % nhead != 0:
+    if embed_dim % nhead != 0:
         raise ValueError("input_dim must be divisible by nhead")
 
     model = TimeSeriesModel(
@@ -133,7 +161,7 @@ def create_model(
         input_dim=input_dim,
         output_sequence_length=output_sequence_length,
         output_dim=output_dim,
-        hidden_dim=hidden_dim,
+        embed_dim=embed_dim,
     )
     return model
 
@@ -154,7 +182,7 @@ def load_model(path):
         input_dim=model_config["input_dim"],
         output_sequence_length=model_config["output_sequence_length"],
         output_dim=model_config["output_dim"],
-        hidden_dim=model_config["hidden_dim"],
+        embed_dim=model_config["embed_dim"],
     )
     model.load_state_dict(checkpoint["state_dict"])
     return model, model_config

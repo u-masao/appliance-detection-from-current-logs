@@ -98,7 +98,7 @@ def create_and_configure_model(
     mlflow.log_params({"lr": lr})
 
     model = create_model(
-        input_dim=input_length * (num_columns - 1),
+        input_dim=(input_length, num_columns - 1),
         output_dim=output_length * len(target_columns),
         hidden_dim=hidden_dim,
     ).to(device)
@@ -406,7 +406,7 @@ def main(
     train_df = load_data(train_path, fraction=data_fraction)
     num_columns = train_df.shape[1]
     model_config = {
-        "input_dim": input_length * (num_columns - 1),
+        "input_dim": (input_length, num_columns - 1),
         "output_dim": output_length * len(target_columns),
         "hidden_dim": hidden_dim,
     }

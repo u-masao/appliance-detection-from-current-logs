@@ -68,7 +68,8 @@ class TimeSeriesModel(nn.Module):
         self.embed_dim = embed_dim
 
         # layers
-        self.input_projection = nn.Linear(input_dim, embed_dim)
+        self.src_input_projection = nn.Linear(input_dim, embed_dim)
+        self.tgt_input_projection = nn.Linear(output_dim, embed_dim)
         self.positional_encoding = PositionalEncoding(embed_dim)
         self.encoder = nn.TransformerEncoder(
             nn.TransformerEncoderLayer(
@@ -90,9 +91,10 @@ class TimeSeriesModel(nn.Module):
             ),
             num_layers=num_decoder_layers,
         )
-        self.output_projection = nn.Linear(embed_dim, output_dim)
+        self.src_output_projection = nn.Linear(embed_dim, output_dim)
+        self.tgt_output_projection = nn.Linear(embed_dim, output_dim)
 
-    def forward(self, src, tgt=None):  # (B, inSeq, inF), (B, outSeq, outF)
+    def forward(self, src, tgt):  # (B, inSeq, inF), (B, outSeq, outF)
         logger = logging.getLogger(__name__)
         logger.info(f"TimeSeriesModel.forward(), src {src.size()=}")
         batch_size = src.size()[0]
@@ -109,7 +111,7 @@ class TimeSeriesModel(nn.Module):
             assert tgt.size()[2] == self.output_dim
 
         # input projection
-        src = self.input_projection(src)  # (B, inSec, E)
+        src = self.src_input_projection(src)  # (B, inSec, E)
         assert src.size()[0] == batch_size
         assert src.size()[1] == self.input_sequence_length
         assert src.size()[2] == self.embed_dim
@@ -128,13 +130,13 @@ class TimeSeriesModel(nn.Module):
         assert src.size()[1] == self.input_sequence_length
         assert src.size()[2] == self.embed_dim
 
-        if tgt is not None:
-            tgt = self.embedding(tgt)  # B, outSec, E
-            tgt = self.positional_encoding(tgt)  # B, outSec, E
-            tgt = self.decoder(tgt, memory)  # (B, outSec, E), (B, outSec, E)
-            tgt = self.output_projection(tgt)  # (B, outSec, outF)
-            tgt = F.relu(tgt)  # value >= 0
-            logger.info(f"TimeSeriesModel.forward(), decoder {tgt.size()=}")
+        # target processing
+        tgt = self.tgt_input_projection(tgt)  # B, outSec, E
+        tgt = self.positional_encoding(tgt)  # B, outSec, E
+        tgt = self.decoder(tgt, memory)  # (B, outSec, E), (B, outSec, E)
+        tgt = self.tgt_output_projection(tgt)  # (B, outSec, outF)
+        tgt = F.relu(tgt)  # value >= 0
+        logger.info(f"TimeSeriesModel.forward(), decoder {tgt.size()=}")
 
         embed = memory.mean(dim=1)
         logger.info(f"TimeSeriesModel.forward(), embed {embed.size()=}")

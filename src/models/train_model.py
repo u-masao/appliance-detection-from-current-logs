@@ -93,7 +93,7 @@ def create_and_configure_model(
         torch.cuda.manual_seed_all(seed)
 
     logger = logging.getLogger(__name__)
-    lr = trial.suggest_float("lr", 1e-6, 1.e-3, log=True)
+    lr = trial.suggest_float("lr", 1e-6, 1.0e-3, log=True)
     # lr = 0.00010234736295408926
     logger.info(f"params: {lr=}")
     mlflow.log_params({"lr": lr})
@@ -322,10 +322,7 @@ def objective(
     help="Random seed for reproducibility.",
 )
 @click.option(
-    "--num_workers",
-    type=int,
-    default=4,
-    help="Number of dataloader workers"
+    "--num_workers", type=int, default=4, help="Number of dataloader workers"
 )
 def main(
     batch_size,

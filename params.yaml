@@ -8,4 +8,4 @@ train_model:
   train_ratio: 0.7
   val_ratio: 0.15
   embed_dim: 64
-  num_workers: 4
+  num_workers: 2

@@ -3529,9 +3529,6 @@ requires-dist = [
     { name = "torch", specifier = ">=2.5.1" },
 ]
 
-[package.metadata.requires-dev]
-dev = []
-
 [[package]]
 name = "starlette"
 version = "0.41.3"

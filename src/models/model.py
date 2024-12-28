@@ -15,7 +15,7 @@ class PositionalEncoding(nn.Module):
 
         # logging
         logger.info("PositionalEncoding.__init__(): %s", input_sequence_length)
-        pe = torch.zeros(max_len, input_sequence_length)
+        pe = torch.zeros(max_len, 12)
 
         logger.info(f"{pe.size()=}")
         position = torch.arange(0, max_len, dtype=torch.float).unsqueeze(1)
@@ -25,7 +25,7 @@ class PositionalEncoding(nn.Module):
         )
         pe[:, 0::2] = torch.sin(position * div_term)
         pe[:, 1::2] = torch.cos(position * div_term)
-        pe = pe.unsqueeze(0)
+        pe = pe.unsqueeze(1)
         self.register_buffer("pe", pe)
         logger.info(f"{self.pe.size()=}")
 

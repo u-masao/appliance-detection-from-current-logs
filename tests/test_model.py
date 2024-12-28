@@ -28,7 +28,9 @@ def test_timeseries_model_forward():
         tgt, embed = model(dummy_input)
     except Exception as e:
         assert False, f"Model forward pass raised an exception: {e}"
+    # Perform a forward pass and ensure tgt is not None
     tgt, embed = model(dummy_input)
+    assert tgt is not None, "Expected tgt to be not None"
 
     # Check if the output shapes are as expected
     assert tgt.shape == (

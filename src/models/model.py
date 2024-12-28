@@ -8,7 +8,9 @@ import torch.nn as nn
 class PositionalEncoding(nn.Module):
     def __init__(self, d_model, max_len=5000):
         super(PositionalEncoding, self).__init__()
+        print('PositionalEncoding.__init__(): d_model', d_model)
         pe = torch.zeros(max_len, d_model)
+        print('PositionalEncoding.__init__(): pe.size()', pe.size())
         position = torch.arange(0, max_len, dtype=torch.float).unsqueeze(1)
         div_term = torch.exp(torch.arange(0, d_model, 2).float() * (-math.log(10000.0) / d_model))
         pe[:, 0::2] = torch.sin(position * div_term)

@@ -73,10 +73,18 @@ class TimeSeriesModel(nn.Module):
         return F.relu(x)
 
 
-def create_model(input_dim, output_dim, hidden_dim):
+def create_model(
+    input_sequence_length,
+    input_dim,
+    output_sequence_length,
+    output_dim,
+    hidden_dim,
+):
     """Create and initialize a TimeSeriesModel with the specified parameters."""
     model = TimeSeriesModel(
+        input_sequence_length=input_sequence_length,
         input_dim=input_dim,
+        output_sequence_length=output_sequence_length,
         output_dim=output_dim,
         hidden_dim=hidden_dim,
     )
@@ -95,7 +103,9 @@ def load_model(path):
     checkpoint = torch.load(path)
     model_config = checkpoint["config"]
     model = create_model(
+        input_sequence_length=model_config["input_sequence_length"],
         input_dim=model_config["input_dim"],
+        output_sequence_length=model_config["output_sequence_length"],
         output_dim=model_config["output_dim"],
         hidden_dim=model_config["hidden_dim"],
     )

@@ -98,8 +98,10 @@ def create_and_configure_model(
     mlflow.log_params({"lr": lr})
 
     model = create_model(
-        input_dim=(input_length, num_columns - 1),
-        output_dim=output_length * len(target_columns),
+        input_sequence_length=input_length,
+        input_dim=num_columns - 1,
+        output_sequence_length=output_length,
+        output_dim=len(target_columns),
         hidden_dim=hidden_dim,
     ).to(device)
     optimizer = torch.optim.Adam(model.parameters(), lr=lr)
@@ -406,8 +408,10 @@ def main(
     train_df = load_data(train_path, fraction=data_fraction)
     num_columns = train_df.shape[1]
     model_config = {
-        "input_dim": (input_length, num_columns - 1),
-        "output_dim": output_length * len(target_columns),
+        "input_sequence_length": input_length,
+        "input_dim": num_columns - 1,
+        "output_sequence_length": output_length,
+        "output_dim": len(target_columns),
         "hidden_dim": hidden_dim,
     }
     model = create_model(**model_config)

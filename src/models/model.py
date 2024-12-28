@@ -34,6 +34,7 @@ class PositionalEncoding(nn.Module):
 class TimeSeriesModel(nn.Module):
     def __init__(self, input_dim, output_dim, hidden_dim: int = 1024):
         super(TimeSeriesModel, self).__init__()
+        sequence_length, features = input_dim
         self.positional_encoding = PositionalEncoding(input_dim)
         self.transformer = nn.Transformer(
             d_model=input_dim,

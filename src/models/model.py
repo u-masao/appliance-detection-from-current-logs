@@ -1,5 +1,6 @@
 import math
 
+import logging
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -37,13 +38,17 @@ class TimeSeriesModel(nn.Module):
         output_sequence_length,
         output_dim,
         hidden_dim: int = 1024,
+        d_model: int = 128,
     ):
         super(TimeSeriesModel, self).__init__()
+        logger = logging.getLogger(__name__)
         self.input_length = input_sequence_length
         self.output_length = output_sequence_length
         self.positional_encoding = PositionalEncoding(input_sequence_length)
+        logger.info(f"{self.positional_encoding.size()=}")
+
         self.transformer = nn.Transformer(
-            d_model=input_dim,
+            d_model=d_model,
             nhead=8,
             num_encoder_layers=3,
             num_decoder_layers=3,

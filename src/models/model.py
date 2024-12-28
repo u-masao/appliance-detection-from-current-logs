@@ -1,31 +1,35 @@
 import math
-import torch.nn.functional as F
 
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 
 
 class PositionalEncoding(nn.Module):
     def __init__(self, d_model, max_len=5000):
         super(PositionalEncoding, self).__init__()
-        print('PositionalEncoding.__init__(): d_model', d_model)
+        print("PositionalEncoding.__init__(): d_model", d_model)
         pe = torch.zeros(max_len, d_model)
-        print('PositionalEncoding.__init__(): pe.size()', pe.size())
+        print("PositionalEncoding.__init__(): pe.size()", pe.size())
         position = torch.arange(0, max_len, dtype=torch.float).unsqueeze(1)
-        div_term = torch.exp(torch.arange(0, d_model, 2).float() * (-math.log(10000.0) / d_model))
+        div_term = torch.exp(
+            torch.arange(0, d_model, 2).float()
+            * (-math.log(10000.0) / d_model)
+        )
         pe[:, 0::2] = torch.sin(position * div_term)
         pe[:, 1::2] = torch.cos(position * div_term)
         pe = pe.unsqueeze(0)
-        self.register_buffer('pe', pe)
-        print('self.pe.size():', self.pe.size())
+        self.register_buffer("pe", pe)
+        print("self.pe.size():", self.pe.size())
 
     def forward(self, x):
-        print('x.size():', x.size())
-        print('x.size():', x.size())
-        pe = self.pe[:x.size(0), :]
-        print('pe.size():', pe.size())
-        print('pe:', pe)
+        print("x.size():", x.size())
+        print("x.size():", x.size())
+        pe = self.pe[: x.size(0), :]
+        print("pe.size():", pe.size())
+        print("pe:", pe)
         return x + pe
+
 
 class TimeSeriesModel(nn.Module):
     def __init__(self, input_dim, output_dim, hidden_dim: int = 1024):
@@ -38,21 +42,21 @@ class TimeSeriesModel(nn.Module):
             num_decoder_layers=3,
             dim_feedforward=hidden_dim,
             dropout=0.1,
-            activation='relu'
+            activation="relu",
         )
         self.fc_out = nn.Linear(input_dim, output_dim)
 
     def forward(self, x):
-        print(f'TimeSeriesModel.forward(),input x.size():', x.size())
+        print(f"TimeSeriesModel.forward(),input x.size():", x.size())
         # Reshape x to (sequence_length, batch_size, input_dim)
         # batch_size, sequence_length, _ = x.size()
         # x = x.permute(1, 0, 2)  # (sequence_length, batch_size, input_dim)
         x = self.positional_encoding(x)
-        print(f'TimeSeriesModel.forward(),pe x.size():', x.size())
+        print(f"TimeSeriesModel.forward(),pe x.size():", x.size())
         x = self.transformer(x, x)
-        print(f'TimeSeriesModel.forward(),transformer x.size():', x.size())
+        print(f"TimeSeriesModel.forward(),transformer x.size():", x.size())
         x = self.fc_out(x)
-        print(f'TimeSeriesModel.forward(),fc_out x.size():', x.size())
+        print(f"TimeSeriesModel.forward(),fc_out x.size():", x.size())
         # Reshape back to (batch_size, sequence_length, output_dim)
         # x = x.permute(1, 0, 2)
         # x = x.contiguous().view(batch_size, sequence_length, -1)

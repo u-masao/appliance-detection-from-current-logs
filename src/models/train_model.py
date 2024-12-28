@@ -271,12 +271,6 @@ def objective(
     help="Hidden dimension for the model.",
 )
 @click.option(
-    "--embed_dim",
-    type=int,
-    default=None,
-    help="Embedding dimension for the transformer model.",
-)
-@click.option(
     "--num_heads",
     type=int,
     default=None,
@@ -331,7 +325,6 @@ def main(
     num_heads,
     num_layers,
     output_length,
-    embed_dim,
     train_path,
     val_path,
     model_output_path,

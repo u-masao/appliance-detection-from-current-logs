@@ -4,7 +4,7 @@ train_model:
   num_epochs: 30
   input_length: 360
   output_length: 5
-  batch_size: 32
+  batch_size: 16
   train_ratio: 0.7
   val_ratio: 0.15
   embed_dim: 64

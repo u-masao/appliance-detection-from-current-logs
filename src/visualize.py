@@ -6,15 +6,14 @@ import pandas as pd
 infer_df = None
 
 
-def load_input_data():
+def load_input_data(input_filepath):
     global infer_df
-    input_filepath = "data/interim/infer_train.parquet"
-    infer_df = pd.read_parquet(input_filepath)
     print(f"load input data: {input_filepath}")
+    infer_df = pd.read_parquet(input_filepath)
     return
 
 
-load_input_data()
+load_input_data("data/interim/infer_train.parquet")
 
 feature_df = pd.read_parquet("data/interim/train.parquet").iloc[[0]]
 target_columns = ["watt_black", "watt_red", "watt_kitchen", "watt_living"]
@@ -86,6 +85,14 @@ with gr.Blocks() as demo:
     gr.Markdown("# Parquet Data Viewer")
 
     row_number = gr.Number(value=0, minimum=0, maximum=len(infer_df))
+
+    selector = gr.Dropdown(
+        choices=[
+            ("train", "data/interim/infer_train.parquet"),
+            ("valid", "data/interim/infer_val.parquet"),
+            ("test", "data/interim/infer_test.parquet"),
+        ]
+    )
     reload_button = gr.Button("reload")
     output_box = gr.Plot()
     output_dataframe = gr.DataFrame()
@@ -96,7 +103,7 @@ with gr.Blocks() as demo:
         outputs=[output_box, output_dataframe],
     )
 
-    reload_button.click(load_input_data)
+    reload_button.click(load_input_data, inputs=[selector])
 
 if __name__ == "__main__":
     demo.launch(share=False)

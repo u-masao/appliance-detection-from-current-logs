@@ -12,8 +12,15 @@ PYTHON_INTERPRETER = uv run python
 
 ## dvc repro
 .PHONY: repro
-repro:
+repro: check_commit
 	uv run dvc repro
+	git commit dvc.lock -m 'run dvc repro'
+
+.PHONY: check_commit
+check_commit:
+	git status
+	git diff --exit-code
+	git diff --exit-code --cached
 
 ### mlflow ui
 .PHONY: mlflow_ui

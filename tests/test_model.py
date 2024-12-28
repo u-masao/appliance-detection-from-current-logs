@@ -3,7 +3,28 @@ import torch
 from src.models.model import TimeSeriesModel
 
 
-def test_timeseries_model_forward():
+def test_positional_encoding():
+    d_model = 16
+    max_len = 10
+    batch_size = 5
+    seq_length = 10
+
+    positional_encoding = PositionalEncoding(d_model=d_model, max_len=max_len)
+
+    # Create a dummy input tensor with the shape (batch_size, seq_length, d_model)
+    dummy_input = torch.zeros(batch_size, seq_length, d_model)
+
+    # Apply positional encoding
+    encoded_output = positional_encoding(dummy_input)
+
+    # Check if the output shape is as expected
+    assert encoded_output.shape == dummy_input.shape, (
+        f"Expected encoded output shape {dummy_input.shape}, "
+        f"but got {encoded_output.shape}"
+    )
+
+    # Check if the positional encoding is applied (output should not be all zeros)
+    assert not torch.all(encoded_output == 0), "Positional encoding not applied"
     input_sequence_length = 10
     input_dim = 3
     output_sequence_length = 4

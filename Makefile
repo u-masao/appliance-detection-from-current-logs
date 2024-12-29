@@ -53,17 +53,17 @@ STORAGE_PATH=/content/drive/MyDrive/dataset/appliance-detection-from-current-log
 ## sync_to_storage
 .PHONY: sync_to_storage
 sync_to_storage:
-	rsync -a data $(STORAGE_PATH)/data/
-	rsync -a mlruns $(STORAGE_PATH)/mlruns/
-	rsync -a models $(STORAGE_PATH)/models/
+	rsync -av data $(STORAGE_PATH)/
+	rsync -av mlruns $(STORAGE_PATH)/
+	rsync -av models $(STORAGE_PATH)/
 	uv run dvc push
 
 ## sync_from_storage
 .PHONY: sync_from_storage
 sync_from_storage:
-	rsync -a $(STORAGE_PATH)/data/ data/
-	rsync -a $(STORAGE_PATH)/mlruns/ mlruns/
-	rsync -a $(STORAGE_PATH)/models/ models/
+	rsync -av $(STORAGE_PATH)/data/ data/
+	rsync -av $(STORAGE_PATH)/mlruns/ mlruns/
+	rsync -av $(STORAGE_PATH)/models/ models/
 	uv run dvc pull
 
 #################################################################################

@@ -176,3 +176,4 @@ cython_debug/
 /nohup.*
 /data/raw/data.zip
 /.gradio/
+/models/

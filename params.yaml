@@ -1,5 +1,5 @@
 train_model:
-  data_fraction: 0.01
+  data_fraction: 0.1
   n_trials: 1
   num_epochs: 200
   input_length: 360
@@ -9,4 +9,4 @@ train_model:
   val_ratio: 0.15
   embed_dim: 64
   num_workers: 2
-  checkpoint_interval: 2
+  checkpoint_interval: 1

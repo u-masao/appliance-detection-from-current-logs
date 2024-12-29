@@ -164,7 +164,7 @@ def train_and_evaluate_model(
 
         # Save checkpoint
         if (epoch + 1) % checkpoint_interval == 0:
-            chckpoint_dir = Path("models/checkpoint/")
+            checkpoint_dir = Path("models/checkpoint/")
             checkpoint_dir.mkdir(parents=True, exist_ok=True)
             checkpoint_path = (
                 checkpoint_dir / f"checkpoint_epoch_{epoch+1:0>4}.pth"

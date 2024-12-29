@@ -45,8 +45,26 @@ visualize:
 	PYTHONPATH=. uv run gradio src/visualize.py
 
 ## train force
+.PHONY: train
 train:
 	uv run dvc repro -s -f train_model inference
+
+STORAGE_PATH=/content/drive/MyDrive/dataset/appliance-detection-from-current-logs/files
+## sync_to_storage
+.PHONY: sync_to_storage
+sync_to_storage:
+	rsync -a data $(STORAGE_PATH)/data/
+	rsync -a mlflow $(STORAGE_PATH)/mlruns/
+	rsync -a models $(STORAGE_PATH)/models/
+	uv run dvc push
+
+## sync_from_storage
+.PHONY: sync_from_storage
+sync_from_storage:
+	rsync -a $(STORAGE_PATH)/data/ data/
+	rsync -a $(STORAGE_PATH)/mlruns/ mlruns/
+	rsync -a $(STORAGE_PATH)/models/ models/
+	uv run dvc pull
 
 #################################################################################
 # PROJECT RULES                                                                 #

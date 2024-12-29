@@ -175,3 +175,4 @@ cython_debug/
 /reports/figures/
 /nohup.out
 /data/raw/data.zip
+/.gradio/

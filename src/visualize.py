@@ -15,14 +15,13 @@ def load_input_data(input_filepath):
     print(f"load input data: {input_filepath}")
     infer_df = pd.read_parquet(input_filepath)
     global model, model_config
-    model, model_config = load_model("models/trained_model.pth")
+    model, model_config = load_model("models/best_model.pth")
     model.eval()
 
 
 load_input_data("data/interim/infer_train.parquet")
 
-train_data_path = "data/interim/train.parquet"
-feature_df = pd.read_parquet(train_data_path).iloc[[0]]
+feature_df = infer_df.iloc[[0]]
 target_columns = ["watt_black", "watt_red", "watt_kitchen", "watt_living"]
 
 

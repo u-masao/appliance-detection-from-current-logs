@@ -133,7 +133,7 @@ class TimeSeriesModel(nn.Module):
         # target processing
         tgt = self.tgt_input_projection(tgt)  # B, outSec, E
         tgt = self.positional_encoding(tgt)  # B, outSec, E
-        tgt = self.decoder(tgt, memory)  # (B, outSec, E), (B, outSec, E)
+        tgt = self.decoder(tgt, memory)  # (B, outSec, E), (B, inSec, E)
         tgt = self.tgt_output_projection(tgt)  # (B, outSec, outF)
         tgt = F.relu(tgt)  # value >= 0
         logger.debug(f"TimeSeriesModel.forward(), decoder {tgt.size()=}")

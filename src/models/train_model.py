@@ -1,5 +1,6 @@
 import logging
 import random
+from pathlib import Path
 
 import click
 import mlflow
@@ -135,6 +136,7 @@ def train_and_evaluate_model(
     num_epochs,
     logger,
     checkpoint_interval,
+    model_config,
 ):
     min_train_loss = float("inf")
     min_val_loss = float("inf")
@@ -162,8 +164,12 @@ def train_and_evaluate_model(
 
         # Save checkpoint
         if (epoch + 1) % checkpoint_interval == 0:
-            checkpoint_path = f"checkpoint_epoch_{epoch+1}.pt"
-            save_model(model, checkpoint_path)
+            chckpoint_dir = Path("models/checkpoint/")
+            checkpoint_dir.mkdir(parents=True, exist_ok=True)
+            checkpoint_path = (
+                checkpoint_dir / f"checkpoint_epoch_{epoch+1:0>4}.pth"
+            )
+            save_model(model, checkpoint_path, model_config=model_config)
             logger.info(f"Checkpoint saved: {checkpoint_path}")
         model.eval()
         val_loss = 0
@@ -212,6 +218,13 @@ def objective(
     logger = logging.getLogger(__name__)
     mlflow.start_run()
     target_columns = ["watt_black", "watt_red", "watt_kitchen", "watt_living"]
+    model_config = {
+        "input_sequence_length": input_length,
+        "input_dim": num_columns - 1,
+        "output_sequence_length": output_length,
+        "output_dim": len(target_columns),
+        "embed_dim": embed_dim,
+    }
     train_loader, val_loader, num_columns = load_and_prepare_data(
         train_path,
         val_path,
@@ -246,6 +259,7 @@ def objective(
         num_epochs,
         logger,
         checkpoint_interval,
+        model_config,
     )
     mlflow.end_run()
     logger.info("Training completed")

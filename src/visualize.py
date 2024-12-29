@@ -21,7 +21,8 @@ def load_input_data(input_filepath):
 
 load_input_data("data/interim/infer_train.parquet")
 
-feature_df = pd.read_parquet("data/interim/train.parquet").iloc[[0]]
+train_data_path = "data/interim/train.parquet"
+feature_df = pd.read_parquet(train_data_path).iloc[[0]]
 target_columns = ["watt_black", "watt_red", "watt_kitchen", "watt_living"]
 
 

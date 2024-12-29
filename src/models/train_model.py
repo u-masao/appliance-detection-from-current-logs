@@ -15,7 +15,7 @@ from torch.utils.data import DataLoader
 from tqdm import tqdm
 
 from src.models.dataset import TimeSeriesDataset, load_data
-from src.models.model import create_model, save_model
+from src.models.model import create_model, save_model, load_model
 
 
 def load_and_prepare_data(
@@ -28,7 +28,21 @@ def load_and_prepare_data(
     target_columns,
     seed,
     num_workers,
+    checkpoint_interval,
 ):
+    """
+    Train and evaluate the model, saving checkpoints at specified intervals.
+
+    :param model: The model to train.
+    :param train_loader: DataLoader for training data.
+    :param val_loader: DataLoader for validation data.
+    :param optimizer: Optimizer for training.
+    :param criterion: Loss function.
+    :param device: Device to use for training.
+    :param num_epochs: Number of epochs to train.
+    :param logger: Logger for logging information.
+    :param checkpoint_interval: Interval (in epochs) to save model checkpoints.
+    """
     train_df = load_data(train_path, fraction=fraction)
     val_df = load_data(val_path, fraction=fraction)
     train_dataset = TimeSeriesDataset(
@@ -146,7 +160,11 @@ def train_and_evaluate_model(
         mlflow.log_metric("loss.train", train_loss, step=epoch + 1)
         mlflow.log_metric("min_loss.train", min_train_loss, step=epoch + 1)
 
-        # validation
+        # Save checkpoint
+        if (epoch + 1) % checkpoint_interval == 0:
+            checkpoint_path = f"checkpoint_epoch_{epoch+1}.pt"
+            save_model(model, checkpoint_path)
+            logger.info(f"Checkpoint saved: {checkpoint_path}")
         model.eval()
         val_loss = 0
         val_iterations = 0
@@ -325,7 +343,14 @@ def objective(
 @click.option(
     "--num_workers", type=int, default=4, help="Number of dataloader workers"
 )
+@click.option(
+    "--checkpoint_interval",
+    type=int,
+    default=5,
+    help="Interval (in epochs) to save model checkpoints.",
+)
 def main(
+    checkpoint_interval,
     batch_size,
     input_length,
     embed_dim,

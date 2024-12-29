@@ -1,6 +1,7 @@
 import torch
 import gradio as gr
 from src.models.model import load_model
+from src.models.dataset import TimeSeriesDataset
 import japanize_matplotlib  # noqa: F401
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -14,6 +15,12 @@ def load_input_data(input_filepath):
     global infer_df
     print(f"load input data: {input_filepath}")
     infer_df = pd.read_parquet(input_filepath)
+    dataset = TimeSeriesDataset(
+        data=infer_df,
+        input_length=model_config["input_sequence_length"],
+        output_length=model_config["output_sequence_length"],
+        target_columns=target_columns,
+    )
     global model, model_config
     model, model_config = load_model("models/best_model.pth")
     model.eval()

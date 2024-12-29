@@ -173,6 +173,6 @@ cython_debug/
 .aider*
 /mlruns/
 /reports/figures/
-/nohup.out
+/nohup.*
 /data/raw/data.zip
 /.gradio/

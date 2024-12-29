@@ -12,7 +12,7 @@ model_config = None
 
 
 def load_input_data(input_filepath):
-    global infer_df
+    global infer_df, model, model_config
     print(f"load input data: {input_filepath}")
     infer_df = pd.read_parquet(input_filepath)
     dataset = TimeSeriesDataset(

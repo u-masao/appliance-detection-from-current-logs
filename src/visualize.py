@@ -9,6 +9,7 @@ from src.models.model import load_model
 
 target_columns = ["watt_black", "watt_red", "watt_kitchen", "watt_living"]
 model_filepath = "models/best_model.pth"
+model_filepath = "checkpoint_epoch_15.pt"
 fraction = 0.01
 
 input_df = None
@@ -24,6 +25,8 @@ def load_input_data(input_filepath):
 
     # load model
     model, model_config = load_model(model_filepath)
+    print(f"{model=}")
+    print(f"{model_config=}")
     model.eval()
 
     # make dataset

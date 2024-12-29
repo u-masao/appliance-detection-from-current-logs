@@ -214,17 +214,11 @@ def objective(
     seed,
     num_workers,
     checkpoint_interval,
+    model_config,
 ):
     logger = logging.getLogger(__name__)
     mlflow.start_run()
     target_columns = ["watt_black", "watt_red", "watt_kitchen", "watt_living"]
-    model_config = {
-        "input_sequence_length": input_length,
-        "input_dim": num_columns - 1,
-        "output_sequence_length": output_length,
-        "output_dim": len(target_columns),
-        "embed_dim": embed_dim,
-    }
     train_loader, val_loader, num_columns = load_and_prepare_data(
         train_path,
         val_path,
@@ -421,6 +415,17 @@ def main(
         storage=storage, direction="minimize", sampler=sampler
     )
 
+    # Load data to determine the number of columns
+    train_df = load_data(train_path, fraction=data_fraction)
+    num_columns = train_df.shape[1]
+    model_config = {
+        "input_sequence_length": input_length,
+        "input_dim": num_columns - 1,
+        "output_sequence_length": output_length,
+        "output_dim": len(target_columns),
+        "embed_dim": embed_dim,
+    }
+
     study.optimize(
         lambda trial: objective(
             trial,
@@ -440,6 +445,7 @@ def main(
             seed,
             num_workers,
             checkpoint_interval,
+            model_config,
         ),
         n_trials=n_trials,
         n_jobs=-1,  # Use all available cores
@@ -449,16 +455,6 @@ def main(
     best_trial = study.best_trial
     # Use CLI options if provided, otherwise use best trial parameters
 
-    # Load data to determine the number of columns
-    train_df = load_data(train_path, fraction=data_fraction)
-    num_columns = train_df.shape[1]
-    model_config = {
-        "input_sequence_length": input_length,
-        "input_dim": num_columns - 1,
-        "output_sequence_length": output_length,
-        "output_dim": len(target_columns),
-        "embed_dim": embed_dim,
-    }
     model = create_model(**model_config)
 
     # Output model architecture

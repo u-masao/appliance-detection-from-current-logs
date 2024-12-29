@@ -1,63 +1,52 @@
-import torch
 import gradio as gr
-from src.models.model import load_model
-from src.models.dataset import TimeSeriesDataset
 import japanize_matplotlib  # noqa: F401
 import matplotlib.pyplot as plt
 import pandas as pd
+import torch
 
-infer_df = None
+from src.models.dataset import TimeSeriesDataset, load_data
+from src.models.model import load_model
+
+target_columns = ["watt_black", "watt_red", "watt_kitchen", "watt_living"]
+model_filepath = "models/best_model.pth"
+fraction = 0.01
+
+input_df = None
 model = None
-model_config = None
+dataset = None
 
 
 def load_input_data(input_filepath):
-    global infer_df, model, model_config
-    print(f"load input data: {input_filepath}")
-    infer_df = pd.read_parquet(input_filepath)
+    global input_df, model, dataset
+
+    # load data
+    input_df = load_data(input_filepath, fraction=fraction)
+
+    # load model
+    model, model_config = load_model(model_filepath)
+    model.eval()
+
+    # make dataset
     dataset = TimeSeriesDataset(
-        data=infer_df,
+        data=input_df,
         input_length=model_config["input_sequence_length"],
         output_length=model_config["output_sequence_length"],
         target_columns=target_columns,
     )
-    model, model_config = load_model("models/best_model.pth")
-    model.eval()
+
+    # inform data loaded
+    gr.Info(f"data loaded: {input_filepath}")
 
 
 load_input_data("data/interim/train.parquet")
 
-feature_df = infer_df.iloc[[0]]
-target_columns = ["watt_black", "watt_red", "watt_kitchen", "watt_living"]
 
-
-def perform_inference(input_data):
-    with torch.no_grad():
-        input_tensor = torch.tensor(input_data).float().unsqueeze(0)
-        output, _ = model(input_tensor, None)
-    return output.squeeze(0).numpy()
-
-def create_dataframes(row_number):
-    # Perform inference
-    input_data = infer_df.iloc[row_number].values
-    predicted_output = perform_inference(input_data)
-    sr = infer_df.iloc[row_number]
+def create_dataframes(x, y, output):
     train_df = pd.DataFrame(
-        sr[sr.index.str.startswith("train_")].values.reshape(-1, 12),
-        columns=feature_df.drop("gap", axis=1).columns,
+        x, columns=input_df.iloc[[0]].drop("gap", axis=1).columns
     )
-    actual_df = pd.DataFrame(
-        sr[sr.index.str.startswith("actual_")].values.reshape(
-            -1, len(target_columns)
-        ),
-        columns=target_columns,
-    )
-    pred_df = pd.DataFrame(
-        sr[sr.index.str.startswith("pred_")].values.reshape(
-            -1, len(target_columns)
-        ),
-        columns=target_columns,
-    )
+    actual_df = pd.DataFrame(y, columns=target_columns)
+    pred_df = pd.DataFrame(output, columns=target_columns)
     append_df = pd.concat(
         [actual_df, pred_df.add_prefix("pred_")], axis=1
     ).assign(predict=1)
@@ -96,35 +85,45 @@ def create_plot(concat_df, append_df):
     return fig
 
 
-def load_and_display_row(row_number):
-    concat_df, append_df = create_dataframes(row_number)
-    fig = create_plot(concat_df, append_df)
+def perform_inference(data_index):
+    with torch.no_grad():
+        x, y = dataset[data_index]
+        output, embed = model(x.unsqueeze(0), y.unsqueeze(0))
+        output = output[0]  # B, outSeq, outF -> outSeq, outF
+        embed = embed[0]  # B, E -> # E
+
+        concat_df, append_df = create_dataframes(x, y, output)
+        fig = create_plot(concat_df, append_df)
+
     return gr.Plot(value=fig), gr.DataFrame(concat_df)
 
 
 with gr.Blocks() as demo:
     gr.Markdown("# Parquet Data Viewer")
 
-    row_number = gr.Number(value=0, minimum=0, maximum=len(infer_df))
+    with gr.Row():
+        input_filepath = gr.Dropdown(
+            choices=[
+                ("train", "data/interim/train.parquet"),
+                ("valid", "data/interim/val.parquet"),
+                ("test", "data/interim/test.parquet"),
+            ]
+        )
+        # reload_button = gr.Button("reload")
+        input_filepath.select(load_input_data, inputs=[input_filepath])
 
-    selector = gr.Dropdown(
-        choices=[
-            ("train", "data/interim/infer_train.parquet"),
-            ("valid", "data/interim/infer_val.parquet"),
-            ("test", "data/interim/infer_test.parquet"),
-        ]
-    )
-    reload_button = gr.Button("reload")
-    output_box = gr.Plot()
-    output_dataframe = gr.DataFrame()
+    with gr.Tab("model check"):
+        model_data_index = gr.Number(value=0, minimum=0, maximum=len(dataset))
+        model_data_reload_button = gr.Button("reload")
+        model_output_box = gr.Plot()
+        model_output_dataframe = gr.DataFrame()
 
-    row_number.change(
-        fn=load_and_display_row,
-        inputs=row_number,
-        outputs=[output_box, output_dataframe],
-    )
+        model_data_index.change(
+            fn=perform_inference,
+            inputs=model_data_index,
+            outputs=[model_output_box, model_output_dataframe],
+        )
 
-    reload_button.click(load_input_data, inputs=[selector])
 
 if __name__ == "__main__":
     demo.launch(share=False)

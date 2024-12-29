@@ -134,6 +134,7 @@ def train_and_evaluate_model(
     device,
     num_epochs,
     logger,
+    checkpoint_interval,
 ):
     min_train_loss = float("inf")
     min_val_loss = float("inf")
@@ -206,6 +207,7 @@ def objective(
     force_cpu,
     seed,
     num_workers,
+    checkpoint_interval,
 ):
     logger = logging.getLogger(__name__)
     mlflow.start_run()
@@ -243,6 +245,7 @@ def objective(
         device,
         num_epochs,
         logger,
+        checkpoint_interval,
     )
     mlflow.end_run()
     logger.info("Training completed")
@@ -349,7 +352,6 @@ def objective(
     help="Interval (in epochs) to save model checkpoints.",
 )
 def main(
-    checkpoint_interval,
     batch_size,
     input_length,
     embed_dim,
@@ -368,6 +370,7 @@ def main(
     force_cpu,
     seed,
     num_workers,
+    checkpoint_interval,
 ):
     """
     Train the transformer model with the specified parameters.
@@ -422,6 +425,7 @@ def main(
             force_cpu,
             seed,
             num_workers,
+            checkpoint_interval,
         ),
         n_trials=n_trials,
         n_jobs=-1,  # Use all available cores

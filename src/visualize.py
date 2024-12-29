@@ -9,7 +9,7 @@ from src.models.model import load_model
 
 target_columns = ["watt_black", "watt_red", "watt_kitchen", "watt_living"]
 model_filepath = "models/best_model.pth"
-model_filepath = "checkpoint_epoch_15.pt"
+model_filepath = "models/checkpoint/checkpoint_epoch_0014.pth"
 fraction = 0.01
 
 input_df = None

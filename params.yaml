@@ -9,3 +9,4 @@ train_model:
   val_ratio: 0.15
   embed_dim: 64
   num_workers: 2
+  checkpoint_interval: 1

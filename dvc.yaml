@@ -79,6 +79,7 @@ stages:
       - data/interim/val.parquet
     outs:
       - models/best_model.pth
+      - models/checkpoint/
 
   inference:
     matrix:

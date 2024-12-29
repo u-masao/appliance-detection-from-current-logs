@@ -106,4 +106,4 @@ with gr.Blocks() as demo:
     reload_button.click(load_input_data, inputs=[selector])
 
 if __name__ == "__main__":
-    demo.launch(share=False)
+    demo.launch(share=True)

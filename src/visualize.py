@@ -1,16 +1,22 @@
+import torch
 import gradio as gr
+from src.models.model import load_model
 import japanize_matplotlib  # noqa: F401
 import matplotlib.pyplot as plt
 import pandas as pd
 
 infer_df = None
+model = None
+model_config = None
 
 
 def load_input_data(input_filepath):
     global infer_df
     print(f"load input data: {input_filepath}")
     infer_df = pd.read_parquet(input_filepath)
-    return
+    global model, model_config
+    model, model_config = load_model("models/trained_model.pth")
+    model.eval()
 
 
 load_input_data("data/interim/infer_train.parquet")
@@ -19,7 +25,16 @@ feature_df = pd.read_parquet("data/interim/train.parquet").iloc[[0]]
 target_columns = ["watt_black", "watt_red", "watt_kitchen", "watt_living"]
 
 
+def perform_inference(input_data):
+    with torch.no_grad():
+        input_tensor = torch.tensor(input_data).float().unsqueeze(0)
+        output, _ = model(input_tensor, None)
+    return output.squeeze(0).numpy()
+
 def create_dataframes(row_number):
+    # Perform inference
+    input_data = infer_df.iloc[row_number].values
+    predicted_output = perform_inference(input_data)
     sr = infer_df.iloc[row_number]
     train_df = pd.DataFrame(
         sr[sr.index.str.startswith("train_")].values.reshape(-1, 12),

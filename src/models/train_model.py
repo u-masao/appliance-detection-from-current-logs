@@ -29,6 +29,8 @@ def load_and_prepare_data(
     seed,
     num_workers,
     checkpoint_interval,
+    checkpoint_interval,
+    checkpoint_interval=checkpoint_interval,
 ):
     """
     Train and evaluate the model, saving checkpoints at specified intervals.

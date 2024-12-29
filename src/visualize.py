@@ -88,7 +88,9 @@ def create_plot(concat_df, append_df):
 def perform_inference(data_index):
     with torch.no_grad():
         x, y = dataset[data_index]
-        output, embed = model(x.unsqueeze(0), y.unsqueeze(0))
+        output, embed = model(
+            x.unsqueeze(0), y.unsqueeze(0)
+        )  # mini batch size
         output = output[0]  # B, outSeq, outF -> outSeq, outF
         embed = embed[0]  # B, E -> # E
 
@@ -126,4 +128,4 @@ with gr.Blocks() as demo:
 
 
 if __name__ == "__main__":
-    demo.launch(share=False)
+    demo.launch(share=True)

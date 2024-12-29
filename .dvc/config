@@ -1,0 +1,4 @@
+[core]
+    remote = storage
+['remote "storage"']
+    url = /content/drive/MyDrive/dataset/appliance-detection-from-current-logs/dvc/

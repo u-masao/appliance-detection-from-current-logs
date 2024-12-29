@@ -25,7 +25,7 @@ def load_input_data(input_filepath):
     model.eval()
 
 
-load_input_data("data/interim/infer_train.parquet")
+load_input_data("data/interim/train.parquet")
 
 feature_df = infer_df.iloc[[0]]
 target_columns = ["watt_black", "watt_red", "watt_kitchen", "watt_living"]

@@ -21,7 +21,6 @@ def load_input_data(input_filepath):
         output_length=model_config["output_sequence_length"],
         target_columns=target_columns,
     )
-    global model, model_config
     model, model_config = load_model("models/best_model.pth")
     model.eval()
 

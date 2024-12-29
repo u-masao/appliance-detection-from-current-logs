@@ -8,8 +8,8 @@ from src.models.dataset import TimeSeriesDataset, load_data
 from src.models.model import load_model
 
 target_columns = ["watt_black", "watt_red", "watt_kitchen", "watt_living"]
-model_filepath = "models/best_model.pth"
-model_filepath = "models/checkpoint/checkpoint_epoch_0014.pth"
+# model_filepath = "models/best_model.pth"
+model_filepath = "models/checkpoint/epoch_0012.pth"
 fraction = 0.01
 
 input_df = None

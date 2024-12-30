@@ -9,13 +9,12 @@ from src.models.model import load_model
 
 target_columns = ["watt_black", "watt_red", "watt_kitchen", "watt_living"]
 model_filepath = "models/best_model.pth"
-# model_filepath = "models/checkpoint/epoch_0012.pth"
 fraction = 0.01
 
-input_df = None
+input_df = pd.DataFrame()
+infered_df = pd.DataFrame()
 model = None
 dataset = None
-infered_df = None
 
 
 def load_input_data(data_type):

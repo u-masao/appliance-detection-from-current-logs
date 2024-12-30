@@ -58,7 +58,7 @@ class TrainingConfig(BaseModel):
 from src.models.model import create_model, load_model, save_model
 
 
-def load_and_prepare_data(data_config: DataConfig, model_config: ModelConfig, training_config: TrainingConfig):
+def load_and_prepare_data(train_path, val_path, data_config: DataConfig, model_config: ModelConfig, training_config: TrainingConfig):
     """
     Train and evaluate the model, saving checkpoints at specified intervals.
 
@@ -72,8 +72,8 @@ def load_and_prepare_data(data_config: DataConfig, model_config: ModelConfig, tr
     :param logger: Logger for logging information.
     :param checkpoint_interval: Interval (in epochs) to save model checkpoints.
     """
-    train_df = load_data(data_config.train_path, fraction=data_config.fraction)
-    val_df = load_data(data_config.val_path, fraction=data_config.fraction)
+    train_df = load_data(train_path, fraction=data_config.fraction)
+    val_df = load_data(val_path, fraction=data_config.fraction)
     train_dataset = TimeSeriesDataset(
         train_df,
         input_length=model_config.input_length,
@@ -217,7 +217,7 @@ def objective(trial, data_config: DataConfig, model_config: ModelConfig, trainin
     logger = logging.getLogger(__name__)
     mlflow.start_run()
     target_columns = ["watt_black", "watt_red", "watt_kitchen", "watt_living"]
-    train_loader, val_loader, num_columns = load_and_prepare_data(data_config, model_config, training_config)
+    train_loader, val_loader, num_columns = load_and_prepare_data(train_path, val_path, data_config, model_config, training_config)
     device = setup_device(model_config.force_cpu)
     logger.info(f"Using device: {device}")
     model_config.num_columns = num_columns

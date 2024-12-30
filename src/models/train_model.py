@@ -196,6 +196,9 @@ def objective(
         model_config,
         training_config,
     )
+    best_model = None
+    best_val_loss = float("inf")
+
     val_loss = train_and_evaluate_model(
         model,
         train_loader,
@@ -206,12 +209,8 @@ def objective(
         model_config,
         training_config,
     )
-        if avg_val_loss < best_val_loss:
-            best_val_loss = avg_val_loss
-            best_model = model.state_dict()
 
-    # Save the best model
-    if best_model is not None:
+    if best_val_loss < float("inf"):
         save_model(model, model_output_path, model_config=model_config)
         logger.info(f"Best model saved with validation loss: {best_val_loss}")
     logger.info("Training completed")

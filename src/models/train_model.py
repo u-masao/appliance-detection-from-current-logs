@@ -255,9 +255,9 @@ def objective(
     help="Hidden dimension for the model.",
 )
 @click.option(
-    "--num_heads",
+    "--nhead",
     type=int,
-    default=None,
+    default=8,
     help="Number of attention heads for the transformer model.",
 )
 @click.option(
@@ -271,6 +271,12 @@ def objective(
     type=int,
     default=32,
     help="Batch size for the DataLoader.",
+)
+@click.option(
+    "--lr",
+    type=float,
+    default=0.000514804885292421,
+    help="Learning ratio",
 )
 @click.option(
     "--train_ratio",
@@ -315,7 +321,8 @@ def main(
     batch_size,
     input_sequence_length,
     embed_dim,
-    num_heads,
+    nhead,
+    lr,
     num_layers,
     output_sequence_length,
     train_path,
@@ -356,16 +363,17 @@ def main(
         batch_size=batch_size,
         num_epochs=num_epochs,
         checkpoint_interval=checkpoint_interval,
+        lr=lr,
         force_cpu=force_cpu,
         seed=seed,
     )
 
     model_config = ModelConfig(
         input_sequence_length=input_sequence_length,
-        input_dim=12,
         output_sequence_length=output_sequence_length,
         output_dim=len(training_config.target_columns),
         embed_dim=embed_dim,
+        nhead=nhead,
     )
 
     storage = optuna.storages.RDBStorage(url=training_config.optuna_db_url)

@@ -109,9 +109,6 @@ def train_and_evaluate_model(
     num_epochs = training_config.num_epochs
     checkpoint_interval = training_config.checkpoint_interval
 
-    best_model = None
-    best_val_loss = float("inf")
-
     for epoch in range(num_epochs):
         # train
         model.train()
@@ -169,11 +166,10 @@ def objective(
     trial,
     train_path,
     val_path,
+    model_output_path,
     data_config: DataConfig,
     model_config: ModelConfig,
     training_config: TrainingConfig,
-    model_output_path,
-    study,
 ):
     logger = logging.getLogger(__name__)
     mlflow.start_run(run_name=f"trial_{trial.number}")
@@ -196,7 +192,6 @@ def objective(
         model_config,
         training_config,
     )
-    best_model = None
     best_val_loss = float("inf")
 
     val_loss = train_and_evaluate_model(
@@ -384,25 +379,15 @@ def main(
             trial,
             train_path,
             val_path,
+            model_output_path,
             data_config,
             model_config,
             training_config,
-            model_output_path,
-            study,
         ),
         n_trials=n_trials,
         n_jobs=-1,  # Use all available cores
     )
     logger.info(f"Best trial: {study.best_trial}")
-    # Define the model with the best parameters
-    # Use CLI options if provided, otherwise use best trial parameters
-
-    model = create_model(model_config).to(training_config.device)
-
-    # Output model architecture
-    logger.debug("Model architecture:")
-    logger.debug(model)
-    save_model(model, model_output_path, model_config=model_config)
 
 
 if __name__ == "__main__":

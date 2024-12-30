@@ -175,11 +175,11 @@ def log_config_and_model(data_config, model_config, training_config, model):
         ["training", training_config],
     ]:
         log_params_to_mlflow(config, prefix)
-    total_params = sum(
-        [p.numel() for p in model.parameters() if p.requires_grad]
-    )
 
-    mlflow.log_param("model.total_params", total_params)
+    # total_params = sum(
+        # [p.numel() for p in model.parameters() if p.requires_grad]
+    # )
+    # mlflow.log_param("model.total_params", total_params)
 
 
 best_val_loss = float("inf")

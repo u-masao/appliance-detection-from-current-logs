@@ -81,6 +81,14 @@ def load_and_prepare_data(data_config: DataConfig, model_config: ModelConfig, tr
         input_length=model_config.input_length,
         output_length=model_config.output_length,
         target_columns=data_config.target_columns,
+        input_length=input_length,
+        num_columns=num_columns,
+        output_length=output_length,
+        embed_dim=embed_dim,
+        target_columns=data_config.target_columns,
+        device=device,
+        force_cpu=force_cpu,
+        seed=seed,
     )
     val_dataset = TimeSeriesDataset(
         val_df,

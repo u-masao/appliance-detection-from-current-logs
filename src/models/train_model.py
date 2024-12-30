@@ -411,6 +411,7 @@ def main(
 
     study.optimize(
         lambda trial: objective(
+            trial,
             train_path,
             val_path,
             model_output_path,

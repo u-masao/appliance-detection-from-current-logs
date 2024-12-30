@@ -21,22 +21,34 @@ from src.models.dataset import TimeSeriesDataset, load_data
 
 class DataConfig(BaseModel):
     fraction: float = 1.0
-    target_columns: list = ["watt_black", "watt_red", "watt_kitchen", "watt_living"]
+    target_columns: list = [
+        "watt_black",
+        "watt_red",
+        "watt_kitchen",
+        "watt_living",
+    ]
     seed: int = 42
     num_workers: int = 4
+
 
 class ModelConfig(BaseModel):
     input_length: int = 60
     num_columns: int = 0
     output_length: int = 5
     embed_dim: int = 64
-    target_columns: list = ["watt_black", "watt_red", "watt_kitchen", "watt_living"]
+    target_columns: list = [
+        "watt_black",
+        "watt_red",
+        "watt_kitchen",
+        "watt_living",
+    ]
     device: torch.device = torch.device("cpu")
     force_cpu: bool = False
     seed: int = 42
 
     class Config:
         arbitrary_types_allowed = True
+
 
 class TrainingConfig(BaseModel):
     batch_size: int = 32
@@ -46,7 +58,12 @@ class TrainingConfig(BaseModel):
     num_columns: int = 0
     output_length: int = 5
     embed_dim: int = 64
-    target_columns: list = ["watt_black", "watt_red", "watt_kitchen", "watt_living"]
+    target_columns: list = [
+        "watt_black",
+        "watt_red",
+        "watt_kitchen",
+        "watt_living",
+    ]
     device: torch.device = torch.device("cpu")
     force_cpu: bool = False
     seed: int = 42
@@ -58,7 +75,13 @@ class TrainingConfig(BaseModel):
 from src.models.model import create_model, load_model, save_model
 
 
-def load_and_prepare_data(train_path, val_path, data_config: DataConfig, model_config: ModelConfig, training_config: TrainingConfig):
+def load_and_prepare_data(
+    train_path,
+    val_path,
+    data_config: DataConfig,
+    model_config: ModelConfig,
+    training_config: TrainingConfig,
+):
     """
     Train and evaluate the model, saving checkpoints at specified intervals.
 
@@ -213,18 +236,42 @@ def train_and_evaluate_model(
     return val_loss
 
 
-def objective(trial, train_path, val_path, data_config: DataConfig, model_config: ModelConfig, training_config: TrainingConfig, model_output_path, study):
+def objective(
+    trial,
+    train_path,
+    val_path,
+    data_config: DataConfig,
+    model_config: ModelConfig,
+    training_config: TrainingConfig,
+    model_output_path,
+    study,
+):
     logger = logging.getLogger(__name__)
     mlflow.start_run()
     target_columns = ["watt_black", "watt_red", "watt_kitchen", "watt_living"]
-    train_loader, val_loader, num_columns = load_and_prepare_data(train_path, val_path, data_config, model_config, training_config)
+    train_loader, val_loader, num_columns = load_and_prepare_data(
+        train_path, val_path, data_config, model_config, training_config
+    )
     device = setup_device(model_config.force_cpu)
     logger.info(f"Using device: {device}")
     model_config.num_columns = num_columns
     model_config.device = device
 
-    model, optimizer, criterion = create_and_configure_model(trial, model_config)
-    val_loss = train_and_evaluate_model(model, train_loader, val_loader, optimizer, criterion, device, training_config.num_epochs, logger, training_config.checkpoint_interval, model_config)
+    model, optimizer, criterion = create_and_configure_model(
+        trial, model_config
+    )
+    val_loss = train_and_evaluate_model(
+        model,
+        train_loader,
+        val_loader,
+        optimizer,
+        criterion,
+        device,
+        training_config.num_epochs,
+        logger,
+        training_config.checkpoint_interval,
+        model_config,
+    )
     mlflow.end_run()
     logger.info("Training completed")
     logger.info(f"Final validation loss: {val_loss}")
@@ -375,7 +422,9 @@ def main(
         }
     )
 
-    data_config = DataConfig(fraction=data_fraction, seed=seed, num_workers=num_workers)
+    data_config = DataConfig(
+        fraction=data_fraction, seed=seed, num_workers=num_workers
+    )
     storage = optuna.storages.RDBStorage(
         url="sqlite:///./data/interim/optuna_study.db"
     )
@@ -406,7 +455,16 @@ def main(
     )
 
     study.optimize(
-        lambda trial: objective(trial, train_path, val_path, data_config, model_config, training_config, model_output_path, study),
+        lambda trial: objective(
+            trial,
+            train_path,
+            val_path,
+            data_config,
+            model_config,
+            training_config,
+            model_output_path,
+            study,
+        ),
         n_trials=n_trials,
         n_jobs=-1,  # Use all available cores
     )
@@ -415,7 +473,13 @@ def main(
     best_trial = study.best_trial
     # Use CLI options if provided, otherwise use best trial parameters
 
-    model = create_model(**model_config)
+    model = create_model(
+        input_sequence_length=config.input_length,
+        input_dim=config.num_columns - 1,
+        output_sequence_length=config.output_length,
+        output_dim=len(config.target_columns),
+        embed_dim=config.embed_dim,
+    ).to(config.device)
 
     # Output model architecture
     logger.debug("Model architecture:")

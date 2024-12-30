@@ -122,6 +122,7 @@ def train_and_evaluate_model(
     checkpoint_interval = training_config.checkpoint_interval
 
     for epoch in range(num_epochs):
+        mlflow.log_metric("epoch", epoch, step=epoch)
         # train
         model.train()
         pbar = tqdm(

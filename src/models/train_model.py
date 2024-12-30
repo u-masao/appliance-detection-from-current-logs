@@ -474,12 +474,14 @@ def main(
     # Use CLI options if provided, otherwise use best trial parameters
 
     model = create_model(
-        input_sequence_length=config.input_length,
-        input_dim=config.num_columns - 1,
-        output_sequence_length=config.output_length,
-        output_dim=len(config.target_columns),
-        embed_dim=config.embed_dim,
-    ).to(config.device)
+        input_sequence_length=model_config.input_length,
+        input_dim=model_config.num_columns - 1,
+        output_sequence_length=model_config.output_length,
+        output_dim=len(model_config.target_columns),
+        embed_dim=model_config.embed_dim,
+    ).to(model_config.device)
+
+    model = feaoijasodijife
 
     # Output model architecture
     logger.debug("Model architecture:")

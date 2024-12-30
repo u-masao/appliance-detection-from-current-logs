@@ -71,8 +71,8 @@ stages:
       size: 62374638
   train_model:
     cmd: python -m src.models.train_model data/interim/train.parquet data/interim/val.parquet
-      models/best_model.pth --data_fraction 0.005 --n_trials 6 --num_epochs 2 --batch_size
-      32 --input_sequence_length 360 --output_sequence_length 5 --embed_dim 2 --num_workers
+      models/best_model.pth --data_fraction 0.01 --n_trials 2 --num_epochs 1 --batch_size
+      32 --input_sequence_length 360 --output_sequence_length 5 --embed_dim 32 --num_workers
       2 --checkpoint_interval 1 --nhead 2 --lr 0.000514804885292421
     deps:
     - path: data/interim/train.parquet
@@ -93,18 +93,18 @@ stages:
       size: 5886
     - path: src/models/train_model.py
       hash: md5
-      md5: c5f854e91f34d4001e25d48aa3bd6db3
-      size: 12030
+      md5: e8e0ef3ae9473455442d52c9ba8e0b1c
+      size: 12368
     outs:
     - path: models/best_model.pth
       hash: md5
-      md5: c3fc66a6d4f346ac8bde1baa596e353f
-      size: 80482
+      md5: 6057df99770f2a2660a65d24cba761ef
+      size: 318818
     - path: models/checkpoint/
       hash: md5
-      md5: 3a2db48fc4ce1ce014959ef89b6d5ffa.dir
-      size: 160964
-      nfiles: 2
+      md5: bb8b9b157f24cf0f89bf210c11f74f68.dir
+      size: 318818
+      nfiles: 1
   split_data:
     cmd: python src/data/split_data.py data/interim/features.parquet data/interim/train.parquet
       data/interim/val.parquet data/interim/test.parquet --train_ratio 0.7 --val_ratio

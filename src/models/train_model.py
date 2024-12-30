@@ -163,6 +163,7 @@ def train_and_evaluate_model(
 
 
 def objective(
+    best_val_loss,
     trial,
     train_path,
     val_path,
@@ -205,6 +206,7 @@ def objective(
         training_config,
     )
 
+    nonlocal best_val_loss
     if val_loss < best_val_loss:
         best_val_loss = val_loss
         save_model(model, model_output_path, model_config=model_config)
@@ -383,9 +385,10 @@ def main(
         storage=storage, direction="minimize", sampler=sampler
     )
 
+    best_val_loss = float("inf")
     study.optimize(
         lambda trial: objective(
-            trial,
+            best_val_loss,
             train_path,
             val_path,
             model_output_path,

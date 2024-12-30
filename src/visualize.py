@@ -106,16 +106,23 @@ def create_plot(concat_df, append_df):
 def perform_inference(data_index):
     with torch.no_grad():
         x, y = dataset[data_index]
-        output, embed = model(
-            x.unsqueeze(0), y.unsqueeze(0)
-        )  # mini batch size
-        output = output[0]  # B, outSeq, outF -> outSeq, outF
-        embed = embed[0]  # B, E -> # E
+        zero_y = torch.zeros(y.size())
+        output, embed = model(x.unsqueeze(0), y.unsqueeze(0))
+        output_zero, embed_zero = model(x.unsqueeze(0), zero_y.unsqueeze(0))
 
-        concat_df, append_df = create_dataframes(x, y, output)
+        concat_df, append_df = create_dataframes(x, y, output[0])
+        concat_zero_df, append_zero_df = create_dataframes(
+            x, y, output_zero[0]
+        )
         fig = create_plot(concat_df, append_df)
+        fig_zero = create_plot(concat_zero_df, append_zero_df)
 
-    return gr.Plot(value=fig), gr.DataFrame(concat_df)
+    return (
+        gr.Plot(value=fig),
+        gr.Plot(value=fig_zero),
+        gr.DataFrame(concat_df.tail(60)),
+        gr.DataFrame(concat_zero_df.tail(60)),
+    )
 
 
 with gr.Blocks() as demo:
@@ -128,7 +135,9 @@ with gr.Blocks() as demo:
         model_data_index = gr.Number(value=0, minimum=0, maximum=len(dataset))
         model_data_reload_button = gr.Button("reload")
         model_output_box = gr.Plot()
+        model_output_box_zero = gr.Plot()
         model_output_dataframe = gr.DataFrame()
+        model_output_dataframe_zero = gr.DataFrame()
 
     with gr.Tab("data check"):
         infered_data_index = gr.Number(
@@ -144,7 +153,12 @@ with gr.Blocks() as demo:
     model_data_index.change(
         fn=perform_inference,
         inputs=model_data_index,
-        outputs=[model_output_box, model_output_dataframe],
+        outputs=[
+            model_output_box,
+            model_output_box_zero,
+            model_output_dataframe,
+            model_output_dataframe_zero,
+        ],
     )
     infered_data_index.change(
         fn=take_infered_data,

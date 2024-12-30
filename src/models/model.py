@@ -48,16 +48,6 @@ class TimeSeriesModel(nn.Module):
     def __init__(
         self,
         config: ModelConfig,
-        # input_sequence_length: int,
-        # input_dim: int,
-        # output_sequence_length: int,
-        # output_dim: int,
-        # embed_dim: int,
-        # nhead: int = 8,
-        # num_encoder_layers: int = 3,
-        # num_decoder_layers: int = 3,
-        # ff_dim: int = 32,
-        # dropout=0.1,
     ):
         super(TimeSeriesModel, self).__init__()
 
@@ -155,8 +145,7 @@ def create_model(config: ModelConfig):
     if config.embed_dim % config.nhead != 0:
         raise ValueError("input_dim must be divisible by nhead")
 
-    model = TimeSeriesModel(config)
-    return model
+    return TimeSeriesModel(config)
 
 
 def save_model(model, path, model_config: ModelConfig):

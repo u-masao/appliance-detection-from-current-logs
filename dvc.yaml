@@ -96,6 +96,7 @@ stages:
       --data_fraction ${train_model.data_fraction}
       --input_length ${train_model.input_length}
       --output_length ${train_model.output_length}
+      --data_fraction ${train_model.data_fraction}
     deps:
       - src/models/inference.py
       - src/models/model.py

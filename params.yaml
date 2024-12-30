@@ -7,6 +7,6 @@ train_model:
   batch_size: 32
   train_ratio: 0.7
   val_ratio: 0.15
-  embed_dim: 64
+  embed_dim: 8
   num_workers: 1
   checkpoint_interval: 1

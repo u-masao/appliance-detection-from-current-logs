@@ -50,6 +50,8 @@ class TimeSeriesModel(nn.Module):
         config: ModelConfig,
     ):
         super(TimeSeriesModel, self).__init__()
+        logger = logging.getLogger(__name__)
+        logging.info(f"init TimeSeriesModel: {config.model_dump()}")
 
         # fields
         self.config = config
@@ -143,7 +145,10 @@ class TimeSeriesModel(nn.Module):
 
 def create_model(config: ModelConfig):
     if config.embed_dim % config.nhead != 0:
-        raise ValueError("input_dim must be divisible by nhead")
+        raise ValueError(
+            f"embed_dim must be divisible by nhead: "
+            f"embed_dim:{config.embed_dim}, nhead:{config.nhead} "
+        )
 
     return TimeSeriesModel(config)
 

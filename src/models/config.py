@@ -30,7 +30,7 @@ class TrainingConfig(BaseModel):
         "watt_living",
     ]
 
-    lr = 0.000514804885292421
+    lr: float = 0.000514804885292421
 
     class Config:
         arbitrary_types_allowed = True

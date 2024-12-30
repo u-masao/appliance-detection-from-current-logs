@@ -71,16 +71,17 @@ def create_and_configure_model(
     trial, model_config: ModelConfig, training_config: TrainingConfig
 ):
     # Set random seeds for reproducibility
-    random.seed(model_config.seed)
-    np.random.seed(model_config.seed)
-    torch.manual_seed(model_config.seed)
-    if not model_config.force_cpu and torch.cuda.is_available():
-        torch.cuda.manual_seed_all(model_config.seed)
+    random.seed(training_config.seed)
+    np.random.seed(training_config.seed)
+    torch.manual_seed(training_config.seed)
+    if not training_config.force_cpu and torch.cuda.is_available():
+        torch.cuda.manual_seed_all(training_config.seed)
 
     logger = logging.getLogger(__name__)
     # lr = trial.suggest_float("lr", 1e-4, 7.0e-4, log=True)
     # lr = 0.00010234736295408926
-    lr = 0.000514804885292421
+    # lr = 0.000514804885292421
+    lr = training_config.lr
     logger.info(f"params: {lr=}")
     mlflow.log_params({"lr": lr})
 

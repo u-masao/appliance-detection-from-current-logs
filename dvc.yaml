@@ -47,7 +47,7 @@ stages:
       data/interim/test.parquet
       --train_ratio ${train_model.train_ratio}
       --val_ratio ${train_model.val_ratio}
-      --input_length ${train_model.input_length}
+      --input_sequence_length ${train_model.input_sequence_length}
     deps:
       - src/data/split_data.py
       - data/interim/features.parquet

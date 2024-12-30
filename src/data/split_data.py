@@ -23,7 +23,7 @@ import pandas as pd
     help="Ratio of data to use for validation.",
 )
 @click.option(
-    "--input_length",
+    "--input_sequence_length",
     type=int,
     default=0,
     help="Number of rows to skip between splits.",
@@ -35,7 +35,7 @@ def main(
     output_test_path,
     train_ratio,
     val_ratio,
-    input_length,
+    input_sequence_length,
 ):
     logger = logging.getLogger(__name__)
     mlflow.start_run()
@@ -47,9 +47,14 @@ def main(
     val_size = int(len(df) * val_ratio)
     train_df = df.iloc[:train_size]
     val_df = df.iloc[
-        train_size + input_length : train_size + input_length + val_size
+        train_size
+        + input_sequence_length : train_size
+        + input_sequence_length
+        + val_size
     ]
-    test_df = df.iloc[train_size + input_length + val_size + input_length :]
+    test_df = df.iloc[
+        train_size + input_sequence_length + val_size + input_sequence_length :
+    ]
 
     train_df.to_parquet(output_train_path)
     train_start, train_end = train_df.index.min(), train_df.index.max()

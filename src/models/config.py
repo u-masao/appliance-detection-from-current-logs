@@ -3,8 +3,9 @@ from pydantic import BaseModel
 
 
 class DataConfig(BaseModel):
-    fraction: float = 1.0
     num_columns: int
+    fraction: float = 1.0
+    num_workers: int = 4
 
 
 class ModelConfig(BaseModel):
@@ -19,7 +20,6 @@ class TrainingConfig(BaseModel):
     batch_size: int = 32
     num_epochs: int = 10
     checkpoint_interval: int = 5
-    num_workers: int = 4
     device: torch.device = torch.device("cpu")
     force_cpu: bool = False
     seed: int = 42

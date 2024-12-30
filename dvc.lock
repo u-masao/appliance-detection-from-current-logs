@@ -108,7 +108,7 @@ stages:
   split_data:
     cmd: python src/data/split_data.py data/interim/features.parquet data/interim/train.parquet
       data/interim/val.parquet data/interim/test.parquet --train_ratio 0.7 --val_ratio
-      0.15 --input_length 60
+      0.15 --input_sequence_length 60
     deps:
     - path: data/interim/features.parquet
       hash: md5
@@ -116,8 +116,8 @@ stages:
       size: 62374638
     - path: src/data/split_data.py
       hash: md5
-      md5: 24601373dad03a6436eec7a3ca5edb43
-      size: 2663
+      md5: 586864497423fdcb8986dfe463fc5600
+      size: 2755
     outs:
     - path: data/interim/test.parquet
       hash: md5

@@ -20,22 +20,20 @@ from src.models.dataset import TimeSeriesDataset, load_data
 
 
 class DataConfig(BaseModel):
-    train_path: str
-    val_path: str
-    fraction: float
-    target_columns: list
-    seed: int
-    num_workers: int
+    fraction: float = 1.0
+    target_columns: list = ["watt_black", "watt_red", "watt_kitchen", "watt_living"]
+    seed: int = 42
+    num_workers: int = 4
 
 class ModelConfig(BaseModel):
-    input_length: int
-    num_columns: int
-    output_length: int
-    embed_dim: int
-    target_columns: list
-    device: torch.device
-    force_cpu: bool
-    seed: int
+    input_length: int = 60
+    num_columns: int = 0
+    output_length: int = 5
+    embed_dim: int = 64
+    target_columns: list = ["watt_black", "watt_red", "watt_kitchen", "watt_living"]
+    device: torch.device = torch.device("cpu")
+    force_cpu: bool = False
+    seed: int = 42
 
     class Config:
         arbitrary_types_allowed = True
@@ -377,14 +375,7 @@ def main(
         }
     )
 
-    data_config = DataConfig(
-        train_path=train_path,
-        val_path=val_path,
-        fraction=data_fraction,
-        target_columns=["watt_black", "watt_red", "watt_kitchen", "watt_living"],
-        seed=seed,
-        num_workers=num_workers,
-    )
+    data_config = DataConfig(fraction=data_fraction, seed=seed, num_workers=num_workers)
     storage = optuna.storages.RDBStorage(
         url="sqlite:///./data/interim/optuna_study.db"
     )

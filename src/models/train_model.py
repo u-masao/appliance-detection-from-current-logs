@@ -68,14 +68,14 @@ def setup_device(force_cpu):
 
 
 def create_and_configure_model(
-    trial, config: ModelConfig, training_config: TrainingConfig
+    trial, model_config: ModelConfig, training_config: TrainingConfig
 ):
     # Set random seeds for reproducibility
-    random.seed(config.seed)
-    np.random.seed(config.seed)
-    torch.manual_seed(config.seed)
-    if not config.force_cpu and torch.cuda.is_available():
-        torch.cuda.manual_seed_all(config.seed)
+    random.seed(model_config.seed)
+    np.random.seed(model_config.seed)
+    torch.manual_seed(model_config.seed)
+    if not model_config.force_cpu and torch.cuda.is_available():
+        torch.cuda.manual_seed_all(model_config.seed)
 
     logger = logging.getLogger(__name__)
     # lr = trial.suggest_float("lr", 1e-4, 7.0e-4, log=True)
@@ -84,13 +84,7 @@ def create_and_configure_model(
     logger.info(f"params: {lr=}")
     mlflow.log_params({"lr": lr})
 
-    model = create_model(
-        input_sequence_length=config.input_sequence_length,
-        input_dim=config.num_columns - 1,
-        output_sequence_length=config.output_sequence_length,
-        output_dim=len(training_config.target_columns),
-        embed_dim=config.embed_dim,
-    ).to(training_config.device)
+    model = create_model(model_config).to(training_config.device)
 
     optimizer = torch.optim.Adam(model.parameters(), lr=lr)
     criterion = nn.MSELoss()
@@ -103,14 +97,16 @@ def train_and_evaluate_model(
     val_loader,
     optimizer,
     criterion,
-    device,
-    num_epochs,
     logger,
-    checkpoint_interval,
     model_config,
+    training_config,
 ):
     min_train_loss = float("inf")
     min_val_loss = float("inf")
+
+    device = training_config.device
+    num_epochs = training_config.num_epochs
+    checkpoint_interval = training_config.checkpoint_interval
 
     for epoch in range(num_epochs):
         # train
@@ -177,13 +173,19 @@ def objective(
 ):
     logger = logging.getLogger(__name__)
     mlflow.start_run(run_name=f"trial_{trial.number}")
+
+    # load data and make loader
     train_loader, val_loader, num_columns = load_and_prepare_data(
         train_path, val_path, data_config, model_config, training_config
     )
-    device = setup_device(training_config.force_cpu)
-    logger.info(f"Using device: {device}")
-    model_config.num_columns = num_columns
-    model_config.device = device
+
+    # update num_columns
+    data_config.num_columns = num_columns
+    model_config.input_dim = data_config.num_columns - 1
+
+    # device
+    training_config.device = setup_device(training_config.force_cpu)
+    logger.info(f"Using device: {training_config.device}")
 
     model, optimizer, criterion = create_and_configure_model(
         trial,
@@ -196,11 +198,9 @@ def objective(
         val_loader,
         optimizer,
         criterion,
-        device,
-        training_config.num_epochs,
         logger,
-        training_config.checkpoint_interval,
         model_config,
+        training_config,
     )
     mlflow.end_run()
     logger.info("Training completed")

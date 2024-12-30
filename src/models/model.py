@@ -174,7 +174,7 @@ def save_model(model, path, model_config=None):
 
 def load_model(path):
     """Load a TimeSeriesModel and its configuration from the specified path."""
-    checkpoint = torch.load(path, weights_only=True)
+    checkpoint = torch.load(path, weights_only=False)
     model_config = checkpoint["config"]
     model = create_model(
         input_sequence_length=model_config["input_sequence_length"],

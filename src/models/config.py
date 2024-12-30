@@ -10,7 +10,7 @@ class DataConfig(BaseModel):
 
 class ModelConfig(BaseModel):
     input_sequence_length: int
-    input_dim: int
+    input_dim: int = 0  # 暫定
     output_sequence_length: int
     output_dim: int
     embed_dim: int

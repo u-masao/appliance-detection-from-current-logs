@@ -166,11 +166,10 @@ def objective(
     trial,
     train_path,
     val_path,
+    model_output_path,
     data_config: DataConfig,
     model_config: ModelConfig,
     training_config: TrainingConfig,
-    model_output_path,
-    study,
 ):
     logger = logging.getLogger(__name__)
     mlflow.start_run(run_name=f"trial_{trial.number}")
@@ -193,6 +192,8 @@ def objective(
         model_config,
         training_config,
     )
+    best_val_loss = float("inf")
+
     val_loss = train_and_evaluate_model(
         model,
         train_loader,
@@ -203,7 +204,10 @@ def objective(
         model_config,
         training_config,
     )
-    mlflow.end_run()
+
+    if best_val_loss < float("inf"):
+        save_model(model, model_output_path, model_config=model_config)
+        logger.info(f"Best model saved with validation loss: {best_val_loss}")
     logger.info("Training completed")
     logger.info(f"Final validation loss: {val_loss}")
     logger.info("==== end process ====")
@@ -251,9 +255,9 @@ def objective(
     help="Hidden dimension for the model.",
 )
 @click.option(
-    "--num_heads",
+    "--nhead",
     type=int,
-    default=None,
+    default=8,
     help="Number of attention heads for the transformer model.",
 )
 @click.option(
@@ -267,6 +271,12 @@ def objective(
     type=int,
     default=32,
     help="Batch size for the DataLoader.",
+)
+@click.option(
+    "--lr",
+    type=float,
+    default=0.000514804885292421,
+    help="Learning ratio",
 )
 @click.option(
     "--train_ratio",
@@ -311,7 +321,8 @@ def main(
     batch_size,
     input_sequence_length,
     embed_dim,
-    num_heads,
+    nhead,
+    lr,
     num_layers,
     output_sequence_length,
     train_path,
@@ -352,16 +363,17 @@ def main(
         batch_size=batch_size,
         num_epochs=num_epochs,
         checkpoint_interval=checkpoint_interval,
+        lr=lr,
         force_cpu=force_cpu,
         seed=seed,
     )
 
     model_config = ModelConfig(
         input_sequence_length=input_sequence_length,
-        input_dim=12,
         output_sequence_length=output_sequence_length,
         output_dim=len(training_config.target_columns),
         embed_dim=embed_dim,
+        nhead=nhead,
     )
 
     storage = optuna.storages.RDBStorage(url=training_config.optuna_db_url)
@@ -375,25 +387,15 @@ def main(
             trial,
             train_path,
             val_path,
+            model_output_path,
             data_config,
             model_config,
             training_config,
-            model_output_path,
-            study,
         ),
         n_trials=n_trials,
         n_jobs=-1,  # Use all available cores
     )
     logger.info(f"Best trial: {study.best_trial}")
-    # Define the model with the best parameters
-    # Use CLI options if provided, otherwise use best trial parameters
-
-    model = create_model(model_config).to(training_config.device)
-
-    # Output model architecture
-    logger.debug("Model architecture:")
-    logger.debug(model)
-    save_model(model, model_output_path, model_config=model_config)
 
 
 if __name__ == "__main__":

@@ -205,7 +205,8 @@ def objective(
         training_config,
     )
 
-    if best_val_loss < float("inf"):
+    if val_loss < best_val_loss:
+        best_val_loss = val_loss
         save_model(model, model_output_path, model_config=model_config)
         logger.info(f"Best model saved with validation loss: {best_val_loss}")
     logger.info("Training completed")

@@ -73,7 +73,7 @@ def run_inference(
     train_df = pd.DataFrame(trains).add_prefix("train_")
     pred_df = pd.DataFrame(predictions).add_prefix("pred_")
     actual_df = pd.DataFrame(actuals).add_prefix("actual_")
-    embeds_df = pd.DataFrame(embeds).add_prefix("embed_")
+    embed_df = pd.DataFrame(embeds).add_prefix("embed_")
     concat_df = pd.concat([train_df, pred_df, actual_df, embed_df], axis=1)
 
     return concat_df

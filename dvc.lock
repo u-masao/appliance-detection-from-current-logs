@@ -98,11 +98,11 @@ stages:
     outs:
     - path: models/best_model.pth
       hash: md5
-      md5: 4ea392b5ce0ab5155f653390a0779dd2
+      md5: c3fc66a6d4f346ac8bde1baa596e353f
       size: 80482
     - path: models/checkpoint/
       hash: md5
-      md5: 4a6045d515a418cbd74918a989325f5e.dir
+      md5: 3a2db48fc4ce1ce014959ef89b6d5ffa.dir
       size: 160964
       nfiles: 2
   split_data:

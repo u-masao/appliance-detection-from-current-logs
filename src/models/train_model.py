@@ -19,6 +19,8 @@ from tqdm import tqdm
 from src.models.dataset import TimeSeriesDataset, load_data
 
 class ModelConfig(BaseModel):
+    class Config:
+        arbitrary_types_allowed = True
     input_length: int
     num_columns: int
     output_length: int

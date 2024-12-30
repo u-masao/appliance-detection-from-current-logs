@@ -37,13 +37,13 @@ class ModelConfig(BaseModel):
     force_cpu: bool
     seed: int
 
+    class Config:
+        arbitrary_types_allowed = True
+
 class TrainingConfig(BaseModel):
     batch_size: int
     num_epochs: int
     checkpoint_interval: int
-    class Config:
-        arbitrary_types_allowed = True
-
     input_length: int
     num_columns: int
     output_length: int
@@ -52,6 +52,9 @@ class TrainingConfig(BaseModel):
     device: torch.device
     force_cpu: bool
     seed: int
+
+    class Config:
+        arbitrary_types_allowed = True
 
 
 from src.models.model import create_model, load_model, save_model

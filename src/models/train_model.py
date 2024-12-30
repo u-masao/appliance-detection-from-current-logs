@@ -235,6 +235,7 @@ def objective(
         best_val_loss = val_loss
         save_model(model, model_output_path, model_config=model_config)
         logger.info(f"Best model saved with validation loss: {best_val_loss}")
+
     mlflow.end_run()
     logger.info("Training completed")
     logger.info(f"Final validation loss: {val_loss}")

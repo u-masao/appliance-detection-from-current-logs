@@ -218,7 +218,7 @@ def objective(
         training_config,
     )
 
-    log_config_and_model(data_config, model_config, training_config, model)
+    # log_config_and_model(data_config, model_config, training_config, model)
 
     val_loss = train_and_evaluate_model(
         model,

@@ -65,7 +65,8 @@ def run_inference(
     embeds = np.concatenate(embeds, axis=0)
 
     logger.info(
-        f"shapes: {trains.shape=}, {predictions.shape=}, {actuals.shape=}, {embeds.shape=}"
+        f"shapes: {trains.shape=}, {predictions.shape=}, "
+        f"{actuals.shape=}, {embeds.shape=}"
     )
 
     train_df = pd.DataFrame(trains).add_prefix("train_")

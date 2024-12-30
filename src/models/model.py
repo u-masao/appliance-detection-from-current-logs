@@ -57,8 +57,6 @@ class TimeSeriesModel(nn.Module):
         dropout=0.1,
     ):
         super(TimeSeriesModel, self).__init__()
-        # init logger
-        logger = logging.getLogger(__name__)
 
         # fields
         self.input_sequence_length = input_sequence_length
@@ -154,7 +152,6 @@ def create_model(
     embed_dim,
     nhead: int = 8,
 ):
-    """Create and initialize a TimeSeriesModel with the specified parameters."""
     if embed_dim % nhead != 0:
         raise ValueError("input_dim must be divisible by nhead")
 

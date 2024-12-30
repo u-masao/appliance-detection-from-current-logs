@@ -7,7 +7,8 @@ import pandas as pd
 
 def align_intervals(df1, df2, ffill_multiplier):
     """
-    Align the intervals of two DataFrames by resampling to the shorter interval.
+    Align the intervals of two DataFrames by resampling
+    to the shorter interval.
 
     :param df1: First DataFrame.
     :param df2: Second DataFrame.

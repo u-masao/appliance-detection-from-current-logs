@@ -11,7 +11,7 @@ def test_positional_encoding():
 
     positional_encoding = PositionalEncoding(d_model=d_model, max_len=max_len)
 
-    # Create a dummy input tensor with the shape (batch_size, seq_length, d_model)
+    # Create a dummy input (batch_size, seq_length, d_model)
     dummy_input = torch.zeros(batch_size, seq_length, d_model)
 
     # Apply positional encoding
@@ -23,7 +23,7 @@ def test_positional_encoding():
         f"but got {encoded_output.shape}"
     )
 
-    # Check if the positional encoding is applied (output should not be all zeros)
+    # Check if the positional encoding (output should not be all zeros)
     assert not torch.all(
         encoded_output == 0
     ), "Positional encoding not applied"
@@ -43,10 +43,12 @@ def test_positional_encoding():
     )
     model.eval()  # Set model to evaluation mode
 
-    # Create a dummy input tensor with the shape (batch_size, input_sequence_length, input_dim)
+    # Create a dummy input tensor
+    # (batch_size, input_sequence_length, input_dim)
     dummy_input = torch.randn(batch_size, input_sequence_length, input_dim)
 
-    # Create a dummy target tensor with the shape (batch_size, output_sequence_length, output_dim)
+    # Create a dummy target tensor
+    # (batch_size, output_sequence_length, output_dim)
     dummy_target = torch.randn(batch_size, output_sequence_length, output_dim)
     # Perform a forward pass and ensure tgt is not None
     try:
@@ -60,9 +62,16 @@ def test_positional_encoding():
         batch_size,
         output_sequence_length,
         output_dim,
-    ), f"Expected tgt shape {(batch_size, output_sequence_length, output_dim)}, but got {tgt.shape}"
+    ), (
+        "Expected tgt shape "
+        f"{(batch_size, output_sequence_length, output_dim)}, "
+        f"but got {tgt.shape}"
+    )
     assert embed is not None, "Expected embed to be not None"
     assert embed.shape == (
         batch_size,
         embed_dim,
-    ), f"Expected embed shape {(batch_size, embed_dim)}, but got {embed.shape}"
+    ), (
+        "Expected embed shape "
+        f"{(batch_size, embed_dim)}, but got {embed.shape}"
+    )

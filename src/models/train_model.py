@@ -15,6 +15,7 @@ from torch.utils.data import DataLoader
 from tqdm import tqdm
 
 from src.models.dataset import TimeSeriesDataset, load_data
+from src.models.model import create_model, save_model
 
 
 class DataConfig(BaseModel):
@@ -68,9 +69,6 @@ class TrainingConfig(BaseModel):
 
     class Config:
         arbitrary_types_allowed = True
-
-
-from src.models.model import create_model, save_model
 
 
 def load_and_prepare_data(
@@ -431,7 +429,6 @@ def main(
     )
 
     # Load data to determine the number of columns
-    train_df = load_data(train_path, fraction=data_fraction)
     device = setup_device(force_cpu)
     model_config = ModelConfig(
         device=device,
@@ -475,7 +472,6 @@ def main(
         output_dim=len(model_config.target_columns),
         embed_dim=model_config.embed_dim,
     ).to(model_config.device)
-
 
     # Output model architecture
     logger.debug("Model architecture:")

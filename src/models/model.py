@@ -5,6 +5,8 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+from src.models.config import ModelConfig
+
 
 class PositionalEncoding(nn.Module):
     def __init__(self, d_model, max_len=5000):
@@ -165,7 +167,7 @@ def create_model(
     return model
 
 
-def save_model(model, path, model_config=None):
+def save_model(model, path, model_config: ModelConfig = None):
     """Save the model and its configuration to the specified path."""
     torch.save(
         {"state_dict": model.state_dict(), "config": model_config}, path
@@ -177,11 +179,11 @@ def load_model(path):
     checkpoint = torch.load(path)
     model_config = checkpoint["config"]
     model = create_model(
-        input_sequence_length=model_config["input_sequence_length"],
-        input_dim=model_config["input_dim"],
-        output_sequence_length=model_config["output_sequence_length"],
-        output_dim=model_config["output_dim"],
-        embed_dim=model_config["embed_dim"],
+        input_sequence_length=model_config.input_sequence_length,
+        input_dim=model_config.input_dim,
+        output_sequence_length=model_config.output_sequence_length,
+        output_dim=model_config.output_dim,
+        embed_dim=model_config.embed_dim,
     )
     model.load_state_dict(checkpoint["state_dict"])
     return model, model_config

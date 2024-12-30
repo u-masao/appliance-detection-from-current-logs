@@ -10,65 +10,12 @@ import optuna.storages
 import torch
 import torch.nn as nn
 from optuna.samplers import TPESampler
-from pydantic import BaseModel
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 
+from src.models.config import DataConfig, ModelConfig, TrainingConfig
 from src.models.dataset import TimeSeriesDataset, load_data
 from src.models.model import create_model, save_model
-
-
-class DataConfig(BaseModel):
-    fraction: float = 1.0
-    target_columns: list = [
-        "watt_black",
-        "watt_red",
-        "watt_kitchen",
-        "watt_living",
-    ]
-    seed: int = 42
-    num_workers: int = 4
-
-
-class ModelConfig(BaseModel):
-    input_length: int = 60
-    num_columns: int = 0
-    output_length: int = 5
-    embed_dim: int = 64
-    target_columns: list = [
-        "watt_black",
-        "watt_red",
-        "watt_kitchen",
-        "watt_living",
-    ]
-    device: torch.device = torch.device("cpu")
-    force_cpu: bool = False
-    seed: int = 42
-
-    class Config:
-        arbitrary_types_allowed = True
-
-
-class TrainingConfig(BaseModel):
-    batch_size: int = 32
-    num_epochs: int = 10
-    checkpoint_interval: int = 5
-    input_length: int = 60
-    num_columns: int = 0
-    output_length: int = 5
-    embed_dim: int = 64
-    target_columns: list = [
-        "watt_black",
-        "watt_red",
-        "watt_kitchen",
-        "watt_living",
-    ]
-    device: torch.device = torch.device("cpu")
-    force_cpu: bool = False
-    seed: int = 42
-
-    class Config:
-        arbitrary_types_allowed = True
 
 
 def load_and_prepare_data(
@@ -95,14 +42,14 @@ def load_and_prepare_data(
     val_df = load_data(val_path, fraction=data_config.fraction)
     train_dataset = TimeSeriesDataset(
         train_df,
-        input_length=model_config.input_length,
-        output_length=model_config.output_length,
+        input_sequence_length=model_config.input_sequence_length,
+        output_sequence_length=model_config.output_sequence_length,
         target_columns=data_config.target_columns,
     )
     val_dataset = TimeSeriesDataset(
         val_df,
-        input_length=model_config.input_length,
-        output_length=model_config.output_length,
+        input_sequence_length=model_config.input_sequence_length,
+        output_sequence_length=model_config.output_sequence_length,
         target_columns=data_config.target_columns,
     )
     generator = torch.Generator().manual_seed(data_config.seed)
@@ -152,9 +99,9 @@ def create_and_configure_model(trial, config: ModelConfig):
     mlflow.log_params({"lr": lr})
 
     model = create_model(
-        input_sequence_length=config.input_length,
+        input_sequence_length=config.input_sequence_length,
         input_dim=config.num_columns - 1,
-        output_sequence_length=config.output_length,
+        output_sequence_length=config.output_sequence_length,
         output_dim=len(config.target_columns),
         embed_dim=config.embed_dim,
     ).to(config.device)
@@ -243,7 +190,7 @@ def objective(
     study,
 ):
     logger = logging.getLogger(__name__)
-    mlflow.start_run()
+    mlflow.start_run(run_name=f"trial_{trial.number}")
     train_loader, val_loader, num_columns = load_and_prepare_data(
         train_path, val_path, data_config, model_config, training_config
     )
@@ -279,7 +226,7 @@ def objective(
 @click.argument("val_path", type=click.Path(exists=True))
 @click.argument("model_output_path", type=click.Path())
 @click.option(
-    "--input_length",
+    "--input_sequence_length",
     type=int,
     default=60 * 3,
     help="Input length for the time series data.",
@@ -345,7 +292,7 @@ def objective(
     help="Ratio of data to use for validation.",
 )
 @click.option(
-    "--output_length",
+    "--output_sequence_length",
     type=int,
     default=5,
     help="Output length for the time series data.",
@@ -373,11 +320,11 @@ def objective(
 )
 def main(
     batch_size,
-    input_length,
+    input_sequence_length,
     embed_dim,
     num_heads,
     num_layers,
-    output_length,
+    output_sequence_length,
     train_path,
     val_path,
     model_output_path,
@@ -432,9 +379,9 @@ def main(
     device = setup_device(force_cpu)
     model_config = ModelConfig(
         device=device,
-        input_length=input_length,
+        input_sequence_length=input_sequence_length,
         num_columns=0,  # Placeholder, will be set in objective
-        output_length=output_length,
+        output_sequence_length=output_sequence_length,
         embed_dim=embed_dim,
         target_columns=data_config.target_columns,
         force_cpu=force_cpu,
@@ -466,9 +413,9 @@ def main(
     # Use CLI options if provided, otherwise use best trial parameters
 
     model = create_model(
-        input_sequence_length=model_config.input_length,
+        input_sequence_length=model_config.input_sequence_length,
         input_dim=model_config.num_columns - 1,
-        output_sequence_length=model_config.output_length,
+        output_sequence_length=model_config.output_sequence_length,
         output_dim=len(model_config.target_columns),
         embed_dim=model_config.embed_dim,
     ).to(model_config.device)

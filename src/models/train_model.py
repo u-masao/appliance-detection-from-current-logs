@@ -109,6 +109,9 @@ def train_and_evaluate_model(
     num_epochs = training_config.num_epochs
     checkpoint_interval = training_config.checkpoint_interval
 
+    best_model = None
+    best_val_loss = float("inf")
+
     for epoch in range(num_epochs):
         # train
         model.train()
@@ -203,7 +206,14 @@ def objective(
         model_config,
         training_config,
     )
-    mlflow.end_run()
+        if avg_val_loss < best_val_loss:
+            best_val_loss = avg_val_loss
+            best_model = model.state_dict()
+
+    # Save the best model
+    if best_model is not None:
+        save_model(model, model_output_path, model_config=model_config)
+        logger.info(f"Best model saved with validation loss: {best_val_loss}")
     logger.info("Training completed")
     logger.info(f"Final validation loss: {val_loss}")
     logger.info("==== end process ====")

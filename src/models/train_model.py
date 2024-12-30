@@ -112,7 +112,7 @@ def train_and_evaluate_model(
     for epoch in range(num_epochs):
         # train
         model.train()
-        pbar = tqdm(train_loader, desc=f"Epoch {epoch+1} [Train]", leave=True)
+        pbar = tqdm(train_loader, desc=f"Epoch {epoch} [Train]", leave=True)
         train_loss = 0
         for i, (x, y) in enumerate(pbar):
             optimizer.zero_grad()
@@ -126,15 +126,15 @@ def train_and_evaluate_model(
             pbar.set_postfix({"avg. loss": avg_train_loss})
 
         min_train_loss = min(min_train_loss, avg_train_loss)
-        mlflow.log_metric("avg_loss.train", avg_train_loss, step=epoch + 1)
-        mlflow.log_metric("loss.train", train_loss, step=epoch + 1)
-        mlflow.log_metric("min_loss.train", min_train_loss, step=epoch + 1)
+        mlflow.log_metric("avg_loss.train", avg_train_loss, step=epoch)
+        mlflow.log_metric("loss.train", train_loss, step=epoch)
+        mlflow.log_metric("min_loss.train", min_train_loss, step=epoch)
 
         # Save checkpoint
-        if (epoch + 1) % checkpoint_interval == 0:
+        if (epoch) % checkpoint_interval == 0:
             checkpoint_dir = Path("models/checkpoint/")
             checkpoint_dir.mkdir(parents=True, exist_ok=True)
-            checkpoint_path = checkpoint_dir / f"epoch_{epoch+1:0>4}.pth"
+            checkpoint_path = checkpoint_dir / f"epoch_{epoch:0>4}.pth"
             save_model(model, checkpoint_path, model_config=model_config)
             logger.info(f"Checkpoint saved: {checkpoint_path}")
         model.eval()
@@ -142,7 +142,7 @@ def train_and_evaluate_model(
         val_iterations = 0
         with torch.no_grad():
             pbar = tqdm(
-                val_loader, desc=f"Epoch {epoch+1} [Validation]", leave=True
+                val_loader, desc=f"Epoch {epoch} [Validation]", leave=True
             )
             for i, (x, y) in enumerate(pbar):
                 x, y = x.to(device), y.to(device)
@@ -155,9 +155,9 @@ def train_and_evaluate_model(
                 pbar.set_postfix({"avg. loss": avg_val_loss})
 
         min_val_loss = min(min_val_loss, avg_val_loss)
-        mlflow.log_metric("avg_loss.val", avg_val_loss, step=epoch + 1)
-        mlflow.log_metric("loss.val", val_loss, step=epoch + 1)
-        mlflow.log_metric("min_loss.val", min_val_loss, step=epoch + 1)
+        mlflow.log_metric("avg_loss.val", avg_val_loss, step=epoch)
+        mlflow.log_metric("loss.val", val_loss, step=epoch)
+        mlflow.log_metric("min_loss.val", min_val_loss, step=epoch)
 
     return val_loss
 

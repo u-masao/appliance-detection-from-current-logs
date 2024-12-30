@@ -50,6 +50,7 @@ def run_inference(
     trains = []
     predictions = []
     actuals = []
+    embeds = []
     with torch.no_grad():
         for x, y in tqdm(test_loader, desc="Inference"):
             x, y = x.to(device), y.to(device)
@@ -57,20 +58,23 @@ def run_inference(
             trains.append(x.cpu().numpy().reshape(len(x), -1))
             predictions.append(output.cpu().numpy().reshape(len(x), -1))
             actuals.append(y.cpu().numpy().reshape(len(x), -1))
+            embeds.append(embeds.cpu().numpy().reshape(len(x), -1))
 
     # Convert lists to arrays
     trains = np.concatenate(trains, axis=0)
     predictions = np.concatenate(predictions, axis=0)
     actuals = np.concatenate(actuals, axis=0)
+    embeds = np.concatenate(embeds, axis=0)
 
     logger.info(
-        f"shapes: {trains.shape=}, {predictions.shape=}, {actuals.shape=}"
+        f"shapes: {trains.shape=}, {predictions.shape=}, {actuals.shape=}, {embeds.shape=}"
     )
 
     train_df = pd.DataFrame(trains).add_prefix("train_")
     pred_df = pd.DataFrame(predictions).add_prefix("pred_")
     actual_df = pd.DataFrame(actuals).add_prefix("actual_")
-    concat_df = pd.concat([train_df, pred_df, actual_df], axis=1)
+    embeds_df = pd.DataFrame(embeds).add_prefix("embed_")
+    concat_df = pd.concat([train_df, pred_df, actual_df, embed_df], axis=1)
 
     return concat_df
 

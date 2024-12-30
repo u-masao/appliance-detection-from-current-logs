@@ -13,7 +13,7 @@ PYTHON_INTERPRETER = uv run python
 ## dvc repro
 .PHONY: repro
 repro: check_commit
-	uv run dvc repro train_model
+	uv run dvc repro
 	git commit dvc.lock -m 'run dvc repro'
 
 .PHONY: check_commit

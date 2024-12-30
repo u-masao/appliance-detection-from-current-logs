@@ -89,8 +89,8 @@ stages:
       size: 1863
     - path: src/models/model.py
       hash: md5
-      md5: b13a8ac8bab8291f11fbcc5bf7d71e66
-      size: 6468
+      md5: 40fae7aee1bbdec9d15164347410f76e
+      size: 6469
     - path: src/models/train_model.py
       hash: md5
       md5: 86ab2ef0c76743cb4a0dccdf406f4c0e
@@ -98,11 +98,11 @@ stages:
     outs:
     - path: models/best_model.pth
       hash: md5
-      md5: ebc0ee8fb30fabc342a7d7a42ae5ce02
+      md5: 5918e9207fc844b320fd3310d1c80959
       size: 2029282
     - path: models/checkpoint/
       hash: md5
-      md5: 184fd02f23cd88b92a568ac70d17c551.dir
+      md5: c50c568a423b945dc7baba82dd6f183f.dir
       size: 4058564
       nfiles: 2
   split_data:

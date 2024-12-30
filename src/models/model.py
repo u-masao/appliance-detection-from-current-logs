@@ -146,29 +146,19 @@ class TimeSeriesModel(nn.Module):
         return tgt, embed
 
 
-def create_model(
-    input_sequence_length,
-    input_dim,
-    output_sequence_length,
-    output_dim,
-    embed_dim,
-    nhead: int = 8,
-):
-    if embed_dim % nhead != 0:
+def create_model(model_config: ModelConfig):
+    if model_config.embed_dim % model_config.nhead != 0:
         raise ValueError("input_dim must be divisible by nhead")
 
-    model = TimeSeriesModel(
-        input_sequence_length=input_sequence_length,
-        input_dim=input_dim,
-        output_sequence_length=output_sequence_length,
-        output_dim=output_dim,
-        embed_dim=embed_dim,
-    )
+    model = TimeSeriesModel(**model_config.model_dump())
     return model
 
 
-def save_model(model, path, model_config: ModelConfig = None):
+def save_model(model, path, model_config: ModelConfig):
     """Save the model and its configuration to the specified path."""
+    if model_config is None:
+        raise ValueError("save_model() では ModelConfig をしていしてください")
+
     torch.save(
         {"state_dict": model.state_dict(), "config": model_config}, path
     )
@@ -178,12 +168,6 @@ def load_model(path):
     """Load a TimeSeriesModel and its configuration from the specified path."""
     checkpoint = torch.load(path)
     model_config = checkpoint["config"]
-    model = create_model(
-        input_sequence_length=model_config.input_sequence_length,
-        input_dim=model_config.input_dim,
-        output_sequence_length=model_config.output_sequence_length,
-        output_dim=model_config.output_dim,
-        embed_dim=model_config.embed_dim,
-    )
+    model = create_model(model_config)
     model.load_state_dict(checkpoint["state_dict"])
     return model, model_config

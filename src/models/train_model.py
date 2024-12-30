@@ -27,16 +27,6 @@ def load_and_prepare_data(
 ):
     """
     Train and evaluate the model, saving checkpoints at specified intervals.
-
-    :param model: The model to train.
-    :param train_loader: DataLoader for training data.
-    :param val_loader: DataLoader for validation data.
-    :param optimizer: Optimizer for training.
-    :param criterion: Loss function.
-    :param device: Device to use for training.
-    :param num_epochs: Number of epochs to train.
-    :param logger: Logger for logging information.
-    :param checkpoint_interval: Interval (in epochs) to save model checkpoints.
     """
     train_df = load_data(train_path, fraction=data_config.fraction)
     val_df = load_data(val_path, fraction=data_config.fraction)
@@ -44,13 +34,13 @@ def load_and_prepare_data(
         train_df,
         input_sequence_length=model_config.input_sequence_length,
         output_sequence_length=model_config.output_sequence_length,
-        target_columns=data_config.target_columns,
+        target_columns=training_config.target_columns,
     )
     val_dataset = TimeSeriesDataset(
         val_df,
         input_sequence_length=model_config.input_sequence_length,
         output_sequence_length=model_config.output_sequence_length,
-        target_columns=data_config.target_columns,
+        target_columns=training_config.target_columns,
     )
     generator = torch.Generator().manual_seed(data_config.seed)
     train_loader = DataLoader(
@@ -77,13 +67,9 @@ def setup_device(force_cpu):
         return torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
-@click.option(
-    "--seed",
-    type=int,
-    default=42,
-    help="Random seed for reproducibility.",
-)
-def create_and_configure_model(trial, config: ModelConfig):
+def create_and_configure_model(
+    trial, config: ModelConfig, training_config: TrainingConfig
+):
     # Set random seeds for reproducibility
     random.seed(config.seed)
     np.random.seed(config.seed)
@@ -102,9 +88,9 @@ def create_and_configure_model(trial, config: ModelConfig):
         input_sequence_length=config.input_sequence_length,
         input_dim=config.num_columns - 1,
         output_sequence_length=config.output_sequence_length,
-        output_dim=len(config.target_columns),
+        output_dim=len(training_config.target_columns),
         embed_dim=config.embed_dim,
-    ).to(config.device)
+    ).to(training_config.device)
 
     optimizer = torch.optim.Adam(model.parameters(), lr=lr)
     criterion = nn.MSELoss()
@@ -200,7 +186,9 @@ def objective(
     model_config.device = device
 
     model, optimizer, criterion = create_and_configure_model(
-        trial, model_config
+        trial,
+        model_config,
+        training_config,
     )
     val_loss = train_and_evaluate_model(
         model,
@@ -341,12 +329,6 @@ def main(
 ):
     """
     Train the transformer model with the specified parameters.
-
-    :param input_path: Path to the input data file.
-    :param output_path: Path to save the output model.
-    :param mlflow_run_name: Name of the MLflow run.
-    :param data_fraction: Fraction of data to use for training.
-    :param num_epochs: Number of training epochs.
     """
     logger = logging.getLogger(__name__)
     logger.info("==== start process ====")
@@ -365,33 +347,31 @@ def main(
     )
 
     data_config = DataConfig(
-        fraction=data_fraction, seed=seed, num_workers=num_workers
-    )
-    storage = optuna.storages.RDBStorage(
-        url="sqlite:///./data/interim/optuna_study.db"
-    )
-    sampler = TPESampler(seed=seed)
-    study = optuna.create_study(
-        storage=storage, direction="minimize", sampler=sampler
-    )
-
-    # Load data to determine the number of columns
-    device = setup_device(force_cpu)
-    model_config = ModelConfig(
-        device=device,
-        input_sequence_length=input_sequence_length,
+        fraction=data_fraction,
+        num_workers=num_workers,
         num_columns=0,  # Placeholder, will be set in objective
-        output_sequence_length=output_sequence_length,
-        embed_dim=embed_dim,
-        target_columns=data_config.target_columns,
-        force_cpu=force_cpu,
-        seed=seed,
     )
 
     training_config = TrainingConfig(
         batch_size=batch_size,
         num_epochs=num_epochs,
         checkpoint_interval=checkpoint_interval,
+        force_cpu=force_cpu,
+        seed=seed,
+    )
+
+    model_config = ModelConfig(
+        input_sequence_length=input_sequence_length,
+        input_dim=12,
+        output_sequence_length=output_sequence_length,
+        output_dim=len(training_config.target_columns),
+        embed_dim=embed_dim,
+    )
+
+    storage = optuna.storages.RDBStorage(url=training_config.optuna_db_url)
+    sampler = TPESampler(seed=seed)
+    study = optuna.create_study(
+        storage=storage, direction="minimize", sampler=sampler
     )
 
     study.optimize(
@@ -412,13 +392,7 @@ def main(
     # Define the model with the best parameters
     # Use CLI options if provided, otherwise use best trial parameters
 
-    model = create_model(
-        input_sequence_length=model_config.input_sequence_length,
-        input_dim=model_config.num_columns - 1,
-        output_sequence_length=model_config.output_sequence_length,
-        output_dim=len(model_config.target_columns),
-        embed_dim=model_config.embed_dim,
-    ).to(model_config.device)
+    model = create_model(model_config).to(training_config.device)
 
     # Output model architecture
     logger.debug("Model architecture:")

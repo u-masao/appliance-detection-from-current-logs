@@ -14,6 +14,7 @@ class ModelConfig(BaseModel):
     output_sequence_length: int
     output_dim: int
     embed_dim: int
+    nhead: int = 8
 
 
 class TrainingConfig(BaseModel):
@@ -23,6 +24,7 @@ class TrainingConfig(BaseModel):
     device: torch.device = torch.device("cpu")
     force_cpu: bool = False
     seed: int = 42
+    optuna_db_url: str = "sqlite:///./data/interim/optuna_study.db"
     target_columns: list = [
         "watt_black",
         "watt_red",

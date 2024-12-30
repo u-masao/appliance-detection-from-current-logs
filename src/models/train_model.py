@@ -78,13 +78,15 @@ def create_and_configure_model(
         torch.cuda.manual_seed_all(training_config.seed)
 
     logger = logging.getLogger(__name__)
-    model_config.nhead = trial.suggest_int("nhead", 2, 8, step=2)
+    model_config.nhead = trial.suggest_int("nhead", 2, 12, step=2)
     model_config.embed_dim = trial.suggest_int(
         "embed_dim",
         model_config.nhead,
-        model_config.nhead * 8,
+        model_config.nhead * 20,
         step=model_config.nhead,
     )
+    # model_config.nhead=4
+    # model_config.embed_dim=24
     logger.info(f"Trial {trial.number} params: {model_config.nhead=}")
     logger.info(f"Trial {trial.number} params: {model_config.embed_dim=}")
     # lr = trial.suggest_float("lr", 1e-4, 7.0e-4, log=True)
@@ -102,6 +104,7 @@ def create_and_configure_model(
 
 
 def train_and_evaluate_model(
+    trial,
     model,
     train_loader,
     val_loader,
@@ -121,7 +124,11 @@ def train_and_evaluate_model(
     for epoch in range(num_epochs):
         # train
         model.train()
-        pbar = tqdm(train_loader, desc=f"Epoch {epoch} [Train]", leave=True)
+        pbar = tqdm(
+            train_loader,
+            desc=f"Trial {trial.number}, Epoch {epoch} [Train]",
+            leave=True,
+        )
         train_loss = 0
         for i, (x, y) in enumerate(pbar):
             optimizer.zero_grad()
@@ -151,7 +158,9 @@ def train_and_evaluate_model(
         val_iterations = 0
         with torch.no_grad():
             pbar = tqdm(
-                val_loader, desc=f"Epoch {epoch} [Validation]", leave=True
+                val_loader,
+                desc=f"Trial {trial.number}, Epoch {epoch} [Validation]",
+                leave=True,
             )
             for i, (x, y) in enumerate(pbar):
                 x, y = x.to(device), y.to(device)
@@ -199,14 +208,19 @@ def objective(
     train_path,
     val_path,
     model_output_path,
-    data_config: DataConfig,
-    model_config: ModelConfig,
-    training_config: TrainingConfig,
+    original_data_config: DataConfig,
+    original_model_config: ModelConfig,
+    original_training_config: TrainingConfig,
 ):
     global best_val_loss
 
     logger = logging.getLogger(__name__)
     mlflow.start_run(run_name=f"trial_{trial.number}", nested=True)
+
+    # copy config for multi threadding
+    data_config = original_data_config.copy(deep=True)
+    model_config = original_model_config.copy(deep=True)
+    training_config = original_training_config.copy(deep=True)
 
     # load data and make loader
     train_loader, val_loader, num_columns = load_and_prepare_data(
@@ -230,6 +244,7 @@ def objective(
     log_config_and_model(data_config, model_config, training_config, model)
 
     val_loss = train_and_evaluate_model(
+        trial,
         model,
         train_loader,
         val_loader,
@@ -433,6 +448,7 @@ def main(
         n_trials=n_trials,
         n_jobs=-1,  # Use all available cores
     )
+
     logger.info(f"Best trial: {study.best_trial}")
 
     mlflow.end_run()
@@ -440,5 +456,7 @@ def main(
 
 if __name__ == "__main__":
     log_fmt = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-    logging.basicConfig(level=logging.DEBUG, format=log_fmt)
+    log_level = logging.DEBUG
+    log_level = logging.INFO
+    logging.basicConfig(level=log_level, format=log_fmt)
     main()

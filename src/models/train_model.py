@@ -1,6 +1,7 @@
 import logging
 import random
 from pathlib import Path
+from pydantic import BaseModel
 
 import click
 import mlflow
@@ -16,6 +17,16 @@ from torch.utils.data import DataLoader
 from tqdm import tqdm
 
 from src.models.dataset import TimeSeriesDataset, load_data
+
+class ModelConfig(BaseModel):
+    input_length: int
+    num_columns: int
+    output_length: int
+    embed_dim: int
+    target_columns: list
+    device: torch.device
+    force_cpu: bool
+    seed: int
 from src.models.model import create_model, load_model, save_model
 
 
@@ -88,23 +99,13 @@ def setup_device(force_cpu):
     default=42,
     help="Random seed for reproducibility.",
 )
-def create_and_configure_model(
-    trial,
-    input_length,
-    num_columns,
-    output_length,
-    embed_dim,
-    target_columns,
-    device,
-    force_cpu,
-    seed,
-):
+def create_and_configure_model(trial, config: ModelConfig):
     # Set random seeds for reproducibility
-    random.seed(seed)
-    np.random.seed(seed)
-    torch.manual_seed(seed)
-    if not force_cpu and torch.cuda.is_available():
-        torch.cuda.manual_seed_all(seed)
+    random.seed(config.seed)
+    np.random.seed(config.seed)
+    torch.manual_seed(config.seed)
+    if not config.force_cpu and torch.cuda.is_available():
+        torch.cuda.manual_seed_all(config.seed)
 
     logger = logging.getLogger(__name__)
     # lr = trial.suggest_float("lr", 1e-4, 7.0e-4, log=True)
@@ -114,12 +115,12 @@ def create_and_configure_model(
     mlflow.log_params({"lr": lr})
 
     model = create_model(
-        input_sequence_length=input_length,
-        input_dim=num_columns - 1,
-        output_sequence_length=output_length,
-        output_dim=len(target_columns),
-        embed_dim=embed_dim,
-    ).to(device)
+        input_sequence_length=config.input_length,
+        input_dim=config.num_columns - 1,
+        output_sequence_length=config.output_length,
+        output_dim=len(config.target_columns),
+        embed_dim=config.embed_dim,
+    ).to(config.device)
 
     optimizer = torch.optim.Adam(model.parameters(), lr=lr)
     criterion = nn.MSELoss()

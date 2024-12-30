@@ -46,8 +46,8 @@ stages:
       size: 38166479
     - path: src/data/merge_parquet_files.py
       hash: md5
-      md5: fe6bda10f7206e708b7ad6bc111a1126
-      size: 4906
+      md5: 05a35d240d23f1f3035ae8057486635e
+      size: 4910
     outs:
     - path: data/interim/dataset.parquet
       hash: md5
@@ -89,21 +89,21 @@ stages:
       size: 1863
     - path: src/models/model.py
       hash: md5
-      md5: 66d4f42fa62d22021e62a64769fe8365
-      size: 6616
+      md5: b13a8ac8bab8291f11fbcc5bf7d71e66
+      size: 6468
     - path: src/models/train_model.py
       hash: md5
-      md5: cc452d51f5c0453dc5ae5b7f9f36babb
-      size: 12861
+      md5: 86ab2ef0c76743cb4a0dccdf406f4c0e
+      size: 13506
     outs:
     - path: models/best_model.pth
       hash: md5
-      md5: 22bb80526e859e26833eb5003e1b97b8
-      size: 2028834
+      md5: ebc0ee8fb30fabc342a7d7a42ae5ce02
+      size: 2029282
     - path: models/checkpoint/
       hash: md5
-      md5: 058775bb93508481f9ab2d0bef260494.dir
-      size: 4057668
+      md5: 184fd02f23cd88b92a568ac70d17c551.dir
+      size: 4058564
       nfiles: 2
   split_data:
     cmd: python src/data/split_data.py data/interim/features.parquet data/interim/train.parquet

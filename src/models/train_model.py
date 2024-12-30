@@ -85,13 +85,13 @@ def create_and_configure_model(
         model_config.nhead * 8,
         step=model_config.nhead,
     )
-    logger.info(f"params: {model_config.nhead=}")
-    logger.info(f"params: {model_config.embed_dim=}")
+    logger.info(f"Trial {trial.number} params: {model_config.nhead=}")
+    logger.info(f"Trial {trial.number} params: {model_config.embed_dim=}")
     # lr = trial.suggest_float("lr", 1e-4, 7.0e-4, log=True)
     # lr = 0.00010234736295408926
     # lr = 0.000514804885292421
     lr = training_config.lr
-    logger.info(f"params: {lr=}")
+    logger.info(f"Trial {trial.number} params: {lr=}")
     mlflow.log_params({"lr": lr})
 
     model = create_model(model_config).to(training_config.device)
@@ -440,5 +440,5 @@ def main(
 
 if __name__ == "__main__":
     log_fmt = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-    logging.basicConfig(level=logging.INFO, format=log_fmt)
+    logging.basicConfig(level=logging.DEBUG, format=log_fmt)
     main()

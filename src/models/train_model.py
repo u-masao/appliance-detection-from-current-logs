@@ -42,7 +42,7 @@ def load_and_prepare_data(
         output_sequence_length=model_config.output_sequence_length,
         target_columns=training_config.target_columns,
     )
-    generator = torch.Generator().manual_seed(data_config.seed)
+    generator = torch.Generator().manual_seed(training_config.seed)
     train_loader = DataLoader(
         train_dataset,
         batch_size=training_config.batch_size,

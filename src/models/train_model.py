@@ -162,8 +162,30 @@ def train_and_evaluate_model(
     return val_loss
 
 
+def log_params_to_mlflow(config, prefix=""):
+    mlflow.log_params(
+        {f"{prefix}.{k}": v for k, v in config.model_dump().items()}
+    )
+
+
+def log_config_and_model(data_config, model_config, training_config, model):
+    for prefix, config in [
+        ["data", data_config],
+        ["model", model_config],
+        ["training", training_config],
+    ]:
+        log_params_to_mlflow(config, prefix)
+    total_params = sum(
+        [p.numel() for p in model.parameters() if p.requires_grad]
+    )
+
+    mlflow.log_param("model.total_params", total_params)
+
+
+best_val_loss = float("inf")
+
+
 def objective(
-    best_val_loss,
     trial,
     train_path,
     val_path,
@@ -172,6 +194,8 @@ def objective(
     model_config: ModelConfig,
     training_config: TrainingConfig,
 ):
+    global best_val_loss
+
     logger = logging.getLogger(__name__)
     mlflow.start_run(run_name=f"trial_{trial.number}")
 
@@ -193,6 +217,8 @@ def objective(
         model_config,
         training_config,
     )
+
+    log_config_and_model(data_config, model_config, training_config, model)
 
     val_loss = train_and_evaluate_model(
         model,
@@ -383,10 +409,8 @@ def main(
         storage=storage, direction="minimize", sampler=sampler
     )
 
-    best_val_loss = {"value": float("inf")}
     study.optimize(
         lambda trial: objective(
-            best_val_loss,
             train_path,
             val_path,
             model_output_path,

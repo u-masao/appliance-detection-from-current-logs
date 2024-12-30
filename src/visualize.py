@@ -8,40 +8,55 @@ from src.models.dataset import TimeSeriesDataset, load_data
 from src.models.model import load_model
 
 target_columns = ["watt_black", "watt_red", "watt_kitchen", "watt_living"]
-# model_filepath = "models/best_model.pth"
-model_filepath = "models/checkpoint/epoch_0012.pth"
+model_filepath = "models/best_model.pth"
+# model_filepath = "models/checkpoint/epoch_0012.pth"
 fraction = 0.01
 
 input_df = None
 model = None
 dataset = None
+infered_df = None
 
 
-def load_input_data(input_filepath):
-    global input_df, model, dataset
+def load_input_data(data_type):
+    global input_df, model, dataset, infered_df
 
-    # load data
-    input_df = load_data(input_filepath, fraction=fraction)
+    if data_type not in ["train", "val", "test"]:
+        gr.Warning("invalid data type")
+        return
+    input_filepath = f"data/interim/{data_type}.parquet"
+    infered_filepath = f"data/interim/infer_{data_type}.parquet"
 
     # load model
     model, model_config = load_model(model_filepath)
     print(f"{model=}")
     print(f"{model_config=}")
+
     model.eval()
+    # load data
+    input_df = load_data(input_filepath, fraction=fraction)
+    print(f"{input_df.columns=}")
+
+    infered_df = load_data(infered_filepath, fraction=fraction)
+    print(f"{infered_df.columns=}")
 
     # make dataset
     dataset = TimeSeriesDataset(
         data=input_df,
-        input_length=model_config["input_sequence_length"],
-        output_length=model_config["output_sequence_length"],
+        input_sequence_length=model_config.input_sequence_length,
+        output_sequence_length=model_config.output_sequence_length,
         target_columns=target_columns,
     )
 
     # inform data loaded
-    gr.Info(f"data loaded: {input_filepath}")
+    gr.Info(f"data loaded: {data_type}")
 
 
-load_input_data("data/interim/train.parquet")
+load_input_data("train")
+
+
+def take_infered_data(num_index):
+    return infered_df.iloc[num_index:, :].head(10)
 
 
 def create_dataframes(x, y, output):
@@ -107,15 +122,7 @@ with gr.Blocks() as demo:
     gr.Markdown("# Parquet Data Viewer")
 
     with gr.Row():
-        input_filepath = gr.Dropdown(
-            choices=[
-                ("train", "data/interim/train.parquet"),
-                ("valid", "data/interim/val.parquet"),
-                ("test", "data/interim/test.parquet"),
-            ]
-        )
-        # reload_button = gr.Button("reload")
-        input_filepath.select(load_input_data, inputs=[input_filepath])
+        input_filepath = gr.Dropdown(choices=["train", "val", "test"])
 
     with gr.Tab("model check"):
         model_data_index = gr.Number(value=0, minimum=0, maximum=len(dataset))
@@ -123,12 +130,26 @@ with gr.Blocks() as demo:
         model_output_box = gr.Plot()
         model_output_dataframe = gr.DataFrame()
 
-        model_data_index.change(
-            fn=perform_inference,
-            inputs=model_data_index,
-            outputs=[model_output_box, model_output_dataframe],
+    with gr.Tab("data check"):
+        infered_data_index = gr.Number(
+            value=0, minimum=0, maximum=len(infered_df)
         )
+        infered_output_table = gr.DataFrame()
 
-
+    input_filepath.select(
+        load_input_data,
+        inputs=[input_filepath],
+        outputs=[infered_output_table],
+    )
+    model_data_index.change(
+        fn=perform_inference,
+        inputs=model_data_index,
+        outputs=[model_output_box, model_output_dataframe],
+    )
+    infered_data_index.change(
+        fn=take_infered_data,
+        inputs=infered_data_index,
+        outputs=[infered_output_table],
+    )
 if __name__ == "__main__":
     demo.launch(share=True)

@@ -19,7 +19,28 @@ from tqdm import tqdm
 from src.models.dataset import TimeSeriesDataset, load_data
 
 
+class DataConfig(BaseModel):
+    train_path: str
+    val_path: str
+    fraction: float
+    target_columns: list
+    seed: int
+    num_workers: int
+
 class ModelConfig(BaseModel):
+    input_length: int
+    num_columns: int
+    output_length: int
+    embed_dim: int
+    target_columns: list
+    device: torch.device
+    force_cpu: bool
+    seed: int
+
+class TrainingConfig(BaseModel):
+    batch_size: int
+    num_epochs: int
+    checkpoint_interval: int
     class Config:
         arbitrary_types_allowed = True
 
@@ -36,17 +57,7 @@ class ModelConfig(BaseModel):
 from src.models.model import create_model, load_model, save_model
 
 
-def load_and_prepare_data(
-    train_path,
-    val_path,
-    fraction,
-    input_length,
-    output_length,
-    batch_size,
-    target_columns,
-    seed,
-    num_workers,
-):
+def load_and_prepare_data(data_config: DataConfig, model_config: ModelConfig, training_config: TrainingConfig):
     """
     Train and evaluate the model, saving checkpoints at specified intervals.
 
@@ -60,13 +71,13 @@ def load_and_prepare_data(
     :param logger: Logger for logging information.
     :param checkpoint_interval: Interval (in epochs) to save model checkpoints.
     """
-    train_df = load_data(train_path, fraction=fraction)
-    val_df = load_data(val_path, fraction=fraction)
+    train_df = load_data(data_config.train_path, fraction=data_config.fraction)
+    val_df = load_data(data_config.val_path, fraction=data_config.fraction)
     train_dataset = TimeSeriesDataset(
         train_df,
-        input_length=input_length,
-        output_length=output_length,
-        target_columns=target_columns,
+        input_length=model_config.input_length,
+        output_length=model_config.output_length,
+        target_columns=data_config.target_columns,
     )
     val_dataset = TimeSeriesDataset(
         val_df,
@@ -74,11 +85,11 @@ def load_and_prepare_data(
         output_length=output_length,
         target_columns=target_columns,
     )
-    generator = torch.Generator().manual_seed(seed)
+    generator = torch.Generator().manual_seed(data_config.seed)
     train_loader = DataLoader(
         train_dataset,
-        batch_size=batch_size,
-        num_workers=num_workers,
+        batch_size=training_config.batch_size,
+        num_workers=data_config.num_workers,
         shuffle=True,
         generator=generator,
     )
@@ -201,65 +212,18 @@ def train_and_evaluate_model(
     return val_loss
 
 
-def objective(
-    trial,
-    train_path,
-    val_path,
-    model_output_path,
-    fraction,
-    num_epochs,
-    study,
-    input_length,
-    batch_size,
-    output_length,
-    embed_dim,
-    train_ratio,
-    val_ratio,
-    force_cpu,
-    seed,
-    num_workers,
-    checkpoint_interval,
-    model_config,
-):
+def objective(trial, data_config: DataConfig, model_config: ModelConfig, training_config: TrainingConfig, model_output_path, study):
     logger = logging.getLogger(__name__)
     mlflow.start_run()
     target_columns = ["watt_black", "watt_red", "watt_kitchen", "watt_living"]
-    train_loader, val_loader, num_columns = load_and_prepare_data(
-        train_path,
-        val_path,
-        fraction,
-        input_length,
-        output_length,
-        batch_size,
-        target_columns,
-        seed=seed,
-        num_workers=num_workers,
-    )
-    device = setup_device(force_cpu)
+    train_loader, val_loader, num_columns = load_and_prepare_data(data_config, model_config, training_config)
+    device = setup_device(model_config.force_cpu)
     logger.info(f"Using device: {device}")
-    config = ModelConfig(
-        input_length=input_length,
-        num_columns=num_columns,
-        output_length=output_length,
-        embed_dim=embed_dim,
-        target_columns=target_columns,
-        device=device,
-        force_cpu=force_cpu,
-        seed=seed,
-    )
-    model, optimizer, criterion = create_and_configure_model(trial, config)
-    val_loss = train_and_evaluate_model(
-        model,
-        train_loader,
-        val_loader,
-        optimizer,
-        criterion,
-        device,
-        num_epochs,
-        logger,
-        checkpoint_interval,
-        model_config,
-    )
+    model_config.num_columns = num_columns
+    model_config.device = device
+
+    model, optimizer, criterion = create_and_configure_model(trial, model_config)
+    val_loss = train_and_evaluate_model(model, train_loader, val_loader, optimizer, criterion, device, training_config.num_epochs, logger, training_config.checkpoint_interval, model_config)
     mlflow.end_run()
     logger.info("Training completed")
     logger.info(f"Final validation loss: {val_loss}")
@@ -410,8 +374,14 @@ def main(
         }
     )
 
-    # Define target columns for prediction
-    target_columns = ["watt_black", "watt_red", "watt_kitchen", "watt_living"]
+    data_config = DataConfig(
+        train_path=train_path,
+        val_path=val_path,
+        fraction=data_fraction,
+        target_columns=["watt_black", "watt_red", "watt_kitchen", "watt_living"],
+        seed=seed,
+        num_workers=num_workers,
+    )
     storage = optuna.storages.RDBStorage(
         url="sqlite:///./data/interim/optuna_study.db"
     )
@@ -423,35 +393,25 @@ def main(
     # Load data to determine the number of columns
     train_df = load_data(train_path, fraction=data_fraction)
     num_columns = train_df.shape[1]
-    model_config = {
-        "input_sequence_length": input_length,
-        "input_dim": num_columns - 1,
-        "output_sequence_length": output_length,
-        "output_dim": len(target_columns),
-        "embed_dim": embed_dim,
-    }
+    model_config = ModelConfig(
+        input_length=input_length,
+        num_columns=0,  # Placeholder, will be set in objective
+        output_length=output_length,
+        embed_dim=embed_dim,
+        target_columns=data_config.target_columns,
+        device=None,  # Placeholder, will be set in objective
+        force_cpu=force_cpu,
+        seed=seed,
+    )
+
+    training_config = TrainingConfig(
+        batch_size=batch_size,
+        num_epochs=num_epochs,
+        checkpoint_interval=checkpoint_interval,
+    )
 
     study.optimize(
-        lambda trial: objective(
-            trial,
-            train_path,
-            val_path,
-            model_output_path,
-            data_fraction,
-            num_epochs,
-            study,
-            input_length,
-            batch_size,
-            output_length,
-            embed_dim,
-            train_ratio,
-            val_ratio,
-            force_cpu,
-            seed,
-            num_workers,
-            checkpoint_interval,
-            model_config,
-        ),
+        lambda trial: objective(trial, data_config, model_config, training_config, model_output_path, study),
         n_trials=n_trials,
         n_jobs=-1,  # Use all available cores
     )

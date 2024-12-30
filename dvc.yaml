@@ -71,6 +71,8 @@ stages:
       --embed_dim ${train_model.embed_dim}
       --num_workers ${train_model.num_workers}
       --checkpoint_interval ${train_model.checkpoint_interval}
+      --nhead ${train_model.nhead}
+      --lr ${train_model.lr}
     deps:
       - src/models/train_model.py
       - src/models/model.py

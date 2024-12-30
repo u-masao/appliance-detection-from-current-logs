@@ -180,7 +180,7 @@ def objective(
     train_loader, val_loader, num_columns = load_and_prepare_data(
         train_path, val_path, data_config, model_config, training_config
     )
-    device = setup_device(model_config.force_cpu)
+    device = setup_device(training_config.force_cpu)
     logger.info(f"Using device: {device}")
     model_config.num_columns = num_columns
     model_config.device = device

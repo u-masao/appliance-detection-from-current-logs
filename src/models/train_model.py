@@ -331,21 +331,16 @@ def main(
     """
     Train the transformer model with the specified parameters.
     """
+    # init log
     logger = logging.getLogger(__name__)
     logger.info("==== start process ====")
-    logger.info(f"Train path: {train_path}")
-    logger.info(f"Validation path: {val_path}")
-    logger.info(f"Model output path: {model_output_path}")
-
     mlflow.set_experiment("train_model")
     mlflow.start_run(run_name=mlflow_run_name)
-    mlflow.log_params(
-        {
-            "train_path": train_path,
-            "val_path": val_path,
-            "model_output_path": model_output_path,
-        }
-    )
+
+    # log input args
+    cli_args = click.get_current_context().params
+    logger.info(f"args: {cli_args}")
+    mlflow.log_params({f"args.{k}": v for k, v in cli_args.items()})
 
     data_config = DataConfig(
         fraction=data_fraction,

@@ -7,12 +7,10 @@ import mlflow
 import numpy as np
 import optuna
 import optuna.storages
-import pandas as pd
 import torch
 import torch.nn as nn
 from optuna.samplers import TPESampler
 from pydantic import BaseModel
-from sklearn.model_selection import train_test_split
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 
@@ -72,7 +70,7 @@ class TrainingConfig(BaseModel):
         arbitrary_types_allowed = True
 
 
-from src.models.model import create_model, load_model, save_model
+from src.models.model import create_model, save_model
 
 
 def load_and_prepare_data(
@@ -248,7 +246,6 @@ def objective(
 ):
     logger = logging.getLogger(__name__)
     mlflow.start_run()
-    target_columns = ["watt_black", "watt_red", "watt_kitchen", "watt_living"]
     train_loader, val_loader, num_columns = load_and_prepare_data(
         train_path, val_path, data_config, model_config, training_config
     )
@@ -435,7 +432,6 @@ def main(
 
     # Load data to determine the number of columns
     train_df = load_data(train_path, fraction=data_fraction)
-    num_columns = train_df.shape[1]
     device = setup_device(force_cpu)
     model_config = ModelConfig(
         device=device,
@@ -470,7 +466,6 @@ def main(
     )
     logger.info(f"Best trial: {study.best_trial}")
     # Define the model with the best parameters
-    best_trial = study.best_trial
     # Use CLI options if provided, otherwise use best trial parameters
 
     model = create_model(
@@ -481,7 +476,6 @@ def main(
         embed_dim=model_config.embed_dim,
     ).to(model_config.device)
 
-    model = feaoijasodijife
 
     # Output model architecture
     logger.debug("Model architecture:")

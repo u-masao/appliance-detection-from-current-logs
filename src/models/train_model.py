@@ -78,9 +78,12 @@ def create_and_configure_model(
         torch.cuda.manual_seed_all(training_config.seed)
 
     logger = logging.getLogger(__name__)
-    model_config.nhead = trial.suggest_int(2, 8, step=2)
+    model_config.nhead = trial.suggest_int("nhead", 2, 8, step=2)
     model_config.embed_dim = trial.suggest_int(
-        model_config.nhead, model_config.nhead * 8, step=model_config.nhead
+        "embed_dim",
+        model_config.nhead,
+        model_config.nhead * 8,
+        step=model_config.nhead,
     )
     # lr = trial.suggest_float("lr", 1e-4, 7.0e-4, log=True)
     # lr = 0.00010234736295408926

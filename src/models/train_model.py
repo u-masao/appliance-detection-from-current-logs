@@ -1,7 +1,6 @@
 import logging
 import random
 from pathlib import Path
-from pydantic import BaseModel
 
 import click
 import mlflow
@@ -12,15 +11,18 @@ import pandas as pd
 import torch
 import torch.nn as nn
 from optuna.samplers import TPESampler
+from pydantic import BaseModel
 from sklearn.model_selection import train_test_split
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 
 from src.models.dataset import TimeSeriesDataset, load_data
 
+
 class ModelConfig(BaseModel):
     class Config:
         arbitrary_types_allowed = True
+
     input_length: int
     num_columns: int
     output_length: int
@@ -29,6 +31,8 @@ class ModelConfig(BaseModel):
     device: torch.device
     force_cpu: bool
     seed: int
+
+
 from src.models.model import create_model, load_model, save_model
 
 

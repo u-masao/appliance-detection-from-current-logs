@@ -163,7 +163,7 @@ def train_and_evaluate_model(
 
 
 def objective(
-    best_val_loss,
+    best_val_loss["value"],
     trial,
     train_path,
     val_path,
@@ -193,7 +193,7 @@ def objective(
         model_config,
         training_config,
     )
-    best_val_loss = float("inf")
+    best_val_loss = {"value": float("inf")}
 
     val_loss = train_and_evaluate_model(
         model,
@@ -206,9 +206,8 @@ def objective(
         training_config,
     )
 
-    nonlocal best_val_loss
-    if val_loss < best_val_loss:
-        best_val_loss = val_loss
+    if val_loss < best_val_loss["value"]:
+        best_val_loss["value"] = val_loss
         save_model(model, model_output_path, model_config=model_config)
         logger.info(f"Best model saved with validation loss: {best_val_loss}")
     logger.info("Training completed")

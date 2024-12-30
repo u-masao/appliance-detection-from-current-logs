@@ -58,7 +58,7 @@ def run_inference(
             trains.append(x.cpu().numpy().reshape(len(x), -1))
             predictions.append(output.cpu().numpy().reshape(len(x), -1))
             actuals.append(y.cpu().numpy().reshape(len(x), -1))
-            embeds.append(embeds.cpu().numpy().reshape(len(x), -1))
+            embeds.append(embed.cpu().numpy().reshape(len(x), -1))
 
     # Convert lists to arrays
     trains = np.concatenate(trains, axis=0)

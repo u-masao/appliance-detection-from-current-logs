@@ -41,17 +41,17 @@ class ModelConfig(BaseModel):
         arbitrary_types_allowed = True
 
 class TrainingConfig(BaseModel):
-    batch_size: int
-    num_epochs: int
-    checkpoint_interval: int
-    input_length: int
-    num_columns: int
-    output_length: int
-    embed_dim: int
-    target_columns: list
-    device: torch.device
-    force_cpu: bool
-    seed: int
+    batch_size: int = 32
+    num_epochs: int = 10
+    checkpoint_interval: int = 5
+    input_length: int = 60
+    num_columns: int = 0
+    output_length: int = 5
+    embed_dim: int = 64
+    target_columns: list = ["watt_black", "watt_red", "watt_kitchen", "watt_living"]
+    device: torch.device = torch.device("cpu")
+    force_cpu: bool = False
+    seed: int = 42
 
     class Config:
         arbitrary_types_allowed = True

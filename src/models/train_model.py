@@ -176,10 +176,10 @@ def log_config_and_model(data_config, model_config, training_config, model):
     ]:
         log_params_to_mlflow(config, prefix)
 
-    # total_params = sum(
-        # [p.numel() for p in model.parameters() if p.requires_grad]
-    # )
-    # mlflow.log_param("model.total_params", total_params)
+    total_params = sum(
+        [p.numel() for p in model.parameters() if p.requires_grad]
+    )
+    mlflow.log_param("model.total_params", total_params)
 
 
 best_val_loss = float("inf")
@@ -197,7 +197,7 @@ def objective(
     global best_val_loss
 
     logger = logging.getLogger(__name__)
-    mlflow.start_run(run_name=f"trial_{trial.number}")
+    mlflow.start_run(run_name=f"trial_{trial.number}", nested=True)
 
     # load data and make loader
     train_loader, val_loader, num_columns = load_and_prepare_data(
@@ -218,7 +218,7 @@ def objective(
         training_config,
     )
 
-    # log_config_and_model(data_config, model_config, training_config, model)
+    log_config_and_model(data_config, model_config, training_config, model)
 
     val_loss = train_and_evaluate_model(
         model,
@@ -235,6 +235,7 @@ def objective(
         best_val_loss = val_loss
         save_model(model, model_output_path, model_config=model_config)
         logger.info(f"Best model saved with validation loss: {best_val_loss}")
+    mlflow.end_run()
     logger.info("Training completed")
     logger.info(f"Final validation loss: {val_loss}")
     logger.info("==== end process ====")
@@ -423,6 +424,8 @@ def main(
         n_jobs=-1,  # Use all available cores
     )
     logger.info(f"Best trial: {study.best_trial}")
+
+    mlflow.end_run()
 
 
 if __name__ == "__main__":

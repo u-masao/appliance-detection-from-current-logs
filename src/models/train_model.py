@@ -81,9 +81,9 @@ def load_and_prepare_data(data_config: DataConfig, model_config: ModelConfig, tr
     )
     val_dataset = TimeSeriesDataset(
         val_df,
-        input_length=input_length,
-        output_length=output_length,
-        target_columns=target_columns,
+        input_length=model_config.input_length,
+        output_length=model_config.output_length,
+        target_columns=data_config.target_columns,
     )
     generator = torch.Generator().manual_seed(data_config.seed)
     train_loader = DataLoader(

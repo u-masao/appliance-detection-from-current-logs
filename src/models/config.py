@@ -18,7 +18,7 @@ class ModelConfig(BaseModel):
     num_encoder_layers: int = 3
     num_decoder_layers: int = 3
     ff_dim: int = 32
-    dropout = 0.1
+    dropout: float = 0.1
 
 
 class TrainingConfig(BaseModel):

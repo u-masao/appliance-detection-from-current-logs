@@ -47,7 +47,7 @@ visualize:
 ## train force
 .PHONY: train
 train:
-	uv run dvc repro -s -f train_model inference
+	uv run dvc repro -s -f train_model
 
 STORAGE_PATH=/content/drive/MyDrive/dataset/appliance-detection-from-current-logs/files
 ## sync_to_storage

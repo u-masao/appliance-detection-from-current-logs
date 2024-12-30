@@ -66,8 +66,8 @@ stages:
       --n_trials ${train_model.n_trials}
       --num_epochs ${train_model.num_epochs}
       --batch_size ${train_model.batch_size}
-      --input_length ${train_model.input_length}
-      --output_length ${train_model.output_length}
+      --input_sequence_length ${train_model.input_sequence_length}
+      --output_sequence_length ${train_model.output_sequence_length}
       --embed_dim ${train_model.embed_dim}
       --num_workers ${train_model.num_workers}
       --checkpoint_interval ${train_model.checkpoint_interval}
@@ -94,8 +94,8 @@ stages:
       data/interim/infer_${item.dataname}.parquet
       --batch_size ${train_model.batch_size}
       --data_fraction ${train_model.data_fraction}
-      --input_length ${train_model.input_length}
-      --output_length ${train_model.output_length}
+      --input_sequence_length ${train_model.input_sequence_length}
+      --output_sequence_length ${train_model.output_sequence_length}
       --data_fraction ${train_model.data_fraction}
     deps:
       - src/models/inference.py

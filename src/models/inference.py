@@ -17,8 +17,8 @@ from src.models.train_model import load_data
 def run_inference(
     model,
     test_df,
-    input_length,
-    output_length,
+    input_sequence_length,
+    output_sequence_length,
     target_columns,
     batch_size,
     device,
@@ -35,8 +35,8 @@ def run_inference(
     # Create test dataset and loader
     test_dataset = TimeSeriesDataset(
         test_df,
-        input_length=input_length,
-        output_length=output_length,
+        input_sequence_length=input_sequence_length,
+        output_sequence_length=output_sequence_length,
         target_columns=target_columns,
     )
     generator = torch.Generator().manual_seed(seed)
@@ -83,13 +83,13 @@ def run_inference(
 @click.argument("input_path", type=click.Path(exists=True))
 @click.argument("output_path", type=click.Path())
 @click.option(
-    "--input_length",
+    "--input_sequence_length",
     type=int,
     default=60 * 3,
     help="Input length for the time series data.",
 )
 @click.option(
-    "--output_length",
+    "--output_sequence_length",
     type=int,
     default=5,
     help="Output length for the time series data.",
@@ -126,8 +126,8 @@ def main(
     input_path,
     output_path,
     data_fraction,
-    input_length,
-    output_length,
+    input_sequence_length,
+    output_sequence_length,
     batch_size,
     device,
     mlflow_run_name,
@@ -154,8 +154,8 @@ def main(
     output_df = run_inference(
         model=model,
         test_df=df,
-        input_length=input_length,
-        output_length=output_length,
+        input_sequence_length=input_sequence_length,
+        output_sequence_length=output_sequence_length,
         target_columns=target_columns,
         batch_size=batch_size,
         device=device,

@@ -3,7 +3,7 @@ from pydantic import BaseModel
 
 
 class DataConfig(BaseModel):
-    num_columns: int
+    num_columns: int = 0
     fraction: float = 1.0
     num_workers: int = 4
 

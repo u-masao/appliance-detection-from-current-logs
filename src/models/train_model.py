@@ -85,6 +85,8 @@ def create_and_configure_model(
         model_config.nhead * 8,
         step=model_config.nhead,
     )
+    logger.info(f"params: {model_config.nhead=}")
+    logger.info(f"params: {model_config.embed_dim=}")
     # lr = trial.suggest_float("lr", 1e-4, 7.0e-4, log=True)
     # lr = 0.00010234736295408926
     # lr = 0.000514804885292421

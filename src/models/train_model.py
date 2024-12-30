@@ -95,9 +95,9 @@ def load_and_prepare_data(data_config: DataConfig, model_config: ModelConfig, tr
     )
     val_loader = DataLoader(
         val_dataset,
-        batch_size=batch_size,
+        batch_size=training_config.batch_size,
+        num_workers=data_config.num_workers,
         shuffle=False,
-        num_workers=num_workers,
         generator=generator,
     )
     return train_loader, val_loader, train_df.shape[1]

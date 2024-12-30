@@ -51,7 +51,7 @@ class TimeSeriesModel(nn.Module):
     ):
         super(TimeSeriesModel, self).__init__()
         logger = logging.getLogger(__name__)
-        logging.info(f"init TimeSeriesModel: {config.model_dump()}")
+        logger.info(f"init TimeSeriesModel: {config.model_dump()}")
 
         # fields
         self.config = config

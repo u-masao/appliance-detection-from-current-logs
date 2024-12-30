@@ -213,7 +213,7 @@ def train_and_evaluate_model(
     return val_loss
 
 
-def objective(trial, data_config: DataConfig, model_config: ModelConfig, training_config: TrainingConfig, model_output_path, study):
+def objective(trial, train_path, val_path, data_config: DataConfig, model_config: ModelConfig, training_config: TrainingConfig, model_output_path, study):
     logger = logging.getLogger(__name__)
     mlflow.start_run()
     target_columns = ["watt_black", "watt_red", "watt_kitchen", "watt_living"]
@@ -406,7 +406,7 @@ def main(
     )
 
     study.optimize(
-        lambda trial: objective(trial, data_config, model_config, training_config, model_output_path, study),
+        lambda trial: objective(trial, train_path, val_path, data_config, model_config, training_config, model_output_path, study),
         n_trials=n_trials,
         n_jobs=-1,  # Use all available cores
     )

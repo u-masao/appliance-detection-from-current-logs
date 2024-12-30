@@ -71,7 +71,7 @@ stages:
       size: 62374638
   train_model:
     cmd: python -m src.models.train_model data/interim/train.parquet data/interim/val.parquet
-      models/best_model.pth --data_fraction 0.01 --n_trials 2 --num_epochs 2 --batch_size
+      models/best_model.pth --data_fraction 0.01 --n_trials 2 --num_epochs 20 --batch_size
       32 --input_sequence_length 60 --output_sequence_length 2 --embed_dim 64 --num_workers
       2 --checkpoint_interval 1
     deps:
@@ -89,8 +89,8 @@ stages:
       size: 2104
     - path: src/models/model.py
       hash: md5
-      md5: 9e7905a1f82d5e794d6d887f2d241813
-      size: 6215
+      md5: 486579cf694462d980b168ccbcb05c7d
+      size: 5886
     - path: src/models/train_model.py
       hash: md5
       md5: 9e1f5367c3ac0a4e7c9f1ee39fa289d0
@@ -98,13 +98,13 @@ stages:
     outs:
     - path: models/best_model.pth
       hash: md5
-      md5: ff8c444ec72a206ed5e9250b8a2c3d99
+      md5: da983946c0c3749932ba4ef8e9714f1d
       size: 2029218
     - path: models/checkpoint/
       hash: md5
-      md5: 83e1b365780729d7eaa8a87e9a49fb0b.dir
-      size: 4058436
-      nfiles: 2
+      md5: 807919c86a93a621d21ffd09bd54f591.dir
+      size: 40584360
+      nfiles: 20
   split_data:
     cmd: python src/data/split_data.py data/interim/features.parquet data/interim/train.parquet
       data/interim/val.parquet data/interim/test.parquet --train_ratio 0.7 --val_ratio
@@ -158,7 +158,7 @@ stages:
       size: 44417877
     - path: models/best_model.pth
       hash: md5
-      md5: ff8c444ec72a206ed5e9250b8a2c3d99
+      md5: da983946c0c3749932ba4ef8e9714f1d
       size: 2029218
     - path: src/models/dataset.py
       hash: md5
@@ -170,13 +170,13 @@ stages:
       size: 4733
     - path: src/models/model.py
       hash: md5
-      md5: 9e7905a1f82d5e794d6d887f2d241813
-      size: 6215
+      md5: 486579cf694462d980b168ccbcb05c7d
+      size: 5886
     outs:
     - path: data/interim/infer_train.parquet
       hash: md5
-      md5: 17c9dbfb6c39833f2596db441079a427
-      size: 18717367
+      md5: dce90683f98845e3ce81b1df5a612232
+      size: 18646220
   inference@val:
     cmd: python -m src.models.inference models/best_model.pth data/interim/val.parquet
       data/interim/infer_val.parquet --batch_size 32 --data_fraction 0.01 --input_sequence_length
@@ -188,7 +188,7 @@ stages:
       size: 11210111
     - path: models/best_model.pth
       hash: md5
-      md5: ff8c444ec72a206ed5e9250b8a2c3d99
+      md5: da983946c0c3749932ba4ef8e9714f1d
       size: 2029218
     - path: src/models/dataset.py
       hash: md5
@@ -200,13 +200,13 @@ stages:
       size: 4733
     - path: src/models/model.py
       hash: md5
-      md5: 9e7905a1f82d5e794d6d887f2d241813
-      size: 6215
+      md5: 486579cf694462d980b168ccbcb05c7d
+      size: 5886
     outs:
     - path: data/interim/infer_val.parquet
       hash: md5
-      md5: 7faf1eda13581c0a55972d0d81765ee2
-      size: 4037822
+      md5: 842365cfb6fe1068fe9a62d2fd88d390
+      size: 4019410
   inference@test:
     cmd: python -m src.models.inference models/best_model.pth data/interim/test.parquet
       data/interim/infer_test.parquet --batch_size 32 --data_fraction 0.01 --input_sequence_length
@@ -218,7 +218,7 @@ stages:
       size: 11321116
     - path: models/best_model.pth
       hash: md5
-      md5: ff8c444ec72a206ed5e9250b8a2c3d99
+      md5: da983946c0c3749932ba4ef8e9714f1d
       size: 2029218
     - path: src/models/dataset.py
       hash: md5
@@ -230,10 +230,10 @@ stages:
       size: 4733
     - path: src/models/model.py
       hash: md5
-      md5: 9e7905a1f82d5e794d6d887f2d241813
-      size: 6215
+      md5: 486579cf694462d980b168ccbcb05c7d
+      size: 5886
     outs:
     - path: data/interim/infer_test.parquet
       hash: md5
-      md5: 7c747b3d215bb7b8f705d5f85e7bb095
-      size: 4049721
+      md5: fc04148a37b64167811e50a4bd955b1e
+      size: 4028882

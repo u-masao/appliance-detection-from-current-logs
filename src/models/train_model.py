@@ -78,10 +78,14 @@ def create_and_configure_model(
         torch.cuda.manual_seed_all(training_config.seed)
 
     logger = logging.getLogger(__name__)
-    lr = trial.suggest_float("lr", 1e-4, 7.0e-4, log=True)
+    model_config.nhead = trial.suggest_int(2, 8, step=2)
+    model_config.embed_dim = trial.suggest_int(
+        model_config.nhead, model_config.nhead * 8, step=model_config.nhead
+    )
+    # lr = trial.suggest_float("lr", 1e-4, 7.0e-4, log=True)
     # lr = 0.00010234736295408926
     # lr = 0.000514804885292421
-    # lr = training_config.lr
+    lr = training_config.lr
     logger.info(f"params: {lr=}")
     mlflow.log_params({"lr": lr})
 

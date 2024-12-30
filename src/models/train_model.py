@@ -404,7 +404,6 @@ def main(
         output_length=output_length,
         embed_dim=embed_dim,
         target_columns=data_config.target_columns,
-        device=None,  # Placeholder, will be set in objective
         force_cpu=force_cpu,
         seed=seed,
     )

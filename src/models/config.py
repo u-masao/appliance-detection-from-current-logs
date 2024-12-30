@@ -15,6 +15,10 @@ class ModelConfig(BaseModel):
     output_dim: int
     embed_dim: int
     nhead: int = 8
+    num_encoder_layers: int = 3
+    num_decoder_layers: int = 3
+    ff_dim: int = 32
+    dropout = 0.1
 
 
 class TrainingConfig(BaseModel):

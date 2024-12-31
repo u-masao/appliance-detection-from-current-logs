@@ -49,7 +49,7 @@ visualize:
 train:
 	uv run dvc repro -s -f train_model
 
-STORAGE_PATH=/content/drive/MyDrive/dataset/appliance-detection-from-current-logs/files
+STORAGE_PATH=/content/drive/MyDrive/dataset/appliance-detection-from-current-logs/files2
 ## sync_to_storage
 .PHONY: sync_to_storage
 sync_to_storage:

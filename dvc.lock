@@ -71,9 +71,9 @@ stages:
       size: 62374638
   train_model:
     cmd: python -m src.models.train_model data/interim/train.parquet data/interim/val.parquet
-      models/best_model.pth --data_fraction 0.01 --n_trials 4 --num_epochs 1 --batch_size
-      32 --input_sequence_length 60 --output_sequence_length 5 --embed_dim 32 --num_workers
-      1 --checkpoint_interval 1 --nhead 2 --lr 0.000514804885292421
+      models/best_model.pth --data_fraction 0.1 --n_trials 2 --num_epochs 10 --batch_size
+      32 --input_sequence_length 360 --output_sequence_length 5 --embed_dim 32 --num_workers
+      4 --checkpoint_interval 1 --nhead 2 --lr 0.000514804885292421
     deps:
     - path: data/interim/train.parquet
       hash: md5
@@ -81,30 +81,30 @@ stages:
       size: 44417877
     - path: data/interim/val.parquet
       hash: md5
-      md5: b74c9b4b4e68908792143c2ddb6a074e
-      size: 11210111
+      md5: 70db5690ee8783741967d9eddd7c89dd
+      size: 11222458
     - path: src/models/dataset.py
       hash: md5
       md5: 37a1d3271859135a6c9bc2a4dc1c84a5
       size: 2104
     - path: src/models/model.py
       hash: md5
-      md5: 85c0d436b651fdbb10701eb32e227018
-      size: 6092
+      md5: 4436dd3557f0282e98776638d22fa0c1
+      size: 6091
     - path: src/models/train_model.py
       hash: md5
-      md5: b791e166292cf847bad06dba92dcc762
-      size: 12918
+      md5: 38d9f490614fc866eb87693060163bd8
+      size: 13048
     outs:
     - path: models/best_model.pth
       hash: md5
-      md5: 5bb6331609f81f7c7b72b3d44ad027f7
-      size: 2029218
+      md5: cb3d7a18dc8459466eeaa5ac3f422968
+      size: 4740578
     - path: models/checkpoint/
       hash: md5
-      md5: 79aa362e084c1e948daee934b0e26b80.dir
-      size: 2029218
-      nfiles: 1
+      md5: fb4daa16235cd0eeb7d1818f955dd9cc.dir
+      size: 101820040
+      nfiles: 20
   split_data:
     cmd: python src/data/split_data.py data/interim/features.parquet data/interim/train.parquet
       data/interim/val.parquet data/interim/test.parquet --train_ratio 0.7 --val_ratio

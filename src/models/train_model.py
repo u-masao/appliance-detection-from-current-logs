@@ -82,7 +82,7 @@ def create_and_configure_model(
     model_config.embed_dim = trial.suggest_int(
         "embed_dim",
         model_config.nhead,
-        512,
+        30,
         step=model_config.nhead,
     )
     # model_config.nhead=4

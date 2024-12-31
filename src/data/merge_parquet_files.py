@@ -129,7 +129,7 @@ def main(input1, input2, output, mlflow_run_name, ffill_multiplier, window):
     :param input2: Path to the second input Parquet file.
     :param output: Path to the output Parquet file.
     """
-    mlflow.set_experiment("merge_datasets")
+    mlflow.set_experiment("make_dataset")
     mlflow.start_run(run_name=mlflow_run_name)
     mlflow.log_params(
         {

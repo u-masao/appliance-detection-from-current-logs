@@ -38,6 +38,7 @@ def main(
     input_sequence_length,
 ):
     logger = logging.getLogger(__name__)
+    mlflow.set_experiment("make_dataset")
     mlflow.start_run()
     logger.info("==== start data splitting ====")
     logger.info(f"Input path: {input_path}")

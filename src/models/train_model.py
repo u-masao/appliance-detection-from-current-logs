@@ -78,11 +78,11 @@ def create_and_configure_model(
         torch.cuda.manual_seed_all(training_config.seed)
 
     logger = logging.getLogger(__name__)
-    model_config.nhead = trial.suggest_int("nhead", 2, 12, step=2)
+    model_config.nhead = trial.suggest_int("nhead", 2, 20, step=2)
     model_config.embed_dim = trial.suggest_int(
         "embed_dim",
         model_config.nhead,
-        model_config.nhead * 20,
+        512,
         step=model_config.nhead,
     )
     # model_config.nhead=4

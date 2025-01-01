@@ -78,21 +78,25 @@ def create_and_configure_model(
         torch.cuda.manual_seed_all(training_config.seed)
 
     logger = logging.getLogger(__name__)
-    # model_config.nhead = trial.suggest_int("nhead", 2, 20, step=2)
-    # model_config.embed_dim = trial.suggest_int(
-        # "embed_dim",
-        # model_config.nhead,
-        # 30,
-        # step=model_config.nhead,
-    # )
+    model_config.nhead = trial.suggest_int(
+        "nhead", model_config.nhead, model_config.nhead, step=2
+    )
+    model_config.embed_dim = trial.suggest_int(
+        "embed_dim",
+        model_config.nhead,
+        model_config.nhead,
+        step=model_config.nhead,
+    )
+    lr = trial.suggest_float("lr", model_config.lr, model_config.lr, log=True)
+
+    # lr = trial.suggest_float("lr", 1e-5, 1e-3, log=True)
     # model_config.nhead=4
     # model_config.embed_dim=24
-    # lr = trial.suggest_float("lr", 1e-4, 7.0e-4, log=True)
     # lr = 0.00010234736295408926
     # lr = 0.000514804885292421
-    model_config.nhead=training_config.nhead
-    model_config.embed_dim=training.embed_dim
-    lr = training_config.lr
+    # model_config.nhead=training_config.nhead
+    # model_config.embed_dim=training.embed_dim
+    # lr = training_config.lr
 
     logger.info(f"Trial {trial.number} params: {model_config.nhead=}")
     logger.info(f"Trial {trial.number} params: {model_config.embed_dim=}")

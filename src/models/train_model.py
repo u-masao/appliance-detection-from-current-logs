@@ -459,7 +459,7 @@ def main(
         n_jobs=-1,  # Use all available cores
     )
 
-    logger.info(f"Best trial: {study.best_trial}")
+    # logger.info(f"Best trial: {study.best_trial}")
 
     mlflow.end_run()
 

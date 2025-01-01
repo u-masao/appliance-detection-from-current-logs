@@ -83,11 +83,13 @@ def create_and_configure_model(
     )
     model_config.embed_dim = trial.suggest_int(
         "embed_dim",
-        model_config.nhead,
-        model_config.nhead,
-        step=model_config.nhead,
+        model_config.embed_dim,
+        model_config.embed_dim,
+        step=model_config.embed_dim,
     )
-    lr = trial.suggest_float("lr", model_config.lr, model_config.lr, log=True)
+    lr = trial.suggest_float(
+        "lr", training_config.lr, training_config.lr, log=True
+    )
 
     # lr = trial.suggest_float("lr", 1e-5, 1e-3, log=True)
     # model_config.nhead=4

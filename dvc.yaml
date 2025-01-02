@@ -56,6 +56,24 @@ stages:
       - data/interim/val.parquet
       - data/interim/test.parquet
 
+  convert_to_csv:
+    matrix:
+      dataname:
+        - train
+        - val
+        - test
+    cmd: >-
+      python -m src.data.convert_to_csv
+      data/interim/${item.dataname}.parquet
+      data/processed/csv/${item.dataname}/
+      --split monthly
+      --data_fraction ${train_model.data_fraction}
+    deps:
+      - src/data/convert_to_csv.py
+      - data/interim/${item.dataname}.parquet
+    outs:
+      - data/processed/csv/${item.dataname}/
+
   train_model:
     cmd: >-
       python -m src.models.train_model
@@ -107,20 +125,3 @@ stages:
       - data/interim/${item.dataname}.parquet
     outs:
       - data/interim/infer_${item.dataname}.parquet
-
-  convert_to_csv:
-    matrix:
-      dataname:
-        - train
-        - val
-        - test
-    cmd: >-
-      python -m src.data.convert_to_csv
-      data/interim/${item.dataname}.parquet
-      data/processed/${item.dataname}.csv
-      --data_fraction ${train_model.data_fraction}
-    deps:
-      - src/data/convert_to_csv.py
-      - data/interim/${item.dataname}.parquet
-    outs:
-      - data/processed/${item.dataname}.csv

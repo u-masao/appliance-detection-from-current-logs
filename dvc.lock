@@ -108,7 +108,7 @@ stages:
   split_data:
     cmd: python src/data/split_data.py data/interim/features.parquet data/interim/train.parquet
       data/interim/val.parquet data/interim/test.parquet --train_ratio 0.7 --val_ratio
-      0.15 --input_sequence_length 30
+      0.15 --input_sequence_length 360
     deps:
     - path: data/interim/features.parquet
       hash: md5
@@ -121,16 +121,16 @@ stages:
     outs:
     - path: data/interim/test.parquet
       hash: md5
-      md5: 497e0f8b4c2dd2d15d74452a34ced60e
-      size: 11330705
+      md5: 6c2de4ff0708a0b476d96a0da94f8738
+      size: 11288189
     - path: data/interim/train.parquet
       hash: md5
       md5: 585430d1f957be95bd4366b431131030
       size: 44418257
     - path: data/interim/val.parquet
       hash: md5
-      md5: 5ea4a39212e154241f6ee5787ec877a4
-      size: 11211173
+      md5: 400c6246e4fdae17a1e987fc1a634f0c
+      size: 11223072
   inference:
     cmd: python src/models/inference.py models/best_model.pth data/interim/features.parquet
       --input_length 180 --output_length 5 --batch_size 128 --device cpu

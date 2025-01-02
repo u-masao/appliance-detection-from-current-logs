@@ -247,13 +247,13 @@ stages:
       size: 44417877
     - path: src/data/convert_to_csv.py
       hash: md5
-      md5: bd0533c06fbf59871cd1472f6b8a125b
-      size: 1256
+      md5: dd615f8dcb437833491117c6b579c499
+      size: 1342
     outs:
     - path: data/processed/train.csv
       hash: md5
-      md5: 8dc734050e321199ee39af7f5ae9b6a5
-      size: 9589728
+      md5: 4d3db5d471d841ccce2be633b11af663
+      size: 9589741
   convert_to_csv@val:
     cmd: python -m src.data.convert_to_csv data/interim/val.parquet data/processed/val.csv
       --data_fraction 0.1
@@ -264,13 +264,13 @@ stages:
       size: 11222458
     - path: src/data/convert_to_csv.py
       hash: md5
-      md5: bd0533c06fbf59871cd1472f6b8a125b
-      size: 1256
+      md5: dd615f8dcb437833491117c6b579c499
+      size: 1342
     outs:
     - path: data/processed/val.csv
       hash: md5
-      md5: 9cffc9c3ac152c09597fabac5fb6e0a5
-      size: 2084840
+      md5: 53d3b91dc2924bc54ec6b92024ac61fe
+      size: 2084853
   convert_to_csv@test:
     cmd: python -m src.data.convert_to_csv data/interim/test.parquet data/processed/test.csv
       --data_fraction 0.1
@@ -281,10 +281,10 @@ stages:
       size: 11287577
     - path: src/data/convert_to_csv.py
       hash: md5
-      md5: bd0533c06fbf59871cd1472f6b8a125b
-      size: 1256
+      md5: dd615f8dcb437833491117c6b579c499
+      size: 1342
     outs:
     - path: data/processed/test.csv
       hash: md5
-      md5: ca91d1db866c7c4db428eaf3f3772e44
-      size: 2073757
+      md5: 22ccf3947468cc91269a44aedb654065
+      size: 2073770

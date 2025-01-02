@@ -26,12 +26,13 @@ def create_features(df):
     df["watt_total"] = df["watt_black"] + df["watt_red"]
 
     # Add a column for days since the start of the year
-    df["days_since_year_start"] = df.index.dayofyear
-    df["day_of_week"] = df.index.dayofweek
+    jst_dt = df.index.tz_convert("Asia/Tokyo")
+    df["days_since_year_start"] = jst_dt.dayofyear
+    df["day_of_week"] = jst_dt.dayofweek
     # Add columns for month, hour, and minute
-    df["month"] = df.index.month
-    df["hour"] = df.index.hour
-    df["minute"] = df.index.minute
+    df["month"] = jst_dt.month
+    df["hour"] = jst_dt.hour
+    df["minute"] = jst_dt.minute
     return df
 
 

@@ -43,6 +43,9 @@ def main(
     # Load data
     df = load_data(input_path, fraction=data_fraction)
 
+    df.index = df.index.dt.tz_convert("Asia/Tokyo")
+    df.index.name = "timestamp_jst"
+
     # output data
     df.to_csv(output_path)
 

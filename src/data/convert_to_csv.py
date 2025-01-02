@@ -26,7 +26,9 @@ def df_to_monthly_csv(df, output_dir):
     # 1ヶ月ごとにCSVファイルに出力
     for year in range(start_year, end_year + 1):  # 最小年〜最大年を処理
         for month in range(1, 13):  # 1月から12月を処理
-            start_date = pd.to_datetime(f"{year}-{month:02d}-01")
+            start_date = pd.to_datetime(
+                f"{year}-{month:02d}-01", utc=True
+            ).tz_convert("Asia/Tokyo")
             end_date = (
                 start_date + pd.DateOffset(months=1) - pd.DateOffset(days=1)
             )
@@ -91,7 +93,6 @@ def main(
 
     # Load data
     df = load_data(input_path, fraction=data_fraction)
-
     df.index = df.index.tz_convert("Asia/Tokyo")
     df.index.name = "timestamp_jst"
 

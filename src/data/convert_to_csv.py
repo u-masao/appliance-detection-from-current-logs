@@ -69,6 +69,7 @@ def df_to_monthly_csv(df, output_dir):
 def main(
     input_path,
     output_dir,
+    split,
     data_fraction,
     mlflow_run_name,
 ):
@@ -84,6 +85,9 @@ def main(
             "output_dir": output_dir,
         }
     )
+
+    if split != "monthly":
+        raise ValueError("split type not supported")
 
     # Load data
     df = load_data(input_path, fraction=data_fraction)

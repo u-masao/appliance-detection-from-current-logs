@@ -117,6 +117,7 @@ stages:
     cmd: >-
       python -m src.data.convert_to_csv
       data/interim/${item.dataname}.parquet
+      data/processed/${item.dataname}.csv
       --data_fraction ${train_model.data_fraction}
     deps:
       - src/data/convert_to_csv.py

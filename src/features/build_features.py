@@ -16,17 +16,18 @@ def create_features(df):
         columns={
             "star_watt_sensor0": "watt_black",
             "star_watt_sensor1": "watt_red",
-            "star_watt_sensor2": "watt_kitchen",
-            "star_watt_sensor3": "watt_living",
+            "star_watt_sensor2": "watt_living",
+            "star_watt_sensor3": "watt_kitchen",
             "env_temp_sensor0": "temperature_outside",
         }
     )
-    df["watt_black_minus_kitchen"] = df["watt_black"] - df["watt_kitchen"]
-    df["watt_red_minus_living"] = df["watt_red"] - df["watt_living"]
-    df["watt_total"] = df["watt_black"] - df["watt_red"]
+    df["watt_black_minus_living"] = df["watt_black"] - df["watt_living"]
+    df["watt_red_minus_kitchen"] = df["watt_red"] - df["watt_kitchen"]
+    df["watt_total"] = df["watt_black"] + df["watt_red"]
 
     # Add a column for days since the start of the year
     df["days_since_year_start"] = df.index.dayofyear
+    df["day_of_week"] = df.index.dayofweek
     # Add columns for month, hour, and minute
     df["month"] = df.index.month
     df["hour"] = df.index.hour
@@ -54,36 +55,49 @@ def main(input_parquet_path, output_parquet_path, mlflow_run_name):
     :param input_parquet_path: Path to the input Parquet file.
     :param output_parquet_path: Path to the output Parquet file.
     """
+
+    # init log
     logger = logging.getLogger(__name__)
     logger.info("==== start process ====")
-    logger.info(f"Input path: {input_parquet_path}")
-    logger.info(f"Output path: {output_parquet_path}")
-
     mlflow.set_experiment("build_features")
     mlflow.start_run(run_name=mlflow_run_name)
-    mlflow.log_params(
-        {
-            "input_parquet_path": input_parquet_path,
-            "output_parquet_path": output_parquet_path,
-            "mlflow_run_name": mlflow_run_name,
-        }
-    )
+
+    # log args
+    cli_args = {
+        "input_parquet_path": input_parquet_path,
+        "output_parquet_path": output_parquet_path,
+        "mlflow_run_name": mlflow_run_name,
+    }
+    logger.info(f"{cli_args=}")
+    mlflow.log_params({f"args.{k}": v for k, v in cli_args.items()})
 
     # Load the Parquet file
-    df = pd.read_parquet(input_parquet_path)
-    logger.info("Loaded DataFrame:\n%s", df.head())
+    input_df = pd.read_parquet(input_parquet_path)
+    logger.info("Loaded DataFrame:\n%s", input_df.head())
 
     # Create features
-    df = create_features(df)
-    logger.info("DataFrame with features:\n%s", df.head())
+    df = create_features(input_df)
 
     # Log the entire DataFrame with features
-    logger.info("Resulting DataFrame:\n%s", df)
+    logger.info("DataFrame with features:\n%s", df.head())
     logger.info("Output DataFrame columns: %s", df.columns)
+
+    # output dataframe
     df.to_parquet(output_parquet_path)
 
-    mlflow.end_run()
+    # log
+    log_params = {
+        "input.length": input_df.shape[0],
+        "input.columns": input_df.shape[1],
+        "output.length": df.shape[0],
+        "output.columns": df.shape[1],
+    }
+    logger.info(f"{log_params=}")
+    mlflow.log_params(log_params)
     logger.info("==== end process ====")
+
+    # cleanup
+    mlflow.end_run()
 
 
 if __name__ == "__main__":

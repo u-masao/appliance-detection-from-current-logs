@@ -123,4 +123,4 @@ stages:
       - src/data/convert_to_csv.py
       - data/interim/${item.dataname}.parquet
     outs:
-      - data/interim/${item.dataname}.csv
+      - data/processed/${item.dataname}.csv

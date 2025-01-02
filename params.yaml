@@ -1,8 +1,11 @@
 train_model:
-  data_fraction: 0.1
+  # data_fraction: 0.1
+  data_fraction: 0.01
   n_trials: 1
-  num_epochs: 100
-  input_sequence_length: 360
+  # num_epochs: 100
+  num_epochs: 1
+  # input_sequence_length: 360
+  input_sequence_length: 30
   output_sequence_length: 5
   batch_size: 32
   train_ratio: 0.7

@@ -141,7 +141,7 @@ def main(
     mlflow.set_experiment("inference")
     mlflow.start_run(run_name=mlflow_run_name)
     mlflow.log_params({"model_path": model_path, "input_path": input_path})
-    target_columns = ["watt_black", "watt_red", "watt_kitchen", "watt_living"]
+    target_columns = ["watt_black", "watt_red", "watt_living", "watt_kitchen"]
 
     # Load model and configuration
     model, model_config = load_model(model_path)

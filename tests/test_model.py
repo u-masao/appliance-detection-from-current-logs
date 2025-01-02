@@ -1,5 +1,6 @@
 import torch
 
+from src.models.config import ModelConfig
 from src.models.model import PositionalEncoding, TimeSeriesModel
 
 
@@ -33,14 +34,15 @@ def test_positional_encoding():
     output_dim = 2
     embed_dim = 16
     batch_size = 5
-
-    model = TimeSeriesModel(
+    model_config = ModelConfig(
         input_sequence_length=input_sequence_length,
         input_dim=input_dim,
         output_sequence_length=output_sequence_length,
         output_dim=output_dim,
         embed_dim=embed_dim,
     )
+
+    model = TimeSeriesModel(model_config)
     model.eval()  # Set model to evaluation mode
 
     # Create a dummy input tensor

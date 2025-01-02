@@ -12,15 +12,15 @@ def test_timeseriesdataset():
         "gap": [0, 0, 0, 0, 0, 0, 0, 1, 0, 0],
         "watt_black": [10, 20, 30, 40, 50, 60, 70, 80, 90, 100],
         "watt_red": [15, 25, 35, 45, 55, 65, 75, 85, 95, 105],
-        "watt_kitchen": [20, 30, 40, 50, 60, 70, 80, 90, 100, 110],
-        "watt_living": [25, 35, 45, 55, 65, 75, 85, 95, 105, 115],
+        "watt_living": [20, 30, 40, 50, 60, 70, 80, 90, 100, 110],
+        "watt_kitchen": [25, 35, 45, 55, 65, 75, 85, 95, 105, 115],
     }
     df = pd.DataFrame(data)
 
     # パラメータを設定
     input_length = 3
     output_length = 2
-    target_columns = ["watt_black", "watt_red", "watt_kitchen", "watt_living"]
+    target_columns = ["watt_black", "watt_red", "watt_living", "watt_kitchen"]
 
     # データセットを作成
     dataset = TimeSeriesDataset(

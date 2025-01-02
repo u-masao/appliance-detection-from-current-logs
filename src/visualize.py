@@ -7,7 +7,7 @@ import torch
 from src.models.dataset import TimeSeriesDataset, load_data
 from src.models.model import load_model
 
-target_columns = ["watt_black", "watt_red", "watt_kitchen", "watt_living"]
+target_columns = ["watt_black", "watt_red", "watt_living", "watt_kitchen"]
 model_filepath = "models/checkpoint/epoch_0070-trial_0.pth"
 fraction = 0.01
 

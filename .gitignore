@@ -177,3 +177,4 @@ cython_debug/
 /data/raw/data.zip
 /.gradio/
 /models/
+/data/processed/

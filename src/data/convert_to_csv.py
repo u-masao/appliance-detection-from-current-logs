@@ -1,4 +1,5 @@
 import logging
+from pathlib import Path
 
 import click
 import mlflow
@@ -41,7 +42,10 @@ def df_to_monthly_csv(df, output_dir):
             # データが存在する場合のみCSVファイルに出力
             if not monthly_data.empty:
                 # CSVファイル名を作成 (例: monthly_data_2022-01.csv)
-                file_name = f"{output_dir}/{year}-{month:02d}.csv"
+                file_name = Path(f"{output_dir}/{year}-{month:02d}.csv")
+
+                # 親ディレクトリを作成
+                file_name.parent.mkdir(parents=True, exist_ok=True)
 
                 # CSVファイルに出力
                 monthly_data.to_csv(file_name)

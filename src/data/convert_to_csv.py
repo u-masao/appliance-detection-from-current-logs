@@ -8,6 +8,47 @@ import pandas as pd
 from src.models.train_model import load_data
 
 
+def df_to_weekly_csv(df, output_dir):
+    """
+    pandas DataFrame の Index に datetime を設定したデータを受け取り、
+    weekly にCSVファイルとして出力する関数。
+
+    Args:
+        df (pd.DataFrame):
+            Index に datetime を設定した pandas DataFrame。
+        output_dir (str, optional):
+            出力ファイル名のプレフィックス。
+    """
+
+    # indexの最小値と最大値から年と月の範囲を取得
+    start_year = df.index.min().year
+    end_year = df.index.max().year
+
+    # 1ヶ月ごとにCSVファイルに出力
+    for year in range(start_year, end_year + 1):  # 最小年〜最大年を処理
+        for week in range(0, 1 + 366 // 7):
+            start_date = pd.to_datetime(f"{year}-01-01", utc=True).tz_convert(
+                "Asia/Tokyo"
+            ) + pd.DataOffset(weeks=week)
+            end_date = (
+                start_date + pd.DateOffset(week=1) - pd.DateOffset(days=1)
+            )
+
+            # 一週ぶんのデータを取得
+            weekly_data = df[(df.index >= start_date) & (df.index <= end_date)]
+
+            # データが存在する場合のみCSVファイルに出力
+            if not weekly_data.empty:
+                # CSVファイル名を作成 (例: 2022-week01.csv)
+                file_name = Path(f"{output_dir}/weekly-{year}-{week:02d}.csv")
+
+                # 親ディレクトリを作成
+                file_name.parent.mkdir(parents=True, exist_ok=True)
+
+                # CSVファイルに出力
+                weekly_data.to_csv(file_name)
+
+
 def df_to_monthly_csv(df, output_dir):
     """
     pandas DataFrame の Index に datetime を設定したデータを受け取り、
@@ -42,7 +83,9 @@ def df_to_monthly_csv(df, output_dir):
             # データが存在する場合のみCSVファイルに出力
             if not monthly_data.empty:
                 # CSVファイル名を作成 (例: monthly_data_2022-01.csv)
-                file_name = Path(f"{output_dir}/{year}-{month:02d}.csv")
+                file_name = Path(
+                    f"{output_dir}/montyly-{year}-{month:02d}.csv"
+                )
 
                 # 親ディレクトリを作成
                 file_name.parent.mkdir(parents=True, exist_ok=True)
@@ -101,6 +144,7 @@ def main(
     df.index.name = "timestamp_jst"
 
     # output data
+    df_to_weekly_csv(df, f"{output_dir}")
     df_to_monthly_csv(df, f"{output_dir}")
 
     mlflow.end_run()

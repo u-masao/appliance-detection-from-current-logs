@@ -29,7 +29,7 @@ def df_to_weekly_csv(df, output_dir):
         for week in range(0, 1 + 366 // 7):
             start_date = pd.to_datetime(f"{year}-01-01", utc=True).tz_convert(
                 "Asia/Tokyo"
-            ) + pd.DataOffset(weeks=week)
+            ) + pd.DateOffset(weeks=week)
             end_date = (
                 start_date + pd.DateOffset(week=1) - pd.DateOffset(days=1)
             )

@@ -5,6 +5,7 @@
 PROJECT_NAME = appliance-detection-from-current-logs
 PYTHON_VERSION = 3.10
 PYTHON_INTERPRETER = uv run python
+STORAGE_PATH=/content/drive/MyDrive/dataset/appliance-detection-from-current-logs/files3
 
 #################################################################################
 # COMMANDS                                                                      #
@@ -49,7 +50,6 @@ visualize:
 train:
 	uv run dvc repro -s -f train_model
 
-STORAGE_PATH=/content/drive/MyDrive/dataset/appliance-detection-from-current-logs/files2
 ## sync_to_storage
 .PHONY: sync_to_storage
 sync_to_storage:

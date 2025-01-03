@@ -31,7 +31,7 @@ def df_to_weekly_csv(df, output_dir):
                 "Asia/Tokyo"
             ) + pd.DateOffset(weeks=week)
             end_date = (
-                start_date + pd.DateOffset(week=1) - pd.DateOffset(days=1)
+                start_date + pd.DateOffset(weeks=1) - pd.DateOffset(days=1)
             )
 
             # 一週ぶんのデータを取得

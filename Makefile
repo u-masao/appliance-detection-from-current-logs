@@ -5,7 +5,7 @@
 PROJECT_NAME = appliance-detection-from-current-logs
 PYTHON_VERSION = 3.10
 PYTHON_INTERPRETER = uv run python
-STORAGE_PATH=/content/drive/MyDrive/dataset/appliance-detection-from-current-logs/files3
+STORAGE_PATH=/content/drive/MyDrive/dataset/appliance-detection-from-current-logs/files4
 
 #################################################################################
 # COMMANDS                                                                      #
@@ -51,19 +51,28 @@ train:
 	uv run dvc repro -s -f train_model
 
 ## sync_to_storage
+ARCHIVES_DIR=archives
 .PHONY: sync_to_storage
 sync_to_storage:
-	rsync -av data $(STORAGE_PATH)/
-	rsync -av mlruns $(STORAGE_PATH)/
-	rsync -av models $(STORAGE_PATH)/
+	mkdir -p $(ARCHIVES_DIR)
+	tar czf $(ARCHIVES_DIR)/data.tgz data/
+	rsync -av $(ARCHIVES_DIR)/data.tgz $(STORAGE_PATH)/
+	tar czf $(ARCHIVES_DIR)/mlruns.tgz mlruns/
+	rsync -av $(ARCHIVES_DIR)/mlruns.tgz $(STORAGE_PATH)/
+	tar czf $(ARCHIVES_DIR)/models.tgz models/
+	rsync -av $(ARCHIVES_DIR)/models.tgz $(STORAGE_PATH)/
 	uv run dvc push
 
 ## sync_from_storage
 .PHONY: sync_from_storage
 sync_from_storage:
-	rsync -av $(STORAGE_PATH)/data/ data/
-	rsync -av $(STORAGE_PATH)/mlruns/ mlruns/
-	rsync -av $(STORAGE_PATH)/models/ models/
+	mkdir -p $(ARCHIVES_DIR)
+	rsync -av $(STORAGE_PATH)/data.tgz $(ARCHIVES_DIR)/data.tgz 
+	tar xzf $(ARCHIVES_DIR)/data.tgz
+	rsync -av $(STORAGE_PATH)/mlruns.tgz $(ARCHIVES_DIR)/mlruns.tgz
+	tar xzf $(ARCHIVES_DIR)/mlruns.tgz
+	rsync -av $(STORAGE_PATH)/models.tgz $(ARCHIVES_DIR)/models.tgz
+	tar xzf $(ARCHIVES_DIR)/models.tgz
 	uv run dvc pull
 
 #################################################################################

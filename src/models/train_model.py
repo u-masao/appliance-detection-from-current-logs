@@ -138,7 +138,7 @@ def train_and_evaluate_model(
 
     for epoch in range(num_epochs):
         mlflow.log_metric("epoch", epoch, step=epoch)
-        current_lr = optimizer.param_group[0]["lr"]
+        current_lr = optimizer.param_groups[0]["lr"]
         mlflow.log_metric("lr", current_lr)
 
         # train

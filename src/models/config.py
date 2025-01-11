@@ -37,6 +37,7 @@ class TrainingConfig(BaseModel):
     ]
 
     lr: float = 0.000514804885292421
+    early_stopping_patience: int = 10
 
     class Config:
         arbitrary_types_allowed = True

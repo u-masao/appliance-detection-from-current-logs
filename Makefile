@@ -49,6 +49,7 @@ visualize:
 .PHONY: train
 train:
 	uv run dvc repro -s -f train_model
+	git commit dvc.lock -m 'run dvc repro'
 
 ## sync_to_storage
 ARCHIVES_DIR=archives

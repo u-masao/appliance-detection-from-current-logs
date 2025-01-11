@@ -110,7 +110,12 @@ def create_and_configure_model(
 
     optimizer = torch.optim.Adam(model.parameters(), lr=lr)
     scheduler = ReduceLROnPlateau(
-        optimizer, "min", factor=0.1, patience=5, verbose=True, min_lr=1e-6
+        optimizer,
+        "min",
+        factor=training_config.scheduler_factor,
+        patience=training_config.scheduler_patience,
+        verbose=True,
+        min_lr=training_config.scheduler_min_lr,
     )
     criterion = nn.MSELoss()
     return model, optimizer, scheduler, criterion

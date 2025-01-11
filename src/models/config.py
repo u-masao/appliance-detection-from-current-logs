@@ -38,6 +38,9 @@ class TrainingConfig(BaseModel):
 
     lr: float = 0.000514804885292421
     early_stopping_patience: int = 10
+    scheduler_factor: float = 1 / (10 ^ 0.5)
+    scheduler_patience: int = 3
+    scheduler_min_lr: float = 1e-6
 
     class Config:
         arbitrary_types_allowed = True

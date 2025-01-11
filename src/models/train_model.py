@@ -10,6 +10,7 @@ import optuna.storages
 import torch
 import torch.nn as nn
 from optuna.samplers import TPESampler
+from torch.optim.lr_scheduler import ReduceLROnPlateau
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 
@@ -108,8 +109,11 @@ def create_and_configure_model(
     model = create_model(model_config).to(training_config.device)
 
     optimizer = torch.optim.Adam(model.parameters(), lr=lr)
+    scheduler = ReduceLROnPlateau(
+        optimizer, "min", factor=0.1, patience=5, verbose=True, min_lr=1e-6
+    )
     criterion = nn.MSELoss()
-    return model, optimizer, criterion
+    return model, optimizer, scheduler, criterion
 
 
 def train_and_evaluate_model(
@@ -118,13 +122,15 @@ def train_and_evaluate_model(
     train_loader,
     val_loader,
     optimizer,
+    scheduler,
     criterion,
     logger,
     model_config,
     training_config,
 ):
-    min_train_loss = float("inf")
-    min_val_loss = float("inf")
+    min_train_loss: float = float("inf")
+    min_val_loss: float = float("inf")
+    epochs_no_improve = 0
 
     device = training_config.device
     num_epochs = training_config.num_epochs
@@ -132,11 +138,15 @@ def train_and_evaluate_model(
 
     for epoch in range(num_epochs):
         mlflow.log_metric("epoch", epoch, step=epoch)
+        current_lr = optimizer.param_group[0]["lr"]
+        mlflow.log_metric("lr", current_lr)
+
         # train
         model.train()
         pbar = tqdm(
             train_loader,
-            desc=f"Trial {trial.number}, Epoch {epoch} [Train]",
+            desc=f"Trial {trial.number}, Epoch {epoch}, "
+            f"lr {current_lr} [Train]",
             leave=True,
         )
         train_loss = 0
@@ -184,12 +194,25 @@ def train_and_evaluate_model(
                 avg_val_loss = val_loss / (i + 1)
                 pbar.set_postfix({"avg. loss": avg_val_loss})
 
-        min_val_loss = min(min_val_loss, avg_val_loss)
+        # update lr scheduler
+        scheduler.step(avg_val_loss)
+
+        mlflow.log_metric(
+            "min_loss.val", min(min_val_loss, avg_val_loss), step=epoch
+        )
         mlflow.log_metric("avg_loss.val", avg_val_loss, step=epoch)
         mlflow.log_metric("loss.val", val_loss, step=epoch)
-        mlflow.log_metric("min_loss.val", min_val_loss, step=epoch)
 
-    return val_loss
+        if avg_val_loss < min_val_loss:
+            min_val_loss = avg_val_loss
+            epochs_no_improve = 0
+        else:
+            epochs_no_improve += 1
+            if epochs_no_improve >= training_config.early_stopping_patience:
+                logger.info("Early stopping triggered")
+                break
+
+    return min_val_loss
 
 
 def log_params_to_mlflow(config, prefix=""):
@@ -247,7 +270,7 @@ def objective(
     training_config.device = setup_device(training_config.force_cpu)
     logger.info(f"Using device: {training_config.device}")
 
-    model, optimizer, criterion = create_and_configure_model(
+    model, optimizer, scheduler, criterion = create_and_configure_model(
         trial,
         model_config,
         training_config,
@@ -255,28 +278,29 @@ def objective(
 
     log_config_and_model(data_config, model_config, training_config, model)
 
-    val_loss = train_and_evaluate_model(
+    min_val_loss = train_and_evaluate_model(
         trial,
         model,
         train_loader,
         val_loader,
         optimizer,
+        scheduler,
         criterion,
         logger,
         model_config,
         training_config,
     )
 
-    if val_loss < best_val_loss:
-        best_val_loss = val_loss
+    if min_val_loss < best_val_loss:
+        best_val_loss = min_val_loss
         save_model(model, model_output_path, model_config=model_config)
         logger.info(f"Best model saved with validation loss: {best_val_loss}")
 
     mlflow.end_run()
     logger.info("Training completed")
-    logger.info(f"Final validation loss: {val_loss}")
+    logger.info(f"Final validation loss: {min_val_loss}")
     logger.info("==== end process ====")
-    return val_loss
+    return min_val_loss
 
 
 @click.command()

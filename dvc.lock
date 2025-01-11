@@ -93,16 +93,16 @@ stages:
       size: 6091
     - path: src/models/train_model.py
       hash: md5
-      md5: 05d900380087c22fc9d59f5c5bd8a0b5
-      size: 14096
+      md5: 612c1caeea37d007af8e6e99632272ca
+      size: 14227
     outs:
     - path: models/best_model.pth
       hash: md5
-      md5: cadb3318590ca2e972f57985343d65ed
+      md5: 15f792cda47dd12b9d459858c403269a
       size: 532386
     - path: models/checkpoint/
       hash: md5
-      md5: 381ec153f6159378473e7c70b2325afc.dir
+      md5: 737799f39017ea49b43ae5229221e1cc.dir
       size: 17595930
       nfiles: 33
   split_data:

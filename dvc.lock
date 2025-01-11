@@ -98,13 +98,13 @@ stages:
     outs:
     - path: models/best_model.pth
       hash: md5
-      md5: e1b60c9197348723a965ff18277ccba7
+      md5: 5d3da42297b3dcbe4641f1dca3c7b57d
       size: 532386
     - path: models/checkpoint/
       hash: md5
-      md5: be0ec2286be21f3c7149792ad77c87c4.dir
-      size: 17595930
-      nfiles: 33
+      md5: 6a88fc96d51fee85db6d0326369a2bfb.dir
+      size: 28260130
+      nfiles: 53
   split_data:
     cmd: python src/data/split_data.py data/interim/features.parquet data/interim/train.parquet
       data/interim/val.parquet data/interim/test.parquet --train_ratio 0.7 --val_ratio

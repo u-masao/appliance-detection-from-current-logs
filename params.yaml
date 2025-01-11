@@ -1,7 +1,7 @@
 train_model:
   data_fraction: 0.01
   n_trials: 1
-  num_epochs: 100
+  num_epochs: 200
   input_sequence_length: 60
   output_sequence_length: 2
   batch_size: 32

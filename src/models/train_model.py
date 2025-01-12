@@ -144,7 +144,7 @@ def train_and_evaluate_model(
     for epoch in range(num_epochs):
         mlflow.log_metric("epoch", epoch, step=epoch)
         current_lr = optimizer.param_groups[0]["lr"]
-        mlflow.log_metric("lr", current_lr)
+        mlflow.log_metric("lr", current_lr, step=epoch)
 
         # train
         model.train()
@@ -202,20 +202,25 @@ def train_and_evaluate_model(
         # update lr scheduler
         scheduler.step(avg_val_loss)
 
-        mlflow.log_metric(
-            "min_loss.val", min(min_val_loss, avg_val_loss), step=epoch
-        )
-        mlflow.log_metric("avg_loss.val", avg_val_loss, step=epoch)
-        mlflow.log_metric("loss.val", val_loss, step=epoch)
-
         if avg_val_loss < min_val_loss:
             min_val_loss = avg_val_loss
             epochs_no_improve = 0
         else:
             epochs_no_improve += 1
-            if epochs_no_improve >= training_config.early_stopping_patience:
-                logger.info("Early stopping triggered")
-                break
+
+        mlflow.log_metric("min_loss.val", min_val_loss, step=epoch)
+        mlflow.log_metric("avg_loss.val", avg_val_loss, step=epoch)
+        mlflow.log_metric("loss.val", val_loss, step=epoch)
+        mlflow.log_metric(
+            "early_stopping_improve_epochs", epochs_no_improve, step=epoch
+        )
+
+        if epochs_no_improve >= training_config.early_stopping_patience:
+            mlflow.log_metric("early_stopping", 1, step=epoch)
+            logger.info("Early stopping triggered")
+            break
+        else:
+            mlflow.log_metric("early_stopping", 0, step=epoch)
 
     return min_val_loss
 

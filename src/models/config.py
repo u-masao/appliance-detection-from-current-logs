@@ -41,6 +41,7 @@ class TrainingConfig(BaseModel):
     scheduler_factor: float = 1 / (10.0**0.5)
     scheduler_patience: int = 3
     scheduler_min_lr: float = 1e-6
+    weight_decay: float = 1e-5
 
     class Config:
         arbitrary_types_allowed = True

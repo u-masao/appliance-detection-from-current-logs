@@ -91,6 +91,9 @@ def create_and_configure_model(
     lr = trial.suggest_float(
         "lr", training_config.lr, training_config.lr, log=True
     )
+    training_config.weight_decay = trial.suggest_float(
+        "weight_decay", 1e-5, 1e-3, log=True
+    )
 
     # lr = trial.suggest_float("lr", 1e-5, 1e-3, log=True)
     # model_config.nhead=4
@@ -108,7 +111,9 @@ def create_and_configure_model(
 
     model = create_model(model_config).to(training_config.device)
 
-    optimizer = torch.optim.Adam(model.parameters(), lr=lr)
+    optimizer = torch.optim.Adam(
+        model.parameters(), lr=lr, weight_decay=training_config.weight_decay
+    )
     scheduler = ReduceLROnPlateau(
         optimizer,
         "min",
@@ -140,6 +145,7 @@ def train_and_evaluate_model(
     device = training_config.device
     num_epochs = training_config.num_epochs
     checkpoint_interval = training_config.checkpoint_interval
+    best_epoch = 0
 
     for epoch in range(num_epochs):
         mlflow.log_metric("epoch", epoch, step=epoch)
@@ -204,6 +210,7 @@ def train_and_evaluate_model(
 
         if avg_val_loss < min_val_loss:
             min_val_loss = avg_val_loss
+            best_epoch = epoch
             epochs_no_improve = 0
         else:
             epochs_no_improve += 1
@@ -211,6 +218,7 @@ def train_and_evaluate_model(
         mlflow.log_metric("min_loss.val", min_val_loss, step=epoch)
         mlflow.log_metric("avg_loss.val", avg_val_loss, step=epoch)
         mlflow.log_metric("loss.val", val_loss, step=epoch)
+        mlflow.log_metric("best_epoch_number", best_epoch, step=epoch)
         mlflow.log_metric(
             "early_stopping_improve_epochs", epochs_no_improve, step=epoch
         )

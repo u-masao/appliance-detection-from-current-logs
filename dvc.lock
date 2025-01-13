@@ -71,7 +71,7 @@ stages:
       size: 62374605
   train_model:
     cmd: python -m src.models.train_model data/interim/train.parquet data/interim/val.parquet
-      models/best_model.pth --data_fraction 1 --n_trials 4 --num_epochs 100 --batch_size
+      models/best_model.pth --data_fraction 0.01 --n_trials 1 --num_epochs 30 --batch_size
       64 --input_sequence_length 360 --output_sequence_length 5 --embed_dim 20 --num_workers
       4 --checkpoint_interval 1 --nhead 10 --lr 0.001
     deps:
@@ -93,18 +93,18 @@ stages:
       size: 6091
     - path: src/models/train_model.py
       hash: md5
-      md5: d56682e42aa61dc17392a32c382db06b
-      size: 14724
+      md5: 14c509c99c32d6e41c77f7ea1c63b291
+      size: 14834
     outs:
     - path: models/best_model.pth
       hash: md5
-      md5: 8f7029b9969a74d25312d8570054ab16
+      md5: ff96dc3bb8f77982f2572559c58c95d3
       size: 532386
     - path: models/checkpoint/
       hash: md5
-      md5: 039f7c559759a9a229cb2e0f37a524a8.dir
-      size: 54387420
-      nfiles: 102
+      md5: 559edccef1f27a7fec11685f2258f6cc.dir
+      size: 15998220
+      nfiles: 30
   split_data:
     cmd: python src/data/split_data.py data/interim/features.parquet data/interim/train.parquet
       data/interim/val.parquet data/interim/test.parquet --train_ratio 0.7 --val_ratio
@@ -239,7 +239,7 @@ stages:
       size: 4028882
   convert_to_csv@train:
     cmd: python -m src.data.convert_to_csv data/interim/train.parquet data/processed/csv/train/
-      --split monthly --data_fraction 1
+      --split monthly --data_fraction 0.01
     deps:
     - path: data/interim/train.parquet
       hash: md5
@@ -252,12 +252,12 @@ stages:
     outs:
     - path: data/processed/csv/train/
       hash: md5
-      md5: 114e7015c37def3060dce21299711184.dir
-      size: 178586408
-      nfiles: 89
+      md5: 5a90f7df1f4e3eb3bccb8f0686732db1.dir
+      size: 1858220
+      nfiles: 2
   convert_to_csv@val:
     cmd: python -m src.data.convert_to_csv data/interim/val.parquet data/processed/csv/val/
-      --split monthly --data_fraction 1
+      --split monthly --data_fraction 0.01
     deps:
     - path: data/interim/val.parquet
       hash: md5
@@ -270,12 +270,12 @@ stages:
     outs:
     - path: data/processed/csv/val/
       hash: md5
-      md5: 5095ab5311fa190df269f355a831856f.dir
-      size: 38214372
-      nfiles: 18
+      md5: 730b54fe4b94918bc9da3e8cbe51c640.dir
+      size: 416414
+      nfiles: 2
   convert_to_csv@test:
     cmd: python -m src.data.convert_to_csv data/interim/test.parquet data/processed/csv/test/
-      --split monthly --data_fraction 1
+      --split monthly --data_fraction 0.01
     deps:
     - path: data/interim/test.parquet
       hash: md5
@@ -288,6 +288,6 @@ stages:
     outs:
     - path: data/processed/csv/test/
       hash: md5
-      md5: 57ac039707540de0b38a775d3d347c5d.dir
-      size: 38029632
-      nfiles: 19
+      md5: 8af7beadbbb644a7ecc2cf5dac8650c9.dir
+      size: 414456
+      nfiles: 2

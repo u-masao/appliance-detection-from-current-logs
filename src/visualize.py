@@ -6,10 +6,11 @@ import torch
 
 from src.models.dataset import TimeSeriesDataset, load_data
 from src.models.model import load_model
+from src.models.predict import predict
 
 target_columns = ["watt_black", "watt_red", "watt_living", "watt_kitchen"]
-model_filepath = "models/checkpoint/epoch_0070-trial_0.pth"
-fraction = 0.01
+model_filepath = "models/checkpoint/epoch_0009-trial_3.pth"
+fraction = 1.00
 
 input_df = pd.DataFrame()
 infered_df = pd.DataFrame()
@@ -71,10 +72,14 @@ def create_dataframes(x, y, output):
     return concat_df, append_df
 
 
-def create_plot(concat_df, append_df):
+def create_plot(concat_df, append_df, title):
+
+    # init figure
     plt.close()
-    pred_columns = [f"pred_{x}" for x in target_columns]
-    fig = plt.figure(figsize=(12, 4))
+    fig = plt.figure(figsize=(12, 5))
+    fig.suptitle(f"actual vs predicted: {title}")
+
+    # make axes
     gs = fig.add_gridspec(2, 4)
     full_ax = fig.add_subplot(gs[0, :])
     detail_axes = [
@@ -82,27 +87,38 @@ def create_plot(concat_df, append_df):
         for x in range(len(target_columns))
     ]
 
+    # 全体像
+    full_ax.set_title("actual plot")
     for column in [target_columns + ["predict"]]:
         full_ax.plot(concat_df[column], label=column, alpha=0.8)
+    full_ax.set_ylabel("[watt]")
 
+    # 個別の予測値
+    pred_columns = [f"pred_{x}" for x in target_columns]
     for index, (actual_column, pred_column) in enumerate(
         zip(target_columns, pred_columns)
     ):
+        detail_axes[index].set_title(actual_column)
         detail_axes[index].plot(
-            append_df[actual_column], label=actual_column, alpha=0.8
+            append_df[actual_column], label="actual", alpha=0.8
         )
         detail_axes[index].plot(
-            append_df[pred_column], label=actual_column, alpha=0.8
+            append_df[pred_column], label="predict", alpha=0.8
         )
+        detail_axes[index].set_ylabel("[watt]")
 
+    # make legend and grid
     for ax in [full_ax] + detail_axes:
-        ax.legend()
+        ax.legend(loc="upper left")
+        ax.set_xlabel("relative time [min]")
         ax.grid()
+
+    # tune layout
     fig.tight_layout()
     return fig
 
 
-def perform_inference(data_index):
+def perform_inference(data_index: int, data_type: str):
     with torch.no_grad():
         x, y = dataset[data_index]
         zero_y = torch.zeros(y.size())
@@ -111,6 +127,9 @@ def perform_inference(data_index):
         output, embed = model(x.unsqueeze(0), y.unsqueeze(0))
         output_zero, embed_zero = model(x.unsqueeze(0), zero_y.unsqueeze(0))
         output_tailx, embed_tailx = model(x.unsqueeze(0), tailx_y.unsqueeze(0))
+        output_predict = predict(
+            model, x.unsqueeze(0), model.config.output_sequence_length
+        )
 
         concat_df, append_df = create_dataframes(x, y, output[0])
         concat_zero_df, append_zero_df = create_dataframes(
@@ -119,14 +138,40 @@ def perform_inference(data_index):
         concat_tailx_df, append_tailx_df = create_dataframes(
             x, y, output_tailx[0]
         )
-        fig = create_plot(concat_df, append_df)
-        fig_zero = create_plot(concat_zero_df, append_zero_df)
-        fig_tailx = create_plot(concat_tailx_df, append_tailx_df)
+        concat_predict_df, append_predict_df = create_dataframes(
+            x, y, output_predict[0]
+        )
+
+        title_prefix = (
+            f"{data_type} set, index {data_index}, {model_filepath}, "
+        )
+
+        fig = create_plot(
+            concat_df,
+            append_df,
+            title_prefix + "teacher forcing (cheating)",
+        )
+        fig_zero = create_plot(
+            concat_zero_df,
+            append_zero_df,
+            title_prefix + "tgt is zero vector",
+        )
+        fig_tailx = create_plot(
+            concat_tailx_df,
+            append_tailx_df,
+            title_prefix + "tgt is repeated tail of X",
+        )
+        fig_predict = create_plot(
+            concat_predict_df,
+            append_predict_df,
+            title_prefix + "tgt is predicted",
+        )
 
     return (
         gr.Plot(value=fig),
         gr.Plot(value=fig_zero),
         gr.Plot(value=fig_tailx),
+        gr.Plot(value=fig_predict),
     )
 
 
@@ -134,14 +179,19 @@ with gr.Blocks() as demo:
     gr.Markdown("# Parquet Data Viewer")
 
     with gr.Row():
-        input_filepath = gr.Dropdown(choices=["train", "val", "test"])
+        data_type = gr.Dropdown(
+            choices=["train", "val", "test"], label="dataset type"
+        )
 
     with gr.Tab("model check"):
-        model_data_index = gr.Number(value=0, minimum=0, maximum=len(dataset))
-        model_data_reload_button = gr.Button("reload")
+        model_data_index = gr.Number(
+            value=0, minimum=0, maximum=len(dataset), label="index of dataset"
+        )
+        # model_data_reload_button = gr.Button("reload")
         model_output_box = gr.Plot()
         model_output_box_zero = gr.Plot()
         model_output_box_tailx = gr.Plot()
+        model_output_box_predict = gr.Plot()
 
     with gr.Tab("data check"):
         infered_data_index = gr.Number(
@@ -149,18 +199,19 @@ with gr.Blocks() as demo:
         )
         infered_output_table = gr.DataFrame()
 
-    input_filepath.select(
+    data_type.select(
         load_input_data,
-        inputs=[input_filepath],
+        inputs=[data_type],
         outputs=[infered_output_table],
     )
     model_data_index.change(
         fn=perform_inference,
-        inputs=model_data_index,
+        inputs=[model_data_index, data_type],
         outputs=[
             model_output_box,
             model_output_box_zero,
             model_output_box_tailx,
+            model_output_box_predict,
         ],
     )
     infered_data_index.change(

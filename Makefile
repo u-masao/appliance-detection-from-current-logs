@@ -26,7 +26,7 @@ check_commit:
 ### mlflow ui
 .PHONY: mlflow_ui
 mlflow_ui:
-	uv run mlflow ui
+	uv run mlflow ui -h 0.0.0.0
 
 ## formatting and lint
 .PHONY: lint

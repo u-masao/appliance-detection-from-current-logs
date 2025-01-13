@@ -88,13 +88,15 @@ def create_and_configure_model(
         model_config.embed_dim,
         step=model_config.embed_dim,
     )
-    lr = trial.suggest_float(
-        "lr", training_config.lr, training_config.lr, log=True
-    )
-    training_config.weight_decay = trial.suggest_float(
-        "weight_decay", 1e-5, 1e-3, log=True
-    )
+    lr = training_config.lr
+    model_config.dropout = trial.suggest_float("dropout", 0.1, 0.3, step=0.1)
 
+    # lr = trial.suggest_float(
+    # "lr", training_config.lr, training_config.lr, log=True
+    # )
+    # training_config.weight_decay = trial.suggest_float(
+    # "weight_decay", 1e-5, 1e-3, log=True
+    # )
     # lr = trial.suggest_float("lr", 1e-5, 1e-3, log=True)
     # model_config.nhead=4
     # model_config.embed_dim=24

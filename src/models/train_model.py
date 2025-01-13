@@ -89,8 +89,7 @@ def create_and_configure_model(
         step=model_config.embed_dim,
     )
     lr = training_config.lr
-    model_config.dropout = trial.suggest_float("dropout", 0.1, 0.3, step=0.1)
-
+    # model_config.dropout = trial.suggest_float("dropout", 0.1, 0.3, step=0.1)
     # lr = trial.suggest_float(
     # "lr", training_config.lr, training_config.lr, log=True
     # )
